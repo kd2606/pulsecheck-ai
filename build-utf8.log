@@ -1,0 +1,48 @@
+﻿
+> pulsecheck.ai@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+node.exe : ΓÜá The "middleware" file convention 
+is deprecated. Please use "proxy" instead. Learn 
+more: https://nextjs.org/docs/messages/middleware-
+to-proxy
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ΓÜá  
+   The "middle...leware-to-proxy:String) [], Rem  
+  oteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 5.8s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/3) ...
+Γ£ô Generating static pages using 15 workers (3/3) in 516.6ms
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /_not-found
+Γö£ ╞Æ /[locale]
+Γö£ ╞Æ /[locale]/cough-analysis
+Γö£ ╞Æ /[locale]/dashboard
+Γö£ ╞Æ /[locale]/health-trends
+Γö£ ╞Æ /[locale]/login
+Γö£ ╞Æ /[locale]/mental-health-screen
+Γö£ ╞Æ /[locale]/people
+Γö£ ╞Æ /[locale]/signup
+Γö£ ╞Æ /[locale]/skin-scan
+Γöö ╞Æ /[locale]/vision-scan
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

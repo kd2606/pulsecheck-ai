@@ -1,0 +1,162 @@
+{
+    "common": {
+        "appName": "PulseCheck AI",
+        "tagline": "Rural Health Accessibility Platform",
+        "loading": "Loading...",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "back": "Back",
+        "next": "Next",
+        "findOnline": "Find Online",
+        "findClinic": "Find Clinic",
+        "signOut": "Sign Out",
+        "signIn": "Sign In"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "symptomChecker": "Symptom Checker",
+        "visionScan": "Vision Scan",
+        "coughAnalysis": "Cough Analysis",
+        "skinScan": "Skin Scan",
+        "mentalHealth": "Mental Health",
+        "trends": "Health Trends",
+        "people": "Family Members",
+        "settings": "Settings"
+    },
+    "auth": {
+        "title": "Welcome to PulseCheck AI",
+        "subtitle": "Your AI-powered health companion for accessible healthcare",
+        "googleSignIn": "Sign in with Google",
+        "phoneSignIn": "Sign in with Phone",
+        "phoneNumber": "Phone Number (+91)",
+        "verificationCode": "Verification Code",
+        "sendCode": "Send Code",
+        "verifyCode": "Verify Code",
+        "enterPhone": "Enter your phone number"
+    },
+    "dashboard": {
+        "title": "Personalized Health Overview",
+        "subtitle": "Tell us about yourself for personalized health insights",
+        "age": "Age",
+        "gender": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "lifestyle": "Lifestyle Factors",
+        "smoker": "Smoker",
+        "sedentary": "Sedentary",
+        "active": "Active",
+        "highStress": "High Stress",
+        "poorDiet": "Poor Diet",
+        "analyze": "Analyze My Health",
+        "threats": "Potential Health Threats",
+        "recommendations": "Health Recommendations",
+        "otcMedicines": "OTC Medicine Suggestions",
+        "greeting": "Hello",
+        "quickActions": "Quick Health Actions",
+        "recentReports": "Recent Reports"
+    },
+    "scan": {
+        "vision": {
+            "title": "Vision Scan - Fatigue Analysis",
+            "description": "Capture or upload a facial photo to analyze fatigue indicators like dark circles, pale skin, and drooping eyelids.",
+            "capture": "Capture Photo",
+            "upload": "Upload Photo",
+            "analyzing": "Analyzing facial features...",
+            "results": "Fatigue Analysis Report"
+        },
+        "cough": {
+            "title": "Cough Analysis",
+            "description": "Record a 5-second cough sample for AI classification and recommendations.",
+            "record": "Start Recording",
+            "stop": "Stop Recording",
+            "analyzing": "Analyzing cough pattern...",
+            "results": "Cough Analysis Report",
+            "timer": "Recording: {seconds}s / 5s"
+        },
+        "skin": {
+            "title": "Skin Scan",
+            "description": "Capture or upload a photo of the affected skin area for condition identification.",
+            "capture": "Capture Photo",
+            "upload": "Upload Photo",
+            "analyzing": "Analyzing skin condition...",
+            "results": "Skin Analysis Report"
+        },
+        "mentalHealth": {
+            "title": "Mental Health Screening",
+            "description": "Answer a few quick questions based on the PHQ-4 standard for a wellness assessment.",
+            "question": "Question {number} of {total}",
+            "options": {
+                "never": "Never",
+                "rarely": "Rarely",
+                "sometimes": "Sometimes",
+                "often": "Often",
+                "constantly": "Almost Constantly"
+            },
+            "results": "Mental Wellness Report",
+            "wellnessScore": "Wellness Score",
+            "mood": "Perceived Mood",
+            "summary": "Summary & Recommendations"
+        }
+    },
+    "trends": {
+        "title": "Health Trends & Analytics",
+        "subtitle": "Track health metrics over time for your family",
+        "selectMember": "Select Family Member",
+        "mentalWellness": "Mental Wellness Score",
+        "fatigueTrend": "Fatigue Trend",
+        "coughTypes": "Cough Type Distribution",
+        "noData": "No data available yet. Complete health scans to see trends."
+    },
+    "people": {
+        "title": "Family Members",
+        "subtitle": "Manage people for health tracking",
+        "addPerson": "Add Family Member",
+        "name": "Name",
+        "relationship": "Relationship",
+        "relationships": {
+            "self": "Self",
+            "spouse": "Spouse",
+            "child": "Child",
+            "parent": "Parent",
+            "sibling": "Sibling",
+            "other": "Other"
+        },
+        "noPeople": "No family members added yet."
+    },
+    "disclaimer": {
+        "title": "Medical Disclaimer",
+        "text": "PulseCheck AI provides health information for educational purposes only. Results are AI-generated estimations and are NOT medical diagnoses or prescriptions. Always consult a qualified healthcare professional for medical advice, diagnosis, or treatment. Do not disregard professional medical advice because of information provided by this application."
+    },
+    "chat": {
+        "title": "Medu",
+        "placeholder": "Type a message...",
+        "welcome": "Hi! I'm Medu, your PulseCheck AI assistant. How can I help you today?"
+    },
+    "symptomChecker": {
+        "title": "Symptom Checker",
+        "description": "Describe your symptoms and get an AI-powered health assessment with precautions and medicine suggestions.",
+        "enterSymptomsTitle": "Enter Your Symptoms",
+        "enterSymptomsDescription": "Describe how you are feeling. Be as detailed as possible for the best results.",
+        "symptomsLabel": "Symptoms",
+        "symptomsPlaceholder": "e.g. I have a fever since 2 days, headache, sore throat and body aches...",
+        "age": "Age",
+        "optional": "optional",
+        "gender": "Gender",
+        "selectGender": "Select gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "analyzing": "Analyzing symptoms...",
+        "checkButton": "Check Symptoms",
+        "enterSymptoms": "Please enter your symptoms first.",
+        "likelyCondition": "Likely Condition",
+        "precautions": "Precautions & Home Care",
+        "otcMedicines": "OTC Medicine Suggestions",
+        "findOnline": "Find Online",
+        "findDoctor": "Find Doctor Near Me"
+    }
+}

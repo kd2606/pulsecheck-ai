@@ -1,0 +1,14 @@
+{
+    "hosting": {
+        "site": "healthsense-ai-prod-478",
+        "source": ".",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "frameworksBackend": {
+            "region": "us-central1"
+        }
+    }
+}
