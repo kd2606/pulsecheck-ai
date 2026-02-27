@@ -11,6 +11,7 @@ const tabs = [
     { name: "mental-health", title: "Mental Health", icon: "brain-outline", hidden: true },
     { name: "vision-scan", title: "Vision Scan", icon: "eye-outline", hidden: true },
     { name: "chatbot", title: "Medu Chat", icon: "chatbubbles-outline", hidden: true },
+    { name: "govt-schemes", title: "Govt Schemes", icon: "business-outline", hidden: true },
 ];
 
 export default function TabsLayout() {
