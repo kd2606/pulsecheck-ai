@@ -38,6 +38,7 @@ export function AppSidebar({ locale }: { locale: string }) {
         { title: t("skinScan"), url: `/${locale}/skin-scan`, icon: Scan },
         { title: t("mentalHealth"), url: `/${locale}/mental-health-screen`, icon: Brain },
         { title: t("trends"), url: `/${locale}/health-trends`, icon: TrendingUp },
+        { title: t("nearbyHospitals"), url: `/${locale}/nearby-hospitals`, icon: Stethoscope },
         { title: t("people"), url: `/${locale}/people`, icon: Users },
     ];
 

@@ -24,6 +24,7 @@
         "mentalHealth": "Mental Health",
         "trends": "Health Trends",
         "people": "Family Members",
+        "nearbyHospitals": "Nearby Hospitals",
         "settings": "Settings"
     },
     "auth": {
