@@ -10,6 +10,7 @@ const tabs = [
     { name: "profile", title: "Profile", icon: "person-outline" },
     { name: "mental-health", title: "Mental Health", icon: "brain-outline", hidden: true },
     { name: "vision-scan", title: "Vision Scan", icon: "eye-outline", hidden: true },
+    { name: "chatbot", title: "Medu Chat", icon: "chatbubbles-outline", hidden: true },
 ];
 
 export default function TabsLayout() {
