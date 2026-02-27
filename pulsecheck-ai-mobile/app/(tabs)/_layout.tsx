@@ -9,6 +9,7 @@ const tabs = [
     { name: "people", title: "Doctors", icon: "people-outline" },
     { name: "profile", title: "Profile", icon: "person-outline" },
     { name: "mental-health", title: "Mental Health", icon: "brain-outline", hidden: true },
+    { name: "vision-scan", title: "Vision Scan", icon: "eye-outline", hidden: true },
 ];
 
 export default function TabsLayout() {

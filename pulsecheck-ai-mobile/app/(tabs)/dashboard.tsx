@@ -9,6 +9,7 @@ const features = [
     { title: "Cough Analysis", icon: "mic-outline", color: "#8B5CF6", route: "/cough-analysis", desc: "Analyze your cough" },
     { title: "Skin Scan", icon: "scan-outline", color: "#F59E0B", route: "/skin-scan", desc: "Detect skin issues" },
     { title: "Mental Health", icon: "pulse-outline", color: "#10B981", route: "/mental-health", desc: "Screen your well-being" },
+    { title: "Vision Scan", icon: "eye-outline", color: "#8B5CF6", route: "/vision-scan", desc: "Check eye fatigue" },
     { title: "Find Doctors", icon: "people-outline", color: "#EC4899", route: "/people", desc: "Nearby specialists" },
 ];
 

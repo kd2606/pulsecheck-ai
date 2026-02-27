@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     optionButton: { flexDirection: "row", alignItems: "center", backgroundColor: "#0F172A", padding: 16, borderRadius: 12, borderWidth: 1, borderColor: "#334155" },
     optionCircle: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: "#10B981", justifyContent: "center", alignItems: "center", marginRight: 12 },
     optionNumber: { color: "#10B981", fontSize: 14, fontWeight: "600" },
-    optionLabel: { color: "#E2E8F0", fontSize: 16 },
+    optionLabel: { color: "#E2E8F0", fontSize: 16, flex: 1 },
 
     recordButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#334155", justifyContent: "center", alignItems: "center", marginBottom: 16 },
     recordingActive: { backgroundColor: "#EF4444" },
