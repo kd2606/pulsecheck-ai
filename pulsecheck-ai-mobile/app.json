@@ -7,17 +7,17 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F172A"
+      "backgroundColor": "#060E1E"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0F172A"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#060E1E"
       },
       "package": "com.pulsecheck.ai",
       "versionCode": 1,
@@ -27,7 +27,8 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "MODIFY_AUDIO_SETTINGS"
       ],
       "googleServicesFile": "./google-services.json"
     },
@@ -40,11 +41,18 @@
         {
           "photosPermission": "Allow PulseCheck AI to access your photos for health analysis."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "scheme": "pulsecheck",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c28b5423-4490-4514-84c3-30e1f5d33737"
+      }
     }
   }
 }

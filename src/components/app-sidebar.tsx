@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { PulseCheckLogo } from "@/components/pulse-check-logo";
 import {
     LayoutDashboard,
     Eye,
@@ -11,9 +12,9 @@ import {
     Brain,
     TrendingUp,
     Users,
-    Heart,
     Stethoscope,
     Landmark,
+    BellRing,
 } from "lucide-react";
 import {
     Sidebar,
@@ -40,6 +41,7 @@ export function AppSidebar({ locale }: { locale: string }) {
         { title: t("mentalHealth"), url: `/${locale}/mental-health-screen`, icon: Brain },
         { title: t("trends"), url: `/${locale}/health-trends`, icon: TrendingUp },
         { title: "Govt Schemes", url: `/${locale}/govt-schemes`, icon: Landmark },
+        { title: "Reminders", url: `/${locale}/reminders`, icon: BellRing },
         { title: t("nearbyHospitals"), url: `/${locale}/nearby-hospitals`, icon: Stethoscope },
         { title: t("people"), url: `/${locale}/people`, icon: Users },
     ];
@@ -47,14 +49,8 @@ export function AppSidebar({ locale }: { locale: string }) {
     return (
         <Sidebar>
             <SidebarHeader className="border-b p-4">
-                <Link href={`/${locale}/dashboard`} className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                        <Heart className="h-4 w-4" />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-bold">PulseCheck AI</span>
-                        <span className="text-[10px] text-muted-foreground">Rural Health Platform</span>
-                    </div>
+                <Link href={`/${locale}/dashboard`}>
+                    <PulseCheckLogo size={40} />
                 </Link>
             </SidebarHeader>
             <SidebarContent>

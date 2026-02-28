@@ -1,17 +1,20 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { View, StyleSheet } from "react-native";
 
 const tabs = [
-    { name: "dashboard", title: "Dashboard", icon: "grid-outline" },
-    { name: "symptom-checker", title: "Symptoms", icon: "medical-outline" },
-    { name: "cough-analysis", title: "Cough", icon: "mic-outline" },
-    { name: "skin-scan", title: "Skin", icon: "scan-outline" },
-    { name: "people", title: "Doctors", icon: "people-outline" },
-    { name: "profile", title: "Profile", icon: "person-outline" },
-    { name: "mental-health", title: "Mental Health", icon: "brain-outline", hidden: true },
-    { name: "vision-scan", title: "Vision Scan", icon: "eye-outline", hidden: true },
-    { name: "chatbot", title: "Medu Chat", icon: "chatbubbles-outline", hidden: true },
-    { name: "govt-schemes", title: "Govt Schemes", icon: "business-outline", hidden: true },
+    { name: "dashboard", title: "Home", icon: "grid", iconOutline: "grid-outline" },
+    { name: "symptom-checker", title: "Symptoms", icon: "medical", iconOutline: "medical-outline" },
+    { name: "cough-analysis", title: "Cough", icon: "mic", iconOutline: "mic-outline" },
+    { name: "skin-scan", title: "Skin", icon: "scan", iconOutline: "scan-outline" },
+    { name: "people", title: "Doctors", icon: "people", iconOutline: "people-outline" },
+    { name: "profile", title: "Profile", icon: "person", iconOutline: "person-outline" },
+    // hidden tabs
+    { name: "mental-health", title: "Mental Health", icon: "pulse", iconOutline: "pulse-outline", hidden: true },
+    { name: "vision-scan", title: "Vision Scan", icon: "eye", iconOutline: "eye-outline", hidden: true },
+    { name: "chatbot", title: "Chat", icon: "chatbubbles", iconOutline: "chatbubbles-outline", hidden: true },
+    { name: "govt-schemes", title: "Schemes", icon: "business", iconOutline: "business-outline", hidden: true },
+    { name: "reminders", title: "Reminders", icon: "notifications", iconOutline: "notifications-outline", hidden: true },
 ];
 
 export default function TabsLayout() {
@@ -19,17 +22,11 @@ export default function TabsLayout() {
         <Tabs
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: {
-                    backgroundColor: "#1E293B",
-                    borderTopColor: "#334155",
-                    borderTopWidth: 1,
-                    paddingBottom: 6,
-                    paddingTop: 6,
-                    height: 64,
-                },
-                tabBarActiveTintColor: "#22C55E",
-                tabBarInactiveTintColor: "#64748B",
-                tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
+                tabBarStyle: styles.tabBar,
+                tabBarActiveTintColor: "#34D399",
+                tabBarInactiveTintColor: "#334155",
+                tabBarLabelStyle: styles.tabLabel,
+                tabBarItemStyle: styles.tabItem,
             }}
         >
             {tabs.map((tab) => (
@@ -39,8 +36,14 @@ export default function TabsLayout() {
                     options={{
                         title: tab.title,
                         href: tab.hidden ? null : undefined,
-                        tabBarIcon: ({ color, size }) => (
-                            <Ionicons name={tab.icon as any} size={size} color={color} />
+                        tabBarIcon: ({ focused, color, size }) => (
+                            <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+                                <Ionicons
+                                    name={(focused ? tab.icon : tab.iconOutline) as any}
+                                    size={22}
+                                    color={color}
+                                />
+                            </View>
                         ),
                     }}
                 />
@@ -48,3 +51,35 @@ export default function TabsLayout() {
         </Tabs>
     );
 }
+
+const styles = StyleSheet.create({
+    tabBar: {
+        backgroundColor: "#060E1E",
+        borderTopWidth: 1,
+        borderTopColor: "#0F1929",
+        paddingBottom: 8,
+        paddingTop: 8,
+        height: 68,
+        elevation: 0,
+        shadowOpacity: 0,
+    },
+    tabLabel: {
+        fontSize: 10,
+        fontWeight: "600",
+        letterSpacing: 0.3,
+        marginTop: 0,
+    },
+    tabItem: {
+        paddingTop: 4,
+    },
+    iconWrap: {
+        width: 36,
+        height: 32,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    iconWrapActive: {
+        backgroundColor: "rgba(52,211,153,0.1)",
+    },
+});
