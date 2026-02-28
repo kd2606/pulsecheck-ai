@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "218534686639",
+    "project_id": "healthsense-ai-prod-478",
+    "storage_bucket": "healthsense-ai-prod-478.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218534686639:android:49d1734e2fe8d73c0f095a",
+        "android_client_info": {
+          "package_name": "com.pulsecheck.ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "218534686639-lv8pg2l9cv5922agntcqm9r9nisia620.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGBWPzzNBcyXiMNnHjCsVnymgytjV77WE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "218534686639-ipe1mjdahbkdst3m51a5a31ok0vb5jcf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
