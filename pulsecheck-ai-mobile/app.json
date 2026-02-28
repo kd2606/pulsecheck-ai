@@ -42,7 +42,17 @@
           "photosPermission": "Allow PulseCheck AI to access your photos for health analysis."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          }
+        }
+      ]
     ],
     "scheme": "pulsecheck",
     "experiments": {
