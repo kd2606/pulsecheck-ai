@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 
 const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
 

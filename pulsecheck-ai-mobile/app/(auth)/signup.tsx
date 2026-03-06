@@ -14,13 +14,14 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../../src/firebase/firebaseConfig";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { PulseCheckLogoMobile } from "../../src/components/PulseCheckLogoMobile";
 
-WebBrowser.maybeCompleteAuthSession();
-
 const GOOGLE_CLIENT_ID_WEB = "218534686639-lv8pg2l9cv5922agntcqm9r9nisia620.apps.googleusercontent.com";
+
+GoogleSignin.configure({
+    webClientId: GOOGLE_CLIENT_ID_WEB,
+});
 
 export default function SignupScreen() {
     const [name, setName] = useState("");
@@ -33,20 +34,7 @@ export default function SignupScreen() {
     const [showCpw, setShowCpw] = useState(false);
     const router = useRouter();
 
-    const [, googleResponse, promptGoogleAsync] = Google.useIdTokenAuthRequest({
-        clientId: GOOGLE_CLIENT_ID_WEB,
-    });
-
-    React.useEffect(() => {
-        if (googleResponse?.type === "success") {
-            const { id_token } = googleResponse.params;
-            setGoogleLoading(true);
-            const credential = GoogleAuthProvider.credential(id_token);
-            signInWithCredential(auth, credential)
-                .catch((e) => Alert.alert("Google Sign-Up Failed", e.message))
-                .finally(() => setGoogleLoading(false));
-        }
-    }, [googleResponse]);
+    // (Legacy Expo Auth Session removed)
 
     const handleSignup = async () => {
         if (!name.trim() || !email.trim() || !password) {
@@ -90,9 +78,17 @@ export default function SignupScreen() {
     const handleGoogleSignup = async () => {
         setGoogleLoading(true);
         try {
-            await promptGoogleAsync();
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            const idToken = userInfo?.data?.idToken || (userInfo as any)?.idToken;
+            if (!idToken) throw new Error("No ID token returned from Google.");
+            const credential = GoogleAuthProvider.credential(idToken);
+            await signInWithCredential(auth, credential);
         } catch (e: any) {
-            Alert.alert("Google Sign-Up", e.message);
+            if (e.code !== 'SIGN_IN_CANCELLED' && e.code !== 'IN_PROGRESS') {
+                Alert.alert("Google Sign-Up Failed", e.message || "An error occurred during authentication.");
+            }
+        } finally {
             setGoogleLoading(false);
         }
     };

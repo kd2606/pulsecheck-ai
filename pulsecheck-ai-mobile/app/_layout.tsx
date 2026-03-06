@@ -11,9 +11,11 @@ function RootLayoutNav() {
     useEffect(() => {
         if (loading) return;
         const inAuthGroup = segments[0] === "(auth)";
+        const inTabsGroup = segments[0] === "(tabs)";
+
         if (!user && !inAuthGroup) {
             router.replace("/(auth)/login");
-        } else if (user && inAuthGroup) {
+        } else if (user && !inTabsGroup) {
             router.replace("/(tabs)/dashboard");
         }
     }, [user, loading, segments]);

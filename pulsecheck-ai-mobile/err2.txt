@@ -1,0 +1,15 @@
+v24.13.1
+env: load .env
+env: export FIREBASE_API_KEY FIREBASE_AUTH_DOMAIN FIREBASE_PROJECT_ID FIREBASE_STORAGE_BUCKET FIREBASE_MESSAGING_SENDER_ID FIREBASE_APP_ID VERCEL_API_BASE
+TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for C:\Users\Krrish\Desktop\pulsecheck.ai\pulsecheck-ai-mobile\node_modules\expo-modules-core\src\index.ts
+TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts" for C:\Users\Krrish\Desktop\pulsecheck.ai\pulsecheck-ai-mobile\node_modules\expo-modules-core\src\index.ts
+    at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:185:9)
+    at defaultGetFormat (node:internal/modules/esm/get_format:211:36)
+    at defaultLoadSync (node:internal/modules/esm/load:158:16)
+    at #loadAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:796:12)
+    at #loadSync (node:internal/modules/esm/loader:816:49)
+    at ModuleLoader.loadAndTranslateForImportInRequiredESM (node:internal/modules/esm/loader:430:38)
+    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:575:36)
+    at afterResolve (node:internal/modules/esm/loader:625:52)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:631:12)
+    at ModuleJobSync.syncLink (node:internal/modules/esm/module_job:160:33)

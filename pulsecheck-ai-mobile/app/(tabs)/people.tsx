@@ -23,65 +23,52 @@ export default function PeopleScreen() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
         (async () => {
             setLoading(true);
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== "granted") {
-                setErrorMsg("Permission to access location was denied");
-                setLoading(false);
-                return;
-            }
-
             try {
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                if (status !== "granted") {
+                    if (isMounted) setErrorMsg("Permission to access location was denied");
+                    return;
+                }
+
                 console.log("Requesting current location...");
-                let loc = await Location.getCurrentPositionAsync({});
-                console.log("Location received:", loc.coords.latitude, loc.coords.longitude);
-                setLocation(loc);
+                let loc = await Location.getLastKnownPositionAsync({});
 
-                // Fetch nearby facilities directly from Overpass API to avoid Vercel Serverless IP rate limits
-                const radius = 5000;
-                const query = `
-                    [out:json][timeout:25];
-                    (
-                      node["amenity"="hospital"](around:${radius},${loc.coords.latitude},${loc.coords.longitude});
-                      way["amenity"="hospital"](around:${radius},${loc.coords.latitude},${loc.coords.longitude});
-                      relation["amenity"="hospital"](around:${radius},${loc.coords.latitude},${loc.coords.longitude});
-                    );
-                    out center;
-                `;
+                if (!loc) {
+                    // Prevent infinite hang if Android location struggles
+                    loc = await Promise.race([
+                        Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error("Location request timed out. Please ensure GPS/Location services are turned on.")), 10000))
+                    ]) as Location.LocationObject;
+                }
 
-                console.log("Fetching directly from Overpass API...");
-                const res = await fetch("https://overpass-api.de/api/interpreter", {
-                    method: "POST",
-                    body: query,
-                });
+                if (!loc) throw new Error("Could not determine your location.");
+
+                if (isMounted) setLocation(loc);
+
+                console.log("Fetching from Vercel API...");
+                const url = `${VERCEL_API}/api/nearby-facilities?lat=${loc.coords.latitude}&lng=${loc.coords.longitude}&radius=5000&type=hospital`;
+                const res = await fetch(url);
 
                 if (!res.ok) {
-                    throw new Error(`Overpass API error: ${res.status}`);
+                    throw new Error(`API error: ${res.status}`);
                 }
 
                 const data = await res.json();
-                console.log("Overpass raw elements received:", data.elements?.length);
+                console.log("Facilities received:", data.places?.length);
 
-                const places: Facility[] = (data.elements || []).map((el: any) => ({
-                    id: el.id,
-                    name: el.tags?.name || "Unnamed Hospital",
-                    type: el.tags?.amenity || "hospital",
-                    lat: el.lat || el.center?.lat,
-                    lng: el.lon || el.center?.lon,
-                    address: [el.tags?.['addr:street'], el.tags?.['addr:city']].filter(Boolean).join(", ") || "Address not available",
-                    phone: el.tags?.phone || el.tags?.['contact:phone'] || null
-                }));
-
-                console.log("Mapped Facilities:", places.length);
-                setFacilities(places);
+                if (isMounted) setFacilities(data.places || []);
             } catch (error: any) {
                 console.error("DEBUG Error fetching location/facilities:", error);
-                setErrorMsg(error.message || "Could not find nearby hospitals.");
+                if (isMounted) setErrorMsg(error.message || "Could not find nearby hospitals.");
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         })();
+
+        return () => { isMounted = false; };
     }, []);
 
     const openMaps = (lat: number, lng: number, name: string) => {

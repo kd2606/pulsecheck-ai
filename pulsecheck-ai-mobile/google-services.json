@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "218534686639-o7knltaop02vncgt6ev8o83a8t6ncm1i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pulsecheck.ai",
+            "certificate_hash": "54fa808a8b06decf525b9072149981fd97b47c59"
+          }
+        },
+        {
           "client_id": "218534686639-lv8pg2l9cv5922agntcqm9r9nisia620.apps.googleusercontent.com",
           "client_type": 3
         }

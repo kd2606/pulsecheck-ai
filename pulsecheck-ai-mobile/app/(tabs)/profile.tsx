@@ -325,7 +325,7 @@ export default function ProfileScreen() {
                     <View style={m.contactCard}>
                         <Ionicons name="person-circle-outline" size={32} color="#A78BFA" style={{ marginBottom: 8 }} />
                         <Text style={m.contactName}>Krrish Dewangan</Text>
-                        <Text style={m.contactRole}>Lead Developer</Text>
+                        <Text style={m.contactRole}>Project Lead</Text>
                         <TouchableOpacity onPress={() => Linking.openURL("mailto:dewangankrrish50@gmail.com")}>
                             <Text style={m.contactEmail}>dewangankrrish50@gmail.com</Text>
                         </TouchableOpacity>
@@ -333,7 +333,7 @@ export default function ProfileScreen() {
                     <View style={[m.contactCard, { marginTop: 12 }]}>
                         <Ionicons name="person-circle-outline" size={32} color="#60A5FA" style={{ marginBottom: 8 }} />
                         <Text style={m.contactName}>Hetansh Panigrahi</Text>
-                        <Text style={m.contactRole}>Developer</Text>
+                        <Text style={m.contactRole}>Programmer</Text>
                         <TouchableOpacity onPress={() => Linking.openURL("mailto:hetanshpanigrahi.official2006@gmail.com")}>
                             <Text style={m.contactEmail}>hetanshpanigrahi.official2006@gmail.com</Text>
                         </TouchableOpacity>

@@ -1,0 +1,8 @@
+The field "cli.appVersionSource" is not set, but it will be required in the future. Learn more: https://docs.expo.dev/build-reference/app-versions/
+Failed to read the app config from the project using "npx expo config" command: npx expo config --json exited with non-zero code: 1.
+Falling back to the version of "@expo/config" shipped with the EAS CLI.
+Package "expo-web-browser" does not contain a valid config plugin.
+Learn more: https://docs.expo.dev/guides/config-plugins/#creating-a-plugin
+
+Cannot use import statement outside a module
+    Error: build command failed.

@@ -42,7 +42,8 @@
           "photosPermission": "Allow PulseCheck AI to access your photos for health analysis."
         }
       ],
-      "expo-web-browser"
+      "expo-font",
+      "@react-native-google-signin/google-signin"
     ],
     "scheme": "pulsecheck",
     "experiments": {
