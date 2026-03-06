@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
-const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_URL = "https://maps.mail.ru/osm/tools/overpass/api/interpreter";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const lat = searchParams.get("lat");
     const lng = searchParams.get("lng");
-    const radius = searchParams.get("radius") || "5000"; // Default 5km
+    const radius = searchParams.get("radius") || "3000"; // Default 3km
     const type = searchParams.get("type") || "hospital";
 
     if (!lat || !lng) {
@@ -20,13 +20,13 @@ export async function GET(request: Request) {
         if (type === "pharmacy") nodeType = '["amenity"="pharmacy"]';
 
         const query = `
-            [out:json][timeout:25];
+            [out:json][timeout:15];
             (
               node${nodeType}(around:${radius},${lat},${lng});
               way${nodeType}(around:${radius},${lat},${lng});
               relation${nodeType}(around:${radius},${lat},${lng});
             );
-            out center;
+            out center 20;
         `;
 
         const response = await fetch(OVERPASS_URL, {
