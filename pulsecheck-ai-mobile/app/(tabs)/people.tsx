@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text, ActivityIndicator, FlatList, Linking, TouchableOpacity } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -96,30 +96,6 @@ export default function PeopleScreen() {
 
     return (
         <View style={styles.container}>
-            {location && (
-                <MapView
-                    provider={PROVIDER_GOOGLE}
-                    style={styles.map}
-                    initialRegion={{
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude,
-                        latitudeDelta: 0.05,
-                        longitudeDelta: 0.05,
-                    }}
-                    showsUserLocation={true}
-                >
-                    {facilities.map((fac) => (
-                        <Marker
-                            key={fac.id.toString()}
-                            coordinate={{ latitude: fac.lat, longitude: fac.lng }}
-                            title={fac.name}
-                            description={fac.type}
-                            pinColor="#10b981"
-                        />
-                    ))}
-                </MapView>
-            )}
-
             <View style={styles.listContainer}>
                 <Text style={styles.title}>Nearby Facilities</Text>
                 {facilities.length === 0 ? (
