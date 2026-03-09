@@ -12,6 +12,7 @@ const SkinScanOutputSchema = z.object({
         })
     ),
     overallAssessment: z.string(),
+    simpleExplanation: z.string(),
     homeCare: z.array(z.string()),
     otcMedicines: z.array(
         z.object({
@@ -42,7 +43,8 @@ export async function analyzeSkinScan(imageBase64: string) {
 Provide a JSON response with:
 1. "conditions": array with "name", "confidence" (High/Medium/Low), and "description"
 2. "overallAssessment": summary paragraph
-3. "homeCare": array of home care suggestions
+3. "simpleExplanation": 1-2 lines explaining the result in simple language a non-medical person can understand.
+4. "homeCare": array of home care suggestions
 4. "otcMedicines": array with "name", "purpose", and "searchQuery" for Google search
 5. "seekDermatologist": boolean if professional evaluation is recommended
 6. "clinicType": type of clinic to visit (e.g., "Dermatologist", "General Practitioner")

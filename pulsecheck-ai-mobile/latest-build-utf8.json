@@ -1,0 +1,52 @@
+﻿[
+  {
+    "id": "db6f3988-4d41-496f-ad01-2e2606132a2a",
+    "status": "FINISHED",
+    "platform": "ANDROID",
+    "artifacts": {
+      "buildUrl": "https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk",
+      "applicationArchiveUrl": "https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk"
+    },
+    "fingerprint": {
+      "id": "019cc23d-9ac4-7228-adc0-21c8649023be",
+      "hash": "c84e21b169179defccfb8f733c76ec6466eb6675"
+    },
+    "initiatingActor": {
+      "id": "be7c7ebe-f433-462b-9a04-7339ddcb2ba9",
+      "displayName": "krrishkumd"
+    },
+    "logFiles": [
+      "https://job-logs.eascdn.net/production/db6f3988-4d41-496f-ad01-2e2606132a2a/1772788173809-e15361f0-64e0-4f68-9388-79b3ae812f45.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260306%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260306T090934Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=4d5d27ae306ffed5f0dd6d003cff9cdebd7ecff8ad5091385880702292a6eda8b5ff7f4ca3c0932b585ccd40d0d2c99a75a278b4b585362db8406c60934f1f88c24009f6918c32a01d64d492932771ff01f92f5a9d305e38082412bacda99dd0fc04eac8d2edaedf202a6ee63db375eab14a8b333fde0713893794271016a87bdd9361c4c2268e2d715775ba4e0de8155b88aaf10fb207d6c77abc85c35ee9eac4acaebc1168356c2b0d04118fec08a11df1942c37be3fb7cf31d56b6be574026d59b0d66937e5a848e23afba82191558b77a8c0142df9343981aeb91265bb98abeeb519c3a0e0f88a89ad356df74e65377be21666ab60dd9db039887f28014b",
+      "https://job-logs.eascdn.net/production/db6f3988-4d41-496f-ad01-2e2606132a2a/1772788246982-8aba21b5-50cc-4b73-be86-53b16e447d82.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260306%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260306T091203Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=1e9bb8e7d4d7227ab99bdcbe03f47420d8851a19a3b1d87efd26285e58e5906dc525e994cfcf174d5640f4716f205c191110363e455c55eddc4b47fe70e9b900c4313018e0ad18082c9b018e6821392437ea8aa91ad09af8c4c074ff8449b3db96860db40b55d56925cc3db92122db163a382c47e0419cf82b33b9246fb5451ae95815a6fd421d1d56adaa3525357a9a1dd9aa920dfe3ed5f7c66090cdba920847fdfa804399b5f1cf54159d2b0e261ceea3a96d95384a6249850077f53315b1a9c902a21e71267f030cbbf6ad246815bc019b24f4ba538cdfa6e33e70088263a009a538a742eca79c9ae41cf86e4384b5f3fb4b2a8a6107cfc8e6e379f0a4b4",
+      "https://job-logs.eascdn.net/production/db6f3988-4d41-496f-ad01-2e2606132a2a/1772788247193-66eff903-8749-410e-8fad-d9947e92ce55.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260306%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260306T091203Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=913f6c961cd9df4a52774fe9b585591c7b21ae031bb7cf69242699c8202c4c3d83df42fa35630b460376ec07f78ebcc3bbc8456101074aa5935156c72bdcd831b8461c74dc0811f2cd446f4a90ae836fd216c30ab68ca57016a57c0abe2dce6258016a921a51257288342f5e514642f8990d927db71d2eb5e9758363ac7b54d8ba60fdab84fafc3995cc45639a8ff7cefea3eaa6cab4fff279809d8a94262a8c640a5b081d66119b38c0fc7e2ee8297280d56f37e76bdfaab63985faa83a50bf095da5e89d7a0d7d45260c9b72e78d1d48063091c1289af1fa6377e75d7794b5d1e9c6d8b51633b4582dddcc7fb5c170f321e26f9c931a1cb8981b3a42312245",
+      "https://job-logs.eascdn.net/production/db6f3988-4d41-496f-ad01-2e2606132a2a/1772788247427-38a42ccb-e1d5-42d8-a902-559226b9c383.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260306%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260306T091203Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=23f8138ace5537e3b6a59bef1b101ab1ed152888f7556672a3d5f073db85840038c61ba0e2fb5bccefa96faca7cc184e3bf307472e8c94a050d85b610c077d13109039ff3dbd1cd859838c2be9038a1525a0ab6da5a81e21d05a8ebac0855c9390eaee0b9cb5e480c36e25108452fa4e028de33eb0fddd402caf39f86433165e8d80bfa0ab45249548029896a4e86d45e039f31e85c403ce8b9297fd9fb54e256fd2dd40dd3c1f9015a8a9b59d557bec47be649e8ba44a31403a3200c40bb929838bad52854cfb03b4ca5f8a81bd047966fc5d750a75008c5c60a8ca123e0be025cb079ffcfb7451314564e4875e5103f7f2bfb64521d8f5bcaefc34b9832062"
+    ],
+    "project": {
+      "id": "c28b5423-4490-4514-84c3-30e1f5d33737",
+      "name": "pulsecheck-ai-mobile",
+      "slug": "pulsecheck-ai-mobile",
+      "ownerAccount": {
+        "id": "4081eadf-9504-4b76-b602-287c8e1ef308",
+        "name": "krrishkumd"
+      }
+    },
+    "distribution": "INTERNAL",
+    "buildProfile": "preview",
+    "sdkVersion": "52.0.0",
+    "appVersion": "1.0.0",
+    "appBuildVersion": "1",
+    "gitCommitHash": "3117747f200459e02148bcefb4a17c4446e33027",
+    "gitCommitMessage": "Fix standalone Android crash by removing MapView without API key",
+    "priority": "NORMAL",
+    "createdAt": "2026-03-06T09:09:33.564Z",
+    "updatedAt": "2026-03-06T09:17:01.967Z",
+    "completedAt": "2026-03-06T09:16:54.732Z",
+    "expirationDate": "2026-03-20T09:09:33.602Z",
+    "isForIosSimulator": false,
+    "metrics": {
+      "buildWaitTime": 131,
+      "buildQueueTime": 105604,
+      "buildDuration": 334620
+    }
+  }
+]

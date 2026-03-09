@@ -171,6 +171,58 @@ export default function CoughAnalysisPage() {
 
             {results && (
                 <FadeIn delay={0.2} className="space-y-4">
+                    {/* Verdict Card */}
+                    {results.confidence === "High" && results.seekMedicalAttention && (
+                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div>
+                                    <p className="font-bold text-base flex items-center gap-2">
+                                        <span className="text-lg">🔴</span> Visit a doctor TODAY
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Your results need immediate attention</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {((results.confidence === "Medium" && results.seekMedicalAttention) || (results.confidence === "High" && !results.seekMedicalAttention)) && (
+                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500" />
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div>
+                                    <p className="font-bold text-base flex items-center gap-2">
+                                        <span className="text-lg">🟡</span> Monitor for 24-48 hours
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Watch symptoms, visit doctor if worsens</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {((results.confidence === "Low") || (results.confidence === "Medium" && !results.seekMedicalAttention)) && (
+                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div>
+                                    <p className="font-bold text-base flex items-center gap-2">
+                                        <span className="text-lg">🟢</span> Rest at home
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Home care should be enough</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    <Card className="border-teal-500/20 shadow-sm bg-teal-500/5 dark:bg-teal-900/10">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2 text-teal-700 dark:text-teal-400">
+                                💬 In Simple Words
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm dark:text-teal-100">{results.simpleExplanation}</p>
+                        </CardContent>
+                    </Card>
+
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle>{t("results")}</CardTitle>
@@ -260,6 +312,11 @@ export default function CoughAnalysisPage() {
                                     ))}
                                 </div>
                             )}
+
+                            <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-700 dark:text-yellow-400 text-center">
+                                <span>⚠️</span>
+                                <span>AI suggestion only — Not a medical diagnosis. Always consult a real doctor for serious concerns.</span>
+                            </div>
                         </CardContent>
                     </Card>
                     <MedicalDisclaimer />

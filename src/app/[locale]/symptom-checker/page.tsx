@@ -27,6 +27,7 @@ export default function SymptomCheckerPage() {
     const t = useTranslations("symptomChecker");
 
     const [symptoms, setSymptoms] = useState("");
+    const quickSymptoms = ["🤒 Fever", "🤕 Headache", "🤢 Stomach Pain", "🤧 Cold & Cough", "😴 Body Ache", "👁️ Eye Problem", "🫀 Chest Pain", "💊 Skin Issue"];
     const [age, setAge] = useState("");
     const [gender, setGender] = useState("");
     const [loading, setLoading] = useState(false);
@@ -80,6 +81,17 @@ export default function SymptomCheckerPage() {
                         {/* Symptoms Textarea */}
                         <div className="space-y-2">
                             <Label htmlFor="symptoms">{t("symptomsLabel")}</Label>
+                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none w-full">
+                                {quickSymptoms.map(s => (
+                                    <button
+                                        key={s}
+                                        onClick={() => setSymptoms(prev => prev ? prev + ", " + s : s)}
+                                        className="whitespace-nowrap rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-700 dark:text-teal-400 transition-colors hover:bg-teal-500/20"
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
                             <Textarea
                                 id="symptoms"
                                 placeholder={t("symptomsPlaceholder")}
@@ -118,7 +130,12 @@ export default function SymptomCheckerPage() {
                             </div>
                         </div>
 
-                        <Button onClick={handleCheck} disabled={loading} className="w-full" size="lg">
+                        <Button
+                            onClick={handleCheck}
+                            disabled={loading}
+                            className="w-full bg-[#00BFA5] hover:bg-[#00BFA5]/90 hover:shadow-[0_0_15px_rgba(0,191,165,0.4)] transition-all duration-300 text-white font-medium"
+                            size="lg"
+                        >
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -137,6 +154,58 @@ export default function SymptomCheckerPage() {
 
             {results && severityInfo && (
                 <FadeIn delay={0.2} className="space-y-4">
+                    {/* Verdict Card */}
+                    {results.severity === "Severe" && (
+                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div>
+                                    <p className="font-bold text-base flex items-center gap-2">
+                                        <span className="text-lg">🔴</span> Visit a doctor TODAY
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Your results need immediate attention</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {results.severity === "Moderate" && (
+                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500" />
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div>
+                                    <p className="font-bold text-base flex items-center gap-2">
+                                        <span className="text-lg">🟡</span> Monitor for 24-48 hours
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Watch symptoms, visit doctor if worsens</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {results.severity === "Mild" && (
+                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+                            <CardContent className="p-4 flex items-center gap-3">
+                                <div>
+                                    <p className="font-bold text-base flex items-center gap-2">
+                                        <span className="text-lg">🟢</span> Rest at home
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">Home care should be enough</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    <Card className="border-teal-500/20 shadow-sm bg-teal-500/5 dark:bg-teal-900/10">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg flex items-center gap-2 text-teal-700 dark:text-teal-400">
+                                💬 In Simple Words
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm dark:text-teal-100">{results.simpleExplanation}</p>
+                        </CardContent>
+                    </Card>
+
                     {/* Main Condition Card */}
                     <Card className="border-2">
                         <CardHeader>
@@ -200,6 +269,11 @@ export default function SymptomCheckerPage() {
 
                             {/* AI Disclaimer text */}
                             <p className="text-xs text-muted-foreground italic border-l-2 border-muted pl-3">{results.disclaimer}</p>
+
+                            <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-700 dark:text-yellow-400 text-center">
+                                <span>⚠️</span>
+                                <span>AI suggestion only — Not a medical diagnosis. Always consult a real doctor for serious concerns.</span>
+                            </div>
 
                             {/* Find Doctor button */}
                             {results.seekDoctor && results.clinicType !== "Not required" && (

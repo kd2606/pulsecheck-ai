@@ -7,6 +7,7 @@ const CoughAnalysisOutputSchema = z.object({
     coughType: z.enum(["dry", "wet", "wheezing", "barking", "unknown"]),
     confidence: z.enum(["High", "Medium", "Low"]),
     description: z.string(),
+    simpleExplanation: z.string(),
     possibleCauses: z.array(z.string()),
     homeRemedies: z.array(z.string()),
     otcMedicines: z.array(
@@ -33,7 +34,8 @@ Provide a JSON response with:
 1. "coughType": one of "dry", "wet", "wheezing", "barking", "unknown"
 2. "confidence": "High", "Medium", or "Low"
 3. "description": brief description of the detected cough characteristics
-4. "possibleCauses": array of possible causes for this type of cough
+4. "simpleExplanation": 1-2 lines explaining the result in simple language a non-medical person can understand.
+5. "possibleCauses": array of possible causes for this type of cough
 5. "homeRemedies": array of home remedy suggestions
 6. "otcMedicines": array with "name", "purpose", and "searchQuery" for Google search
 7. "seekMedicalAttention": boolean if the cough sounds concerning

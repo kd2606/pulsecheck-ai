@@ -23,7 +23,7 @@ export function RuralHospitalList() {
                 <h2 className="font-semibold flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-indigo-500" /> Nearby Hospitals
                 </h2>
-                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] border-emerald-500/20">GPS Cached (Offline)</Badge>
+                <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] border-emerald-500/20">Showing saved location</Badge>
             </div>
 
             <div className="space-y-4">

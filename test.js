@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 const OVERPASS_URL = "https://maps.mail.ru/osm/tools/overpass/api/interpreter";
 
 async function test() {
@@ -8,7 +10,7 @@ async function test() {
     let nodeType = '["amenity"="hospital"]';
 
     const query = `
-        [out:json][timeout:10];
+        [out:json][timeout:15];
         (
           node${nodeType}(around:${radius},${lat},${lng});
           way${nodeType}(around:${radius},${lat},${lng});
@@ -21,21 +23,35 @@ async function test() {
         const response = await fetch(OVERPASS_URL, {
             method: "POST",
             body: query,
-            headers: {
-                "User-Agent": "PulseCheckAI-App/1.0"
-            }
         });
 
-        console.log("Status:", response.status);
         if (!response.ok) {
-            const txt = await response.text();
-            console.log("Error text:", txt.substring(0, 500));
-        } else {
-            const data = await response.json();
-            console.log("Data elements:", data.elements?.length);
+            console.error("Status:", response.status);
+            return;
         }
+
+        const data = await response.json();
+        const places = data.elements.map(el => {
+            const lat = el.lat || el.center?.lat;
+            const lon = el.lon || el.center?.lon;
+            return {
+                id: el.id,
+                name: el.tags?.name || "Unnamed Facility",
+                type: el.tags?.amenity || type,
+                lat,
+                lng: lon,
+                address: [
+                    el.tags?.['addr:street'],
+                    el.tags?.['addr:city']
+                ].filter(Boolean).join(", ") || "Address not available",
+                phone: el.tags?.phone || el.tags?.['contact:phone'] || null,
+                website: el.tags?.website || el.tags?.['contact:website'] || null
+            };
+        });
+
+        console.log("Places:", places);
     } catch (e) {
-        console.error("Exception:", e);
+        console.error(e);
     }
 }
 
