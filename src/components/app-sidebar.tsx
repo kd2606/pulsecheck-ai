@@ -15,6 +15,7 @@ import {
     Stethoscope,
     Landmark,
     BellRing,
+    ClipboardList,
 } from "lucide-react";
 import {
     Sidebar,
@@ -40,6 +41,7 @@ export function AppSidebar({ locale }: { locale: string }) {
         { title: t("skinScan"), url: `/${locale}/skin-scan`, icon: Scan },
         { title: t("mentalHealth"), url: `/${locale}/mental-health-screen`, icon: Brain },
         { title: t("trends"), url: `/${locale}/health-trends`, icon: TrendingUp },
+        { title: "Health Records", url: `/${locale}/health-records`, icon: ClipboardList },
         { title: "Govt Schemes", url: `/${locale}/govt-schemes`, icon: Landmark },
         { title: "Reminders", url: `/${locale}/reminders`, icon: BellRing },
         { title: t("nearbyHospitals"), url: `/${locale}/nearby-hospitals`, icon: Stethoscope },
