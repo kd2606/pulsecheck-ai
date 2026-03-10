@@ -229,7 +229,8 @@ export function FloatingChat() {
             // Create a placeholder message for the streaming response
             const modelMsgId = Date.now().toString();
             setMessages(prev => {
-                const updated = [...prev, { id: modelMsgId, role: "model" as const, content: "", timestamp: new Date(), type: "text" }];
+                const newMsg: ChatMessage = { id: modelMsgId, role: "model", content: "", timestamp: new Date(), type: "text" };
+                const updated = [...prev, newMsg];
                 if (updated.length > 20) return updated.slice(updated.length - 20);
                 return updated;
             });
