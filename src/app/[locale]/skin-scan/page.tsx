@@ -12,6 +12,7 @@ import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
+import { saveHealthRecord } from "@/firebase/healthRecords";
 
 export default function SkinScanPage() {
     const t = useTranslations("scan.skin");
@@ -75,6 +76,25 @@ export default function SkinScanPage() {
         try {
             const result = await analyzeSkinScan(imageData);
             setResults(result);
+            if (!result) return;
+
+            // Auto-save the health record
+            const topConfidence = result.conditions[0]?.confidence || "Low";
+            const severityLevel = topConfidence === "High" ? "high" : topConfidence === "Medium" ? "moderate" : "low";
+            const verdictStr = topConfidence === "High" ? "doctor_today" : topConfidence === "Medium" ? "monitor" : "rest";
+
+            await saveHealthRecord(user?.uid, {
+                type: "skin",
+                title: result.conditions[0]?.name || "Skin Analysis",
+                severity: severityLevel,
+                verdict: verdictStr,
+                summary: result.simpleExplanation,
+                details: {
+                    condition: result.conditions[0]?.name,
+                    medicines: result.otcMedicines.map(m => m.name),
+                    homecare: result.homeCare
+                }
+            });
         } catch (error) {
             console.error("Analysis error:", error);
         } finally {

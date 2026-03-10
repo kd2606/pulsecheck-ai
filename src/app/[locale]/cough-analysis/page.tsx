@@ -13,6 +13,7 @@ import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
+import { saveHealthRecord } from "@/firebase/healthRecords";
 
 export default function CoughAnalysisPage() {
     const t = useTranslations("scan.cough");
@@ -89,6 +90,24 @@ export default function CoughAnalysisPage() {
         try {
             const result = await analyzeCough(audioData);
             setResults(result);
+            if (!result) return;
+
+            // Auto-save the health record
+            const severityLevel = result.seekMedicalAttention ? "high" : "moderate";
+            const verdictStr = result.seekMedicalAttention ? "doctor_today" : "monitor";
+
+            await saveHealthRecord(user?.uid, {
+                type: "cough",
+                title: "Cough Analysis",
+                severity: severityLevel,
+                verdict: verdictStr,
+                summary: result.simpleExplanation,
+                details: {
+                    condition: result.coughType,
+                    medicines: result.otcMedicines.map(m => m.name),
+                    homecare: result.homeRemedies
+                }
+            });
         } catch (error) {
             console.error("Analysis error:", error);
         } finally {

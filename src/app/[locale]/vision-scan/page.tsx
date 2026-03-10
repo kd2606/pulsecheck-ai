@@ -12,6 +12,7 @@ import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
+import { saveHealthRecord } from "@/firebase/healthRecords";
 
 export default function VisionScanPage() {
     const t = useTranslations("scan.vision");
@@ -75,6 +76,24 @@ export default function VisionScanPage() {
         try {
             const result = await analyzeVisionScan(imageData);
             setResults(result);
+            if (!result) return;
+
+            // Auto-save the health record
+            const severityLevel = result.fatigueDetected ? "moderate" : "low";
+            const verdictStr = result.fatigueDetected ? "monitor" : "rest";
+
+            await saveHealthRecord(user?.uid, {
+                type: "vision",
+                title: "Eye Health Analysis",
+                severity: severityLevel,
+                verdict: verdictStr,
+                summary: result.simpleExplanation,
+                details: {
+                    condition: result.overallAssessment,
+                    medicines: result.otcMedicines.map(m => m.name),
+                    homecare: result.lifestyleSuggestions
+                }
+            });
         } catch (error) {
             console.error("Analysis error:", error);
         } finally {

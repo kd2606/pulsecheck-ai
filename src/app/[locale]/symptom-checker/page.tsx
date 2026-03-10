@@ -14,6 +14,8 @@ import { FadeIn } from "@/components/ui/fade-in";
 import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck, Info } from "lucide-react";
 import { checkSymptoms } from "@/ai/flows/symptom-checker";
 import { toast } from "sonner";
+import { useUser } from "@/firebase/auth/useUser";
+import { saveHealthRecord } from "@/firebase/healthRecords";
 
 type Results = Awaited<ReturnType<typeof checkSymptoms>>;
 
@@ -25,6 +27,7 @@ const severityConfig: Record<string, { variant: "destructive" | "default" | "sec
 
 export default function SymptomCheckerPage() {
     const t = useTranslations("symptomChecker");
+    const { user } = useUser();
 
     const [symptoms, setSymptoms] = useState("");
     const quickSymptoms = ["🤒 Fever", "🤕 Headache", "🤢 Stomach Pain", "🤧 Cold & Cough", "😴 Body Ache", "👁️ Eye Problem", "🫀 Chest Pain", "💊 Skin Issue"];
@@ -47,6 +50,24 @@ export default function SymptomCheckerPage() {
                 gender: gender || undefined,
             });
             setResults(result);
+            if (!result) return;
+
+            // Auto-save the health record
+            const severityLevel = result.severity === "Severe" ? "high" : result.severity === "Moderate" ? "moderate" : "low";
+            const verdictStr = result.severity === "Severe" ? "doctor_today" : result.severity === "Moderate" ? "monitor" : "rest";
+
+            await saveHealthRecord(user?.uid, {
+                type: "symptom",
+                title: "Symptom Analysis",
+                severity: severityLevel,
+                verdict: verdictStr,
+                summary: result.simpleExplanation,
+                details: {
+                    condition: result.likelyCondition,
+                    medicines: result.otcMedicines.map(m => m.name),
+                    homecare: result.precautions
+                }
+            });
         } catch (error) {
             console.error("Symptom check error:", error);
             toast.error("Analysis failed. Please try again.");

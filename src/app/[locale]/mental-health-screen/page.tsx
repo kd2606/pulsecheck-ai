@@ -14,6 +14,7 @@ import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
+import { saveHealthRecord } from "@/firebase/healthRecords";
 
 const ANSWER_OPTIONS = [
     { value: 0, labelKey: "never" },
@@ -109,6 +110,25 @@ export default function MentalHealthPage() {
                 }
             });
             setResults(result);
+            if (!result) return;
+
+            // Auto-save the health record
+            const severityLevel = result.seekProfessionalHelp ? "high" : result.wellnessScore < 60 ? "moderate" : "low";
+            const verdictStr = result.seekProfessionalHelp ? "doctor_today" : result.wellnessScore < 60 ? "monitor" : "rest";
+
+            await saveHealthRecord(user?.uid, {
+                type: "mental",
+                title: "Mental Health Screen",
+                severity: severityLevel,
+                verdict: verdictStr,
+                summary: result.summary,
+                details: {
+                    condition: result.perceivedMood,
+                    medicines: [],
+                    homecare: result.recommendations
+                }
+            });
+
             setStep("results");
         } catch (error) {
             console.error("Analysis error:", error);
