@@ -10,6 +10,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AppHeader } from "@/components/app-header";
 import { Toaster } from "@/components/ui/sonner";
 import { FloatingChat } from "@/components/floating-chat";
+import { DemoBanner } from "@/components/demo-banner";
+
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -53,9 +55,11 @@ export default async function LocaleLayout({ children, params }: Props) {
                             <SidebarProvider>
                                 <AppSidebar locale={locale} />
                                 <SidebarInset className="overflow-hidden w-full max-w-full">
+                                    <DemoBanner />
                                     <AppHeader locale={locale} />
                                     <main className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden">{children}</main>
                                 </SidebarInset>
+
                             </SidebarProvider>
                             <FloatingChat />
                             <Toaster />

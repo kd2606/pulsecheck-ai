@@ -272,6 +272,20 @@ export default function LandingPage() {
                                 ▶ See How it Works
                             </a>
                         </div>
+                        <div style={{ marginTop: 12 }}>
+                            <Link
+                                href="/en/login"
+                                style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    // Fast demo login — navigate to login page with demo flag so it auto-triggers
+                                    window.location.href = "/en/login?demo=1";
+                                }}
+                            >
+                                👀 Preview without signup →
+                            </Link>
+                        </div>
+
                         <div style={{ marginTop: 40, display: "flex", gap: 28, flexWrap: "wrap" }}>
                             {[["100%", "Free Forever"], ["5+", "AI Health Tools"], ["24/7", "Pulse Agent"]].map(([v, l]) => (
                                 <div key={l}>

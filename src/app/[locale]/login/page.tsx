@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useUser } from "@/firebase/auth/useUser";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
@@ -10,21 +10,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { HeartPulse, Mail } from "lucide-react";
+import { HeartPulse, Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-[90vh] items-center justify-center p-4">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
+    );
+}
+
+function LoginContent() {
     const t = useTranslations("auth");
     const { signInWithGoogle } = useUser();
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const locale = params.locale as string;
+    const isAutoDemo = searchParams.get("demo") === "1";
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const hasTriggeredDemo = useRef(false);
+
+    useEffect(() => {
+        if (isAutoDemo && !hasTriggeredDemo.current) {
+            hasTriggeredDemo.current = true;
+            handleDemoLogin();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAutoDemo]);
+
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,19 +66,25 @@ export default function LoginPage() {
 
     const handleDemoLogin = async () => {
         setLoading(true);
+        const DEMO_EMAIL = "demo@pulsecheckai.in";
+        const DEMO_PASSWORD = "demo123456";
         try {
-            await signInWithEmailAndPassword(auth, "demo@pulsecheck.ai", "demo123");
-            toast.success("Demo Login successful!");
+            await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+            toast.success("Demo login successful! 👋");
             router.push(`/${locale}/dashboard`);
         } catch (error: any) {
-            // If demo account doesn't exist, create it on the fly
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/invalid-login-credentials') {
+            // Auto-create demo account if it doesn't exist yet
+            if (
+                error.code === "auth/user-not-found" ||
+                error.code === "auth/invalid-credential" ||
+                error.code === "auth/invalid-login-credentials"
+            ) {
                 try {
-                    await createUserWithEmailAndPassword(auth, "demo@pulsecheck.ai", "demo123");
-                    toast.success("Demo account created and logged in!");
+                    await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+                    toast.success("Demo account ready! 👋");
                     router.push(`/${locale}/dashboard`);
                 } catch (createError: any) {
-                    toast.error("Failed to create demo account: " + createError.message);
+                    toast.error("Demo setup failed: " + createError.message);
                 }
             } else {
                 toast.error("Demo login failed: " + error.message);
@@ -63,6 +93,7 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
+
 
     const handleGoogleSignIn = async () => {
         setLoading(true);
