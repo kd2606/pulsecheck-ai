@@ -201,7 +201,7 @@ export default function TrendsPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
                         <AlertCircle className="h-10 w-10 text-yellow-500" />
-                        <p className="text-muted-foreground">Data load nahi hua. Retry karo →</p>
+                        <p className="text-muted-foreground">Data load took too long or failed.</p>
                         <Button variant="outline" onClick={handleRetry}>
                             <RefreshCw className="mr-2 h-4 w-4" /> Retry
                         </Button>
@@ -220,7 +220,10 @@ export default function TrendsPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
                         <TrendingUp className="h-10 w-10 text-muted-foreground" />
-                        <p className="text-muted-foreground">No trend data yet. Use health features to generate insights.</p>
+                        <p className="text-muted-foreground">No health trends yet. Start checking your symptoms!</p>
+                        <Button onClick={() => (window.location.href = "/en/symptom-checker")}>
+                            Go to Symptom Checker →
+                        </Button>
                     </CardContent>
                 </Card>
             );

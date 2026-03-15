@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useFirebaseContext } from "@/firebase/provider";
 import { useEffect, useState } from "react";
 import { collection, query, where, doc, onSnapshot } from "firebase/firestore";
@@ -49,11 +50,21 @@ export default function DashboardPage() {
     const [recentScans, setRecentScans] = useState<any[]>([]);
     const [showAndroidBanner, setShowAndroidBanner] = useState(false);
 
+    const [isDataLoading, setIsDataLoading] = useState(true);
+
     useEffect(() => {
         if (!loading && !user) {
             router.push(`/${locale}/login`);
         }
     }, [user, loading, router, locale]);
+
+    useEffect(() => {
+        // Enforce a strict 3-second max loading state
+        const timer = setTimeout(() => {
+            setIsDataLoading(false);
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         // Check if banner was dismissed previously
@@ -77,15 +88,16 @@ export default function DashboardPage() {
                     holisticScore: data.holisticScore || 78
                 });
             }
+            // First snapshot resolves loading state early if within 3s
+            setIsDataLoading(false);
         });
 
         // Listen to active vision reports
         const reportsQuery = query(collection(db, "reports"), where("userId", "==", user.uid));
         const unsubscribeReports = onSnapshot(reportsQuery, (snapshot) => {
             const scans: any[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Sort by date descending
             scans.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            setRecentScans(scans.slice(0, 3)); // Only keep the top 3
+            setRecentScans(scans.slice(0, 3));
         });
 
         return () => {
@@ -99,12 +111,34 @@ export default function DashboardPage() {
         router.push(`/${locale}/login`);
     };
 
-    if (loading) {
+    if (loading || isDataLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-transparent">
-                <div className="animate-pulse flex flex-col items-center">
-                    <HeartPulse className="w-12 h-12 text-emerald-500 mb-4 animate-bounce" />
-                    <p className="text-muted-foreground">Loading your health data...</p>
+            <div className="min-h-screen bg-transparent pb-24 p-4 md:p-6 w-full">
+                <header className="flex items-center justify-between mb-8">
+                    <div className="space-y-2">
+                        <Skeleton className="h-10 w-48 bg-white/10 dark:bg-white/10" />
+                        <Skeleton className="h-4 w-32 bg-white/10 dark:bg-white/10" />
+                    </div>
+                </header>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <GlassCard className="p-8 h-full min-h-[250px] flex flex-col justify-between">
+                        <Skeleton className="h-6 w-32 mb-8 bg-white/10 dark:bg-white/10" />
+                        <div className="flex justify-center flex-1 items-center">
+                            <Skeleton className="h-32 w-32 rounded-full bg-white/10 dark:bg-white/10" />
+                        </div>
+                    </GlassCard>
+                    <GlassCard className="p-8 h-full min-h-[250px] flex flex-col justify-between">
+                        <Skeleton className="h-6 w-32 mb-8 bg-white/10 dark:bg-white/10" />
+                        <div className="flex-1 mt-auto">
+                            <Skeleton className="w-full h-24 bg-white/10 dark:bg-white/10" />
+                        </div>
+                    </GlassCard>
+                    <GlassCard className="p-8 h-full min-h-[250px] flex flex-col justify-between">
+                        <Skeleton className="h-6 w-32 mb-8 bg-white/10 dark:bg-white/10" />
+                        <div className="flex-1 mt-auto">
+                            <Skeleton className="w-full h-24 bg-white/10 dark:bg-white/10" />
+                        </div>
+                    </GlassCard>
                 </div>
             </div>
         );
@@ -146,7 +180,7 @@ export default function DashboardPage() {
                                 <span className="text-[10px] text-white font-bold">EDIT</span>
                             </div>
                             {user.photoURL ? (
-                                <img src={user.photoURL} alt="User" className="w-full h-full object-cover relative z-0" />
+                                <img src={user.photoURL} alt="User" loading="lazy" className="w-full h-full object-cover relative z-0" />
                             ) : (
                                 <div className="w-full h-full relative z-0 bg-gradient-to-tr from-emerald-400 to-indigo-400 flex items-center justify-center text-white font-bold capitalize">
                                     {user.displayName ? user.displayName[0] : user.email ? user.email[0] : "U"}

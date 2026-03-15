@@ -174,7 +174,7 @@ export default function PeoplePage() {
                 <Card>
                     <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
                         <AlertCircle className="h-10 w-10 text-yellow-500" />
-                        <p className="text-muted-foreground">Data load nahi hua. Retry karo →</p>
+                        <p className="text-muted-foreground">Data load took too long or failed.</p>
                         <Button variant="outline" onClick={() => user && loadPeople(user.uid, true)}>
                             <RefreshCw className="mr-2 h-4 w-4" /> Retry
                         </Button>
@@ -188,7 +188,10 @@ export default function PeoplePage() {
                 <Card>
                     <CardContent className="flex flex-col items-center gap-4 p-12">
                         <Users className="h-12 w-12 text-muted-foreground" />
-                        <p className="text-muted-foreground">{t("noPeople")}</p>
+                        <p className="text-muted-foreground">No family members added yet. Add someone to start tracking.</p>
+                        <Button onClick={() => setDialogOpen(true)} className="mt-2">
+                            <Plus className="mr-2 h-4 w-4" /> Add Family Member
+                        </Button>
                     </CardContent>
                 </Card>
             );
