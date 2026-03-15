@@ -12,8 +12,8 @@ import {
 } from "@/components/dashboard/rural-features";
 import { UserProfileModal } from "@/components/dashboard/user-profile";
 import { AddVitalsModal } from "@/components/dashboard/add-vitals-modal";
-import { motion, Variants } from "framer-motion";
-import { User, Settings, Plus, Activity, Brain, HeartPulse, Hospital, FileText, ChevronRight, LogOut } from "lucide-react";
+import { motion, Variants, AnimatePresence } from "framer-motion";
+import { User, Settings, Plus, Activity, Brain, HeartPulse, Hospital, FileText, ChevronRight, LogOut, Smartphone, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -47,12 +47,21 @@ export default function DashboardPage() {
     const { user, loading } = useFirebaseContext();
     const [vitals, setVitals] = useState({ heartRate: 72, stressLevel: 30, holisticScore: 78 });
     const [recentScans, setRecentScans] = useState<any[]>([]);
+    const [showAndroidBanner, setShowAndroidBanner] = useState(false);
 
     useEffect(() => {
         if (!loading && !user) {
             router.push(`/${locale}/login`);
         }
     }, [user, loading, router, locale]);
+
+    useEffect(() => {
+        // Check if banner was dismissed previously
+        const isDismissed = localStorage.getItem("pulse-android-banner-dismissed");
+        if (!isDismissed) {
+            setShowAndroidBanner(true);
+        }
+    }, []);
 
     useEffect(() => {
         if (!user) return;
@@ -147,6 +156,53 @@ export default function DashboardPage() {
                     </UserProfileModal>
                 </div>
             </header>
+
+            {/* Android App Banner */}
+            <AnimatePresence>
+                {showAndroidBanner && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10, height: 0 }}
+                        animate={{ opacity: 1, y: 0, height: "auto" }}
+                        exit={{ opacity: 0, y: -10, height: 0 }}
+                        className="mb-8 overflow-hidden"
+                    >
+                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-5 rounded-xl bg-black/40 border-l-4 border-l-teal-500 border-y border-r border-white/5 backdrop-blur-md shadow-lg gap-4 relative">
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
+                                <div className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-full bg-teal-500/20 flex flex-col items-center justify-center text-teal-400">
+                                    <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-white tracking-tight leading-tight sm:text-lg">
+                                        Get <span className="text-teal-400">PulseCheck AI</span> on Mobile
+                                    </h3>
+                                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 max-w-sm">
+                                        For a faster and better experience, install our Android app. Free, no Play Store needed.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-end mt-2 sm:mt-0">
+                                <a 
+                                    href="https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk"
+                                    onClick={() => console.log('APK Download clicked')}
+                                    className="bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-colors whitespace-nowrap shadow-[0_0_15px_rgba(0,191,165,0.3)]"
+                                >
+                                    Download APK →
+                                </a>
+                                <button 
+                                    onClick={() => {
+                                        setShowAndroidBanner(false);
+                                        localStorage.setItem("pulse-android-banner-dismissed", "true");
+                                    }}
+                                    className="text-muted-foreground hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 sm:p-2.5 rounded-lg"
+                                    aria-label="Dismiss banner"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Main Grid */}
             <motion.div

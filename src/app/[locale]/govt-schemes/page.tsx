@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FadeIn } from "@/components/ui/fade-in";
-import { Loader2, ExternalLink, Landmark, Briefcase, HeartPulse, UserCircle } from "lucide-react";
+import { Loader2, Landmark, HeartPulse, CheckCircle2, AlertTriangle, Info, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { suggestGovtSchemes } from "@/ai/flows/govt-schemes";
 
@@ -20,18 +20,25 @@ const INDIAN_STATES = [
     "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir"
 ];
 
+const CATEGORIES = ["General", "SC/ST", "OBC", "BPL/Poor", "Farmer", "Woman"];
+
 export default function GovtSchemesPage() {
+    const [step, setStep] = useState<1 | 2>(1);
+    
+    // Form fields
     const [age, setAge] = useState("");
-    const [gender, setGender] = useState("");
-    const [stateLocation, setStateLocation] = useState("");
-    const [income, setIncome] = useState("");
-    const [occupation, setOccupation] = useState("");
-    const [healthConditions, setHealthConditions] = useState("");
+    const [stateLocation, setStateLocation] = useState("Chhattisgarh");
+    const [category, setCategory] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<Results | null>(null);
 
     const handleSearch = async () => {
+        if (!age || !category) {
+            toast.error("Please enter your age and select a category.");
+            return;
+        }
+
         setLoading(true);
         setResults(null);
         try {
@@ -40,12 +47,9 @@ export default function GovtSchemesPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     profile: {
-                        age: age ? parseInt(age, 10) : undefined,
-                        gender: gender || undefined,
-                        state: stateLocation || undefined,
-                        income: income || undefined,
-                        occupation: occupation || undefined,
-                        healthConditions: healthConditions || undefined,
+                        age: parseInt(age, 10),
+                        state: stateLocation,
+                        category: category,
                     }
                 }),
             });
@@ -56,6 +60,7 @@ export default function GovtSchemesPage() {
 
             const data = await response.json();
             setResults(data);
+            setStep(2);
         } catch (error) {
             console.error("Schemes check error:", error);
             toast.error("Analysis failed. Please try again.");
@@ -63,9 +68,37 @@ export default function GovtSchemesPage() {
             setLoading(false);
         }
     };
+    
+    // Render status badge based on eligibilityStatus
+    const renderEligibilityBadge = (status: "eligible" | "maybe" | "check") => {
+        switch (status) {
+            case "eligible":
+                return (
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-md text-sm font-medium w-fit">
+                        <CheckCircle2 className="h-4 w-4" />
+                        You are eligible!
+                    </div>
+                );
+            case "maybe":
+                return (
+                    <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 px-3 py-1.5 rounded-md text-sm font-medium w-fit">
+                        <AlertTriangle className="h-4 w-4" />
+                        You may be eligible
+                    </div>
+                );
+            case "check":
+            default:
+                return (
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-md text-sm font-medium w-fit">
+                        <Info className="h-4 w-4" />
+                        Check eligibility
+                    </div>
+                );
+        }
+    };
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="space-y-6 max-w-3xl mx-auto">
             <FadeIn direction="down">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
@@ -78,45 +111,35 @@ export default function GovtSchemesPage() {
                 </div>
             </FadeIn>
 
-            <FadeIn delay={0.1}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Enter Your Profile</CardTitle>
-                        <CardDescription>Fill out these details to discover eligible government programs.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="age">Age</Label>
+            {step === 1 && (
+                <FadeIn delay={0.1}>
+                    <Card className="border-2 border-muted overflow-hidden">
+                        <CardHeader className="text-center pb-4 pt-8 bg-muted/20">
+                            <div className="mx-auto bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold w-fit mb-4">
+                                🏛️ 50+ Government Schemes Available
+                            </div>
+                            <CardTitle className="text-2xl">Find your eligible schemes</CardTitle>
+                            <CardDescription>Just 3 quick details to get started</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-8 p-6 sm:p-8">
+                            <div className="space-y-3">
+                                <Label htmlFor="age" className="text-base text-muted-foreground uppercase tracking-wider font-bold">1. Your Age</Label>
                                 <Input
                                     id="age"
                                     type="number"
                                     min={1}
                                     max={120}
                                     placeholder="e.g. 45"
+                                    className="h-14 text-lg"
                                     value={age}
                                     onChange={(e) => setAge(e.target.value)}
                                 />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Gender</Label>
-                                <Select value={gender} onValueChange={setGender}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Gender" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Male">Male</SelectItem>
-                                        <SelectItem value="Female">Female</SelectItem>
-                                        <SelectItem value="Other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>State of Residence</Label>
+                            <div className="space-y-3">
+                                <Label className="text-base text-muted-foreground uppercase tracking-wider font-bold">2. State</Label>
                                 <Select value={stateLocation} onValueChange={setStateLocation}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="h-14 text-lg">
                                         <SelectValue placeholder="Select State" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -127,119 +150,105 @@ export default function GovtSchemesPage() {
                                 </Select>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Annual Household Income</Label>
-                                <Select value={income} onValueChange={setIncome}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Income Range" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Below 50,000 INR">Below ₹50,000</SelectItem>
-                                        <SelectItem value="50,000 - 1 Lakh INR">₹50,000 - ₹1 Lakh</SelectItem>
-                                        <SelectItem value="1 - 2.5 Lakhs INR">₹1 Lakh - ₹2.5 Lakhs</SelectItem>
-                                        <SelectItem value="2.5 - 5 Lakhs INR">₹2.5 Lakhs - ₹5 Lakhs</SelectItem>
-                                        <SelectItem value="Above 5 Lakhs INR">Above ₹5 Lakhs</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                            <div className="space-y-3">
+                                <Label className="text-base text-muted-foreground uppercase tracking-wider font-bold">3. Category</Label>
+                                <div className="flex flex-wrap gap-3">
+                                    {CATEGORIES.map((c) => (
+                                        <button
+                                            key={c}
+                                            onClick={() => setCategory(c)}
+                                            className={`px-5 py-3 rounded-full border-2 transition-all font-medium ${
+                                                category === c 
+                                                    ? "border-primary bg-primary text-primary-foreground" 
+                                                    : "border-border hover:border-primary/50 text-muted-foreground bg-background"
+                                            }`}
+                                        >
+                                            {c}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="occupation">Occupation / Category</Label>
-                                <Input
-                                    id="occupation"
-                                    placeholder="e.g. Farmer, Student, Pregnant Woman, etc."
-                                    value={occupation}
-                                    onChange={(e) => setOccupation(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="healthConditions">Pre-existing Health Conditions (Optional)</Label>
-                                <Input
-                                    id="healthConditions"
-                                    placeholder="e.g. Diabetes, physical disability, TB..."
-                                    value={healthConditions}
-                                    onChange={(e) => setHealthConditions(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <Button onClick={handleSearch} disabled={loading} className="w-full mt-4" size="lg">
-                            {loading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Analyzing Eligibility...
-                                </>
-                            ) : (
-                                <>
-                                    <Landmark className="mr-2 h-4 w-4" />
-                                    Find Schemes
-                                </>
-                            )}
-                        </Button>
-                    </CardContent>
-                </Card>
-            </FadeIn>
-
-            {results && (
-                <FadeIn delay={0.2} className="space-y-6">
-                    <Card className="border-orange-500/20 bg-orange-50/50 dark:bg-orange-900/10">
-                        <CardHeader>
-                            <CardTitle className="text-xl text-orange-700 dark:text-orange-400">Next Steps & Guidance</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-muted-foreground leading-relaxed">
-                                {results.generalAdvice}
-                            </p>
+                            <Button 
+                                onClick={handleSearch} 
+                                disabled={loading} 
+                                className="w-full h-14 text-lg mt-6 bg-teal-500 hover:bg-teal-600 text-white shadow-lg disabled:opacity-50" 
+                                size="lg"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        Finding Schemes...
+                                    </>
+                                ) : (
+                                    <>
+                                        Find My Schemes →
+                                    </>
+                                )}
+                            </Button>
                         </CardContent>
                     </Card>
+                </FadeIn>
+            )}
 
-                    <h3 className="text-xl font-bold mt-8 mb-4">Recommended Schemes</h3>
+            {step === 2 && results && (
+                <FadeIn delay={0.1} className="space-y-6">
+                    <Button variant="ghost" className="mb-2 -ml-4 hover:bg-transparent hover:text-primary transition-colors" onClick={() => setStep(1)}>
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to edit profile
+                    </Button>
 
-                    <div className="grid gap-4">
-                        {results.schemes.map((scheme, i) => (
-                            <Card key={i} className="overflow-hidden">
-                                <CardHeader className="bg-muted/30 border-b pb-4">
-                                    <div className="flex justify-between items-start gap-4">
-                                        <div>
-                                            <CardTitle className="text-lg text-primary">{scheme.name}</CardTitle>
-                                            <CardDescription className="mt-1">{scheme.description}</CardDescription>
+                    {!results.schemes || results.schemes.length === 0 ? (
+                        <Card className="text-center py-16 border-2">
+                            <CardContent>
+                                <Info className="h-16 w-16 mx-auto text-muted-foreground mb-4 opacity-50" />
+                                <h3 className="text-2xl font-bold mb-2">No schemes found for your profile.</h3>
+                                <p className="text-muted-foreground mb-8 text-lg">Try changing your category or state to see different programs.</p>
+                                <Button onClick={() => setStep(1)} size="lg" variant="outline" className="border-2">
+                                    Try Again
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="grid gap-6">
+                            {results.schemes.map((scheme, i) => (
+                                <Card key={i} className="overflow-hidden border-2 transition-all hover:border-primary/50">
+                                    <CardHeader className="bg-muted/10 border-b pb-5">
+                                        <CardTitle className="text-xl sm:text-2xl text-primary leading-tight">{scheme.name}</CardTitle>
+                                        <CardDescription className="mt-2 text-base">{scheme.description}</CardDescription>
+                                    </CardHeader>
+                                    
+                                    <CardContent className="pt-6 space-y-6">
+                                        {renderEligibilityBadge(scheme.eligibilityStatus)}
+
+                                        <div className="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/20">
+                                            <Label className="text-xs uppercase tracking-wider text-primary font-bold flex items-center gap-1.5 mb-2">
+                                                <HeartPulse className="h-4 w-4" /> Benefit
+                                            </Label>
+                                            <p className="text-lg sm:text-xl font-medium text-foreground">{scheme.benefits}</p>
                                         </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="pt-4 space-y-4">
-                                    <div className="space-y-1">
-                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                                            <UserCircle className="h-3 w-3" /> Eligibility
-                                        </Label>
-                                        <p className="text-sm font-medium">{scheme.eligibility}</p>
-                                    </div>
 
-                                    <div className="space-y-1">
-                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                                            <HeartPulse className="h-3 w-3" /> Key Benefits
-                                        </Label>
-                                        <p className="text-sm">{scheme.benefits}</p>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                                            <Briefcase className="h-3 w-3" /> How to Apply
-                                        </Label>
-                                        <p className="text-sm">{scheme.howToApply}</p>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="bg-muted/10 border-t pt-4">
-                                    <Button variant="outline" className="w-full" asChild>
-                                        <a href={scheme.officialLink} target="_blank" rel="noopener noreferrer">
-                                            <ExternalLink className="mr-2 h-4 w-4" />
-                                            Find Official Information
-                                        </a>
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
-                    </div>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Eligibility Details</Label>
+                                            <p className="text-sm border-l-2 border-muted pl-3 text-muted-foreground">{scheme.eligibility}</p>
+                                        </div>
+                                    </CardContent>
+                                    
+                                    <CardFooter className="bg-muted/10 border-t pt-5 pb-5 flex gap-3 flex-wrap sm:flex-nowrap">
+                                        <Button className="w-full sm:w-1/2 h-12 text-base font-semibold" asChild>
+                                            <a href={`https://www.google.com/search?q=${encodeURIComponent(scheme.name + " how to apply")}`} target="_blank" rel="noopener noreferrer">
+                                                How to Apply →
+                                            </a>
+                                        </Button>
+                                        <Button variant="outline" className="w-full sm:w-1/2 h-12 text-base border-2" asChild>
+                                            <a href={scheme.officialLink} target="_blank" rel="noopener noreferrer">
+                                                Know More →
+                                            </a>
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
                 </FadeIn>
             )}
         </div>

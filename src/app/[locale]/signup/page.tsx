@@ -42,7 +42,7 @@ export default function SignupPage() {
             });
 
             toast.success("Account created successfully!");
-            router.push(`/${locale}/dashboard`);
+            router.push(`/${locale}/onboarding`);
         } catch (error: any) {
             toast.error(error.message || "Failed to create account");
         } finally {

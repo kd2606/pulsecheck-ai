@@ -26,6 +26,62 @@ function useFadeIn() {
     return ref;
 }
 
+const APK_URL = "https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk";
+
+// ─── Install Details Component for Landing Page ────────────────────────────
+function InstallTooltip({ children }: { children: React.ReactNode }) {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div style={{ position: "relative", display: "inline-block" }}>
+            <div 
+                onMouseEnter={() => setIsOpen(true)} 
+                onMouseLeave={() => setIsOpen(false)}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                {children}
+            </div>
+            {isOpen && (
+                <div style={{
+                    position: "absolute",
+                    bottom: "100%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    marginBottom: "12px",
+                    width: "240px",
+                    background: "#000",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                    zIndex: 100,
+                    textAlign: "left"
+                }}>
+                    <div style={{ color: TEAL, fontWeight: 700, fontSize: "14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>📱</span> How to install:
+                    </div>
+                    <ol style={{ margin: 0, paddingLeft: "16px", fontSize: "12px", color: "rgba(255,255,255,0.8)", lineHeight: 1.6 }}>
+                        <li style={{ paddingBottom: "4px" }}>Click Download APK</li>
+                        <li style={{ paddingBottom: "4px" }}>Open downloaded file</li>
+                        <li style={{ paddingBottom: "4px" }}>Allow 'Install unknown apps' if prompted</li>
+                        <li>Install & enjoy!</li>
+                    </ol>
+                    <div style={{
+                        position: "absolute",
+                        bottom: "-6px",
+                        left: "50%",
+                        transform: "translateX(-50%) rotate(45deg)",
+                        width: "12px",
+                        height: "12px",
+                        background: "#000",
+                        borderRight: "1px solid rgba(255,255,255,0.1)",
+                        borderBottom: "1px solid rgba(255,255,255,0.1)",
+                    }} />
+                </div>
+            )}
+        </div>
+    );
+}
+
 function FadeSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
     const ref = useFadeIn();
     return (
@@ -272,10 +328,10 @@ export default function LandingPage() {
                                 ▶ See How it Works
                             </a>
                         </div>
-                        <div style={{ marginTop: 12 }}>
+                        <div style={{ marginTop: 16 }}>
                             <Link
                                 href="/en/login"
-                                style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+                                style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", textDecoration: "none", fontWeight: 500 }}
                                 onClick={async (e) => {
                                     e.preventDefault();
                                     // Fast demo login — navigate to login page with demo flag so it auto-triggers
@@ -284,6 +340,30 @@ export default function LandingPage() {
                             >
                                 👀 Preview without signup →
                             </Link>
+                        </div>
+
+                        {/* Android Download Section */}
+                        <div style={{ marginTop: 32, paddingTop: 32, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 10 }}>
+                                <Link 
+                                    href="/en/login"
+                                    style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "transparent", color: "#fff", fontWeight: 600, fontSize: 15, padding: "12px 24px", borderRadius: 10, textDecoration: "none", border: `1.5px solid ${TEAL}` }}
+                                >
+                                    🌐 Open Web App
+                                </Link>
+                                <InstallTooltip>
+                                    <a 
+                                        href={APK_URL}
+                                        onClick={() => console.log('APK Download clicked')}
+                                        style={{ display: "inline-flex", alignItems: "center", gap: 8, background: TEAL, color: "#fff", fontWeight: 700, fontSize: 15, padding: "12px 24px", borderRadius: 10, textDecoration: "none", boxShadow: `0 4px 20px rgba(0,191,165,0.3)` }}
+                                    >
+                                        📱 Download Android App ↓
+                                    </a>
+                                </InstallTooltip>
+                            </div>
+                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center", gap: 6 }}>
+                                ⭐ Free • No Play Store needed • Direct APK install
+                            </div>
                         </div>
 
                         <div style={{ marginTop: 40, display: "flex", gap: 28, flexWrap: "wrap" }}>
@@ -446,7 +526,7 @@ export default function LandingPage() {
                         </div>
                         <div>
                             <div style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.3)", marginBottom: 12, letterSpacing: 1, textTransform: "uppercase" }}>Legal</div>
-                            {[["About", "#"], ["Privacy Policy", "#"], ["Terms", "#"]].map(([l, h]) => (
+                            {[["About", "/en/about"], ["Privacy Policy", "/en/privacy-policy"], ["Terms", "#"]].map(([l, h]) => (
                                 <div key={l} style={{ marginBottom: 8 }}>
                                     <Link href={h} style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>{l}</Link>
                                 </div>

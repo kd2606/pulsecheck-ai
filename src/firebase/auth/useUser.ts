@@ -36,7 +36,7 @@ export function useUser() {
         const provider = new GoogleAuthProvider();
         try {
             // Try popup first (works on localhost and when domains are properly configured)
-            await signInWithPopup(auth, provider);
+            return await signInWithPopup(auth, provider);
         } catch (error: any) {
             // If popup fails due to cross-origin/iframe issues, fall back to redirect
             if (
@@ -47,7 +47,7 @@ export function useUser() {
                 error.message?.includes("cross-origin")
             ) {
                 console.warn("Popup sign-in failed, falling back to redirect:", error.message);
-                await signInWithRedirect(auth, provider);
+                return await signInWithRedirect(auth, provider);
             } else {
                 throw error;
             }

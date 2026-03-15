@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useUser } from "@/firebase/auth/useUser";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebase/clientApp";
+import { auth, db } from "@/firebase/clientApp";
+import { doc, getDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,9 +55,14 @@ function LoginContent() {
         e.preventDefault();
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCred = await signInWithEmailAndPassword(auth, email, password);
+            const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
             toast.success("Login successful!");
-            router.push(`/${locale}/dashboard`);
+            if (userDoc.exists() && userDoc.data().onboardingDone) {
+                router.push(`/${locale}/dashboard`);
+            } else {
+                router.push(`/${locale}/onboarding`);
+            }
         } catch (error: any) {
             toast.error(error.message || "Failed to login");
         } finally {
@@ -98,8 +104,15 @@ function LoginContent() {
     const handleGoogleSignIn = async () => {
         setLoading(true);
         try {
-            await signInWithGoogle();
-            router.push(`/${locale}/dashboard`);
+            const userCred = await signInWithGoogle();
+            if (userCred && userCred.user) {
+                const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
+                if (userDoc.exists() && userDoc.data().onboardingDone) {
+                    router.push(`/${locale}/dashboard`);
+                } else {
+                    router.push(`/${locale}/onboarding`);
+                }
+            }
         } catch (error: any) {
             if (error.code === 'auth/configuration-not-found' || error.message?.includes('configuration-not-found')) {
                 toast.error("Configuration Error", {
