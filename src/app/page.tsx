@@ -334,12 +334,40 @@ export default function LandingPage() {
                                 style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", textDecoration: "none", fontWeight: 500 }}
                                 onClick={async (e) => {
                                     e.preventDefault();
-                                    // Fast demo login — navigate to login page with demo flag so it auto-triggers
                                     window.location.href = "/en/login?demo=1";
                                 }}
                             >
                                 👀 Preview without signup →
                             </Link>
+                        </div>
+                        {/* APK Download Button — hero shortcut */}
+                        <div style={{ marginTop: 12 }}>
+                            <a
+                                href={APK_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => console.log('APK Download clicked')}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                    background: TEAL,
+                                    color: "#fff",
+                                    fontWeight: 700,
+                                    fontSize: 15,
+                                    padding: "13px 24px",
+                                    borderRadius: 10,
+                                    textDecoration: "none",
+                                    boxShadow: `0 4px 20px rgba(0,191,165,0.3)`,
+                                    marginBottom: 6,
+                                }}
+                            >
+                                📱 Download Android App (Free APK)
+                            </a>
+                            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", textAlign: "center" }}>
+                                ⭐ Free • No Play Store needed
+                            </div>
                         </div>
 
                         {/* Android Download Section */}
@@ -526,7 +554,7 @@ export default function LandingPage() {
                         </div>
                         <div>
                             <div style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.3)", marginBottom: 12, letterSpacing: 1, textTransform: "uppercase" }}>Legal</div>
-                            {[["About", "/en/about"], ["Privacy Policy", "/en/privacy-policy"], ["Terms", "#"]].map(([l, h]) => (
+                            {[["About", "/en/about"], ["Privacy Policy", "/en/privacy-policy"], ["Terms", "/en/privacy-policy"]].map(([l, h]) => (
                                 <div key={l} style={{ marginBottom: 8 }}>
                                     <Link href={h} style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>{l}</Link>
                                 </div>

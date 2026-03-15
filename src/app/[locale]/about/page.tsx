@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Info, Code, Globe, Github, Mail, Smartphone } from "lucide-react";
-import Image from "next/image";
 
 export default function AboutPage() {
     return (
