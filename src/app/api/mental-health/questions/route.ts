@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { generateMentalHealthQuestions } from "@/ai/flows/mental-health";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
     try {
         const result = await generateMentalHealthQuestions(5);

@@ -84,7 +84,7 @@ Important: Maintain an immensely empathetic, clinical yet human tone. Read betwe
     }
 }
 
-export const MentalHealthQuestionsSchema = z.object({
+const MentalHealthQuestionsSchema = z.object({
     questions: z.array(z.string()).describe("A list of uniquely generated psychiatric questions.")
 });
 
