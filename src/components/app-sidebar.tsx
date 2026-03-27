@@ -44,7 +44,7 @@ import {
 /* Features demo users cannot fully use — clicking will still navigate but the page should handle it */
 const DEMO_LOCKED = new Set(["/health-records", "/people"]);
 
-const APK_URL = "https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk";
+const APK_URL = "https://expo.dev/artifacts/eas/a4cyVYKBAo1t1yKs552SYf4.apk";
 
 export function AppSidebar({ locale }: { locale: string }) {
     const t = useTranslations("nav");

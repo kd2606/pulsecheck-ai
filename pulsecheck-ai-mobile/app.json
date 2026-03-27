@@ -20,7 +20,7 @@
         "backgroundColor": "#060E1E"
       },
       "package": "com.pulsecheck.ai",
-      "versionCode": 2,
+      "versionCode": 4,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",

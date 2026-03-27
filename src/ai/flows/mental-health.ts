@@ -19,6 +19,7 @@ const MentalHealthInputSchema = z.object({
 
 const MentalHealthOutputSchema = z.object({
     wellnessScore: z.number().min(0).max(100),
+
     perceivedMood: z.string(),
     summary: z.string(),
     recommendations: z.array(z.string()),

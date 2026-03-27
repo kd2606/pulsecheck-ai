@@ -216,7 +216,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-end mt-2 sm:mt-0">
                                 <a 
-                                    href="https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk"
+                                    href="https://expo.dev/artifacts/eas/a4cyVYKBAo1t1yKs552SYf4.apk"
                                     onClick={() => console.log('APK Download clicked')}
                                     className="bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-colors whitespace-nowrap shadow-[0_0_15px_rgba(0,191,165,0.3)]"
                                 >

@@ -26,7 +26,7 @@ function useFadeIn() {
     return ref;
 }
 
-const APK_URL = "https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk";
+const APK_URL = "https://expo.dev/artifacts/eas/a4cyVYKBAo1t1yKs552SYf4.apk";
 
 // ─── Install Details Component for Landing Page ────────────────────────────
 function InstallTooltip({ children }: { children: React.ReactNode }) {

@@ -58,7 +58,7 @@ export default function AboutPage() {
                         </div>
                         
                         <a 
-                            href="https://expo.dev/artifacts/eas/t6Bj84qdr1xpCsLqay3GJo.apk"
+                            href="https://expo.dev/artifacts/eas/a4cyVYKBAo1t1yKs552SYf4.apk"
                             onClick={() => console.log('APK Download clicked')}
                             className="inline-flex items-center gap-3 bg-teal-500 hover:bg-teal-400 text-black font-bold text-lg px-8 py-4 rounded-xl transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(0,191,165,0.4)]"
                         >
