@@ -5,6 +5,8 @@ import { useAuthContext } from "../../src/context/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { PulseCheckLogoMobile } from "../../src/components/PulseCheckLogoMobile";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 
 const { width } = Dimensions.get("window");
 
@@ -41,121 +43,181 @@ export default function DashboardScreen() {
     const [tipIndex] = useState(Math.floor(Math.random() * TIPS.length));
 
     return (
-        <SafeAreaView style={s.root}>
-            <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+        <LinearGradient
+            colors={["#060E1E", "#0D1B3E", "#0A1A2F", "#060E1E"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={s.root}
+        >
+            {/* Decorative glow blobs */}
+            <View style={s.blob1} />
+            <View style={s.blob2} />
 
-                {/* ── TOP BAR ── */}
-                <View style={s.topBar}>
-                    <PulseCheckLogoMobile size={52} />
-                    <TouchableOpacity style={s.avatarBtn} onPress={() => router.push("/profile")} activeOpacity={0.7}>
-                        <Text style={s.avatarInitial}>{firstName[0]?.toUpperCase() ?? "U"}</Text>
-                    </TouchableOpacity>
-                </View>
+            <SafeAreaView style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
-                {/* ── HERO HEALTH CARD ── */}
-                <View style={s.heroCard}>
-                    <View style={s.heroLeft}>
-                        <View style={s.heroIconWrap}>
-                            <Ionicons name="heart" size={22} color="#EF4444" />
-                        </View>
-                        <Text style={s.heroGreeting}>{getGreeting()}, {firstName} 👋</Text>
-                        <Text style={s.heroTitle}>Health Overview</Text>
-                        <Text style={s.heroBody}>
-                            Monitor your health daily with AI-powered analysis and personalized insights.
-                        </Text>
-                        <View style={s.heroStatsRow}>
-                            {[{ val: "12", lbl: "Scans" }, { val: "5", lbl: "Checkups" }, { val: "8", lbl: "Reports" }].map(st => (
-                                <View key={st.lbl} style={s.heroStat}>
-                                    <Text style={s.heroStatVal}>{st.val}</Text>
-                                    <Text style={s.heroStatLbl}>{st.lbl}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                    <View style={s.heroPulse}>
-                        <Ionicons name="pulse" size={64} color="rgba(239,68,68,0.15)" />
-                    </View>
-                </View>
-
-                {/* ── QUICK ACTIONS ── */}
-                <Text style={s.sectionTitle}>Quick Actions</Text>
-                <View style={s.grid}>
-                    {features.map((f) => (
+                    {/* ── TOP BAR ── */}
+                    <View style={s.topBar}>
+                        <PulseCheckLogoMobile size={52} />
                         <TouchableOpacity
-                            key={f.title}
-                            style={s.featureCard}
-                            onPress={() => router.push(f.route as any)}
-                            activeOpacity={0.75}
+                            onPress={() => router.push("/profile")}
+                            activeOpacity={0.7}
                         >
-                            <View style={[s.featureIconBg, { backgroundColor: f.color + "18" }]}>
-                                <Ionicons name={f.icon as any} size={26} color={f.color} />
-                            </View>
-                            <Text style={s.featureTitle} numberOfLines={1}>{f.title}</Text>
-                            <Text style={s.featureDesc} numberOfLines={1}>{f.desc}</Text>
+                            <BlurView intensity={60} tint="dark" style={s.avatarBtn}>
+                                <Text style={s.avatarInitial}>{firstName[0]?.toUpperCase() ?? "U"}</Text>
+                            </BlurView>
                         </TouchableOpacity>
-                    ))}
-                </View>
-
-                {/* ── TIP OF THE DAY ── */}
-                <Text style={s.sectionTitle}>Tip of the Day</Text>
-                <View style={s.tipCard}>
-                    <View style={s.tipIconWrap}>
-                        <Ionicons name="bulb-outline" size={22} color="#FBBF24" />
                     </View>
-                    <Text style={s.tipText}>{TIPS[tipIndex]}</Text>
-                </View>
 
-                {/* ── DISCLAIMER ── */}
-                <View style={s.disclaimer}>
-                    <Ionicons name="information-circle-outline" size={14} color="#334155" />
-                    <Text style={s.disclaimerText}>
-                        AI results are for informational purposes only. Always consult a qualified healthcare professional.
-                    </Text>
-                </View>
+                    {/* ── HERO HEALTH CARD ── */}
+                    <BlurView intensity={50} tint="dark" style={s.heroCard}>
+                        <View style={s.heroLeft}>
+                            <View style={s.heroIconWrap}>
+                                <Ionicons name="heart" size={22} color="#EF4444" />
+                            </View>
+                            <Text style={s.heroGreeting}>{getGreeting()}, {firstName} 👋</Text>
+                            <Text style={s.heroTitle}>Health Overview</Text>
+                            <Text style={s.heroBody}>
+                                Monitor your health daily with AI-powered analysis and personalized insights.
+                            </Text>
+                            <View style={s.heroStatsRow}>
+                                {[{ val: "12", lbl: "Scans" }, { val: "5", lbl: "Checkups" }, { val: "8", lbl: "Reports" }].map(st => (
+                                    <View key={st.lbl} style={s.heroStat}>
+                                        <Text style={s.heroStatVal}>{st.val}</Text>
+                                        <Text style={s.heroStatLbl}>{st.lbl}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                        <View style={s.heroPulse}>
+                            <Ionicons name="pulse" size={72} color="rgba(52,211,153,0.1)" />
+                        </View>
+                    </BlurView>
 
-                <View style={{ height: 30 }} />
-            </ScrollView>
-        </SafeAreaView>
+                    {/* ── QUICK ACTIONS ── */}
+                    <Text style={s.sectionTitle}>Quick Actions</Text>
+                    <View style={s.grid}>
+                        {features.map((f) => (
+                            <TouchableOpacity
+                                key={f.title}
+                                onPress={() => router.push(f.route as any)}
+                                activeOpacity={0.75}
+                                style={s.featureCardOuter}
+                            >
+                                <BlurView intensity={40} tint="dark" style={s.featureCard}>
+                                    <View style={[s.featureIconBg, { backgroundColor: f.color + "22" }]}>
+                                        <Ionicons name={f.icon as any} size={26} color={f.color} />
+                                    </View>
+                                    <Text style={s.featureTitle} numberOfLines={1}>{f.title}</Text>
+                                    <Text style={s.featureDesc} numberOfLines={1}>{f.desc}</Text>
+                                </BlurView>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/* ── TIP OF THE DAY ── */}
+                    <Text style={s.sectionTitle}>Tip of the Day</Text>
+                    <BlurView intensity={40} tint="dark" style={s.tipCard}>
+                        <View style={s.tipIconWrap}>
+                            <Ionicons name="bulb-outline" size={22} color="#FBBF24" />
+                        </View>
+                        <Text style={s.tipText}>{TIPS[tipIndex]}</Text>
+                    </BlurView>
+
+                    {/* ── DISCLAIMER ── */}
+                    <View style={s.disclaimer}>
+                        <Ionicons name="information-circle-outline" size={14} color="#334155" />
+                        <Text style={s.disclaimerText}>
+                            AI results are for informational purposes only. Always consult a qualified healthcare professional.
+                        </Text>
+                    </View>
+
+                    <View style={{ height: 100 }} />
+                </ScrollView>
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 
 const CARD_W = (width - 44 - 14) / 2;
 
 const s = StyleSheet.create({
-    root: { flex: 1, backgroundColor: "#060E1E" },
+    root: { flex: 1 },
     content: { padding: 22, paddingTop: 8 },
+
+    // Decorative blobs
+    blob1: {
+        position: "absolute", top: -80, left: -60,
+        width: 300, height: 300, borderRadius: 150,
+        backgroundColor: "rgba(52,211,153,0.07)",
+    },
+    blob2: {
+        position: "absolute", top: 200, right: -80,
+        width: 260, height: 260, borderRadius: 130,
+        backgroundColor: "rgba(96,165,250,0.06)",
+    },
 
     // Top bar
     topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
-    greeting: { fontSize: 14, color: "#475569", fontWeight: "500" },
-    name: { fontSize: 26, fontWeight: "800", color: "#F8FAFC", letterSpacing: -0.3, marginTop: 2 },
-    avatarBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1E293B", justifyContent: "center", alignItems: "center", borderWidth: 1.5, borderColor: "#334155" },
+    avatarBtn: {
+        width: 44, height: 44, borderRadius: 22,
+        justifyContent: "center", alignItems: "center",
+        overflow: "hidden",
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.12)",
+    },
     avatarInitial: { fontSize: 18, fontWeight: "800", color: "#34D399" },
 
     // Hero card
-    heroCard: { backgroundColor: "#0F1929", borderRadius: 22, padding: 22, marginBottom: 30, borderWidth: 1, borderColor: "#1E293B", flexDirection: "row", overflow: "hidden" },
+    heroCard: {
+        borderRadius: 24, padding: 22, marginBottom: 30,
+        flexDirection: "row", overflow: "hidden",
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
+    },
     heroLeft: { flex: 1 },
-    heroIconWrap: { width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(239,68,68,0.12)", justifyContent: "center", alignItems: "center", marginBottom: 12 },
-    heroGreeting: { fontSize: 13, color: "#475569", marginBottom: 6 },
-    heroTitle: { fontSize: 17, fontWeight: "700", color: "#F8FAFC", marginBottom: 8 },
-    heroBody: { fontSize: 13, color: "#475569", lineHeight: 20, marginBottom: 16 },
+    heroIconWrap: {
+        width: 38, height: 38, borderRadius: 12,
+        backgroundColor: "rgba(239,68,68,0.15)",
+        justifyContent: "center", alignItems: "center", marginBottom: 12,
+        borderWidth: 1, borderColor: "rgba(239,68,68,0.2)",
+    },
+    heroGreeting: { fontSize: 13, color: "#94A3B8", marginBottom: 6 },
+    heroTitle: { fontSize: 18, fontWeight: "800", color: "#F8FAFC", marginBottom: 8, letterSpacing: -0.3 },
+    heroBody: { fontSize: 13, color: "#64748B", lineHeight: 20, marginBottom: 16 },
     heroStatsRow: { flexDirection: "row", gap: 20 },
     heroStat: {},
-    heroStatVal: { fontSize: 20, fontWeight: "800", color: "#34D399" },
-    heroStatLbl: { fontSize: 11, color: "#475569", fontWeight: "600" },
+    heroStatVal: { fontSize: 22, fontWeight: "800", color: "#34D399" },
+    heroStatLbl: { fontSize: 11, color: "#64748B", fontWeight: "600" },
     heroPulse: { justifyContent: "center", alignItems: "center", marginLeft: 8 },
 
     // Grid
-    sectionTitle: { fontSize: 17, fontWeight: "700", color: "#F8FAFC", marginBottom: 16, letterSpacing: -0.2 },
-    grid: { flexDirection: "row", flexWrap: "wrap", gap: 14, marginBottom: 30 },
-    featureCard: { width: CARD_W, backgroundColor: "#0F1929", borderRadius: 18, padding: 18, borderWidth: 1, borderColor: "#1E293B" },
-    featureIconBg: { width: 50, height: 50, borderRadius: 15, justifyContent: "center", alignItems: "center", marginBottom: 12 },
-    featureTitle: { color: "#F1F5F9", fontWeight: "700", fontSize: 14, marginBottom: 4 },
-    featureDesc: { color: "#475569", fontSize: 12 },
+    sectionTitle: { fontSize: 17, fontWeight: "700", color: "#F1F5F9", marginBottom: 14, letterSpacing: -0.2 },
+    grid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 28 },
+    featureCardOuter: { width: CARD_W, borderRadius: 20, overflow: "hidden" },
+    featureCard: {
+        padding: 18,
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.09)",
+        overflow: "hidden",
+    },
+    featureIconBg: {
+        width: 50, height: 50, borderRadius: 16,
+        justifyContent: "center", alignItems: "center", marginBottom: 12,
+    },
+    featureTitle: { color: "#F1F5F9", fontWeight: "700", fontSize: 13, marginBottom: 4, letterSpacing: -0.1 },
+    featureDesc: { color: "#64748B", fontSize: 11 },
 
     // Tip
-    tipCard: { backgroundColor: "#0F1929", borderRadius: 18, padding: 18, marginBottom: 20, flexDirection: "row", gap: 14, alignItems: "flex-start", borderWidth: 1, borderColor: "#1E293B" },
-    tipIconWrap: { width: 38, height: 38, borderRadius: 11, backgroundColor: "rgba(251,191,36,0.1)", justifyContent: "center", alignItems: "center", flexShrink: 0 },
+    tipCard: {
+        borderRadius: 20, padding: 18, marginBottom: 20,
+        flexDirection: "row", gap: 14, alignItems: "flex-start",
+        overflow: "hidden",
+        borderWidth: 1, borderColor: "rgba(251,191,36,0.15)",
+    },
+    tipIconWrap: {
+        width: 40, height: 40, borderRadius: 13,
+        backgroundColor: "rgba(251,191,36,0.12)",
+        justifyContent: "center", alignItems: "center", flexShrink: 0,
+        borderWidth: 1, borderColor: "rgba(251,191,36,0.2)",
+    },
     tipText: { flex: 1, color: "#94A3B8", fontSize: 13, lineHeight: 22 },
 
     // Disclaimer

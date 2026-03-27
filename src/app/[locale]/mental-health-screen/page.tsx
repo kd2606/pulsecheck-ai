@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,12 +43,33 @@ export default function MentalHealthPage() {
 
     const { user } = useUser();
     const { saveScan } = useScanStore();
+    
+    const [dynamicQuestions, setDynamicQuestions] = useState<string[]>([]);
+    const [fetchingQuestions, setFetchingQuestions] = useState(true);
+
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            try {
+                const res = await fetch("/api/mental-health/questions");
+                if (!res.ok) throw new Error("Failed to fetch");
+                const data = await res.json();
+                setDynamicQuestions(data.questions || DEEP_PSYCH_QUESTIONS);
+            } catch (err) {
+                console.error(err);
+                setDynamicQuestions(DEEP_PSYCH_QUESTIONS);
+            } finally {
+                setFetchingQuestions(false);
+            }
+        };
+        fetchQuestions();
+    }, []);
 
     const handleAnswer = async (value: number) => {
         const newAnswers = [...answers, value];
         setAnswers(newAnswers);
 
-        if (currentQuestion < DEEP_PSYCH_QUESTIONS.length - 1) {
+        if (currentQuestion < dynamicQuestions.length - 1) {
             setCurrentQuestion(currentQuestion + 1);
         } else {
             // All questions answered, move to voice analysis step
@@ -100,7 +121,7 @@ export default function MentalHealthPage() {
             const mockVocalTension = mockVoiceWpm > 150 ? "High" : mockVoiceWpm < 125 ? "Low" : "Normal";
 
             const result = await analyzeMentalHealth({
-                answers: DEEP_PSYCH_QUESTIONS.map((q, i) => ({
+                answers: dynamicQuestions.map((q, i) => ({
                     question: q,
                     answer: answers[i],
                 })),
@@ -162,20 +183,29 @@ export default function MentalHealthPage() {
                 <p className="text-muted-foreground">{t("description")}</p>
             </FadeIn>
 
-            {step === "questions" && !loading && (
+            {fetchingQuestions && (
+                <Card>
+                    <CardContent className="flex flex-col items-center gap-4 p-12">
+                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Preparing your personalized assessment...</p>
+                    </CardContent>
+                </Card>
+            )}
+
+            {step === "questions" && !loading && !fetchingQuestions && (
                 <FadeIn delay={0.1}>
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Brain className="h-5 w-5" />
-                                {t("question", { number: currentQuestion + 1, total: DEEP_PSYCH_QUESTIONS.length })}
+                                {t("question", { number: currentQuestion + 1, total: dynamicQuestions.length })}
                             </CardTitle>
                             <CardDescription>
-                                <Progress value={((currentQuestion) / DEEP_PSYCH_QUESTIONS.length) * 100} className="mt-2" />
+                                <Progress value={((currentQuestion) / dynamicQuestions.length) * 100} className="mt-2" />
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <p className="text-lg font-medium">{DEEP_PSYCH_QUESTIONS[currentQuestion]}</p>
+                            <p className="text-lg font-medium">{dynamicQuestions[currentQuestion]}</p>
                             <div className="grid gap-2">
                                 {ANSWER_OPTIONS.map((option) => (
                                     <Button

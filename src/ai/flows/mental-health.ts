@@ -83,3 +83,24 @@ Important: Maintain an immensely empathetic, clinical yet human tone. Read betwe
         };
     }
 }
+
+export const MentalHealthQuestionsSchema = z.object({
+    questions: z.array(z.string()).describe("A list of uniquely generated psychiatric questions.")
+});
+
+export async function generateMentalHealthQuestions(count: number = 5) {
+    try {
+        const { output } = await ai.generate({
+            prompt: `You are an expert psychiatrist. Generate exactly ${count} unique, deep psychiatric questions to assess a patient's mental wellness, stress, and anxiety. The questions should be written directly to the patient (e.g., "How often do you feel..."). They should be answerable on a scale of Never/Rarely/Sometimes/Often/Constantly. Avoid generic questions; aim for deep emotional intelligence indicators like emotional regulation, dissociation, lethargy, or self-criticism.`,
+            output: { schema: MentalHealthQuestionsSchema },
+        });
+
+        if (!output || !output.questions || output.questions.length === 0) {
+            throw new Error("Genkit returned empty questions");
+        }
+        return output;
+    } catch (error) {
+        console.error("Failed to generate dynamic questions:", error);
+        return { questions: DEEP_PSYCH_QUESTIONS };
+    }
+}

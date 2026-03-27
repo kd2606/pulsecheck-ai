@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
-    ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert
+    ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
 
@@ -41,171 +44,201 @@ export default function ChatbotScreen() {
                 body: JSON.stringify({ messages: newMessages }),
             });
 
-            if (!res.ok) {
-                throw new Error("API Connection Failed");
-            }
-
+            if (!res.ok) throw new Error("API Connection Failed");
             const data = await res.json();
             if (data.error) throw new Error(data.error);
-
             setMessages((prev) => [...prev, data]);
         } catch (error: any) {
             console.error("Chat Error:", error);
-            setMessages((prev) => [...prev, { role: "model", content: "Sorry, I had trouble processing that. Please try again." }]);
-            Alert.alert("Network Error", "Unable to reach the AI. Please try again later.");
+            setMessages((prev) => [
+                ...prev,
+                { role: "model", content: "I'm having trouble connecting right now. Please check your internet and try again." }
+            ]);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        <LinearGradient
+            colors={["#060E1E", "#0D1B3E", "#0A1A2F", "#060E1E"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ flex: 1 }}
         >
-            <View style={styles.header}>
-                <View style={styles.iconBg}>
-                    <Ionicons name="chatbubbles" size={24} color="#3B82F6" />
-                </View>
-                <View>
-                    <Text style={styles.title}>Medu AI</Text>
-                    <Text style={styles.subtitle}>Your personal health assistant</Text>
-                </View>
-            </View>
+            {/* Glow blobs */}
+            <View style={s.blob1} />
+            <View style={s.blob2} />
 
-            <ScrollView
-                ref={scrollViewRef}
-                contentContainerStyle={styles.chatArea}
-                showsVerticalScrollIndicator={false}
-            >
-                {messages.map((msg, index) => (
-                    <View
-                        key={index}
-                        style={[
-                            styles.messageRow,
-                            msg.role === "user" ? styles.rowUser : styles.rowModel
-                        ]}
-                    >
-                        {msg.role === "model" && (
-                            <View style={styles.avatarModel}>
-                                <Ionicons name="medical" size={14} color="#fff" />
-                            </View>
-                        )}
-                        <View
-                            style={[
-                                styles.messageBubble,
-                                msg.role === "user" ? styles.bubbleUser : styles.bubbleModel
-                            ]}
-                        >
-                            <Text style={[
-                                styles.messageText,
-                                msg.role === "user" ? styles.textUser : styles.textModel
-                            ]}>
-                                {msg.content}
-                            </Text>
-                        </View>
-                        {msg.role === "user" && (
-                            <View style={styles.avatarUser}>
-                                <Ionicons name="person" size={14} color="#fff" />
-                            </View>
-                        )}
-                    </View>
-                ))}
-
-                {isLoading && (
-                    <View style={[styles.messageRow, styles.rowModel]}>
-                        <View style={styles.avatarModel}>
-                            <Ionicons name="medical" size={14} color="#fff" />
-                        </View>
-                        <View style={[styles.messageBubble, styles.bubbleModel, { paddingHorizontal: 16 }]}>
-                            <ActivityIndicator size="small" color="#3B82F6" />
-                        </View>
-                    </View>
-                )}
-            </ScrollView>
-
-            <View style={styles.inputArea}>
-                <TextInput
-                    style={styles.textInput}
-                    placeholder="Type a message..."
-                    placeholderTextColor="#64748B"
-                    value={input}
-                    onChangeText={setInput}
-                    onSubmitEditing={handleSend}
-                    maxLength={500}
-                />
-                <TouchableOpacity
-                    style={[styles.sendButton, !input.trim() || isLoading ? styles.sendDisabled : null]}
-                    onPress={handleSend}
-                    disabled={!input.trim() || isLoading}
+            <SafeAreaView style={{ flex: 1 }}>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === "ios" ? "padding" : undefined}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
                 >
-                    <Ionicons name="send" size={18} color="#fff" />
-                </TouchableOpacity>
-            </View>
-        </KeyboardAvoidingView>
+                    {/* ─── HEADER ─── */}
+                    <BlurView intensity={50} tint="dark" style={s.header}>
+                        <View style={s.iconBg}>
+                            <Ionicons name="chatbubbles" size={22} color="#60A5FA" />
+                        </View>
+                        <View>
+                            <Text style={s.title}>Medu AI</Text>
+                            <Text style={s.subtitle}>Your personal health assistant</Text>
+                        </View>
+                    </BlurView>
+
+                    {/* ─── MESSAGES ─── */}
+                    <ScrollView
+                        ref={scrollViewRef}
+                        contentContainerStyle={s.chatArea}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {messages.map((msg, index) => (
+                            <View
+                                key={index}
+                                style={[s.messageRow, msg.role === "user" ? s.rowUser : s.rowModel]}
+                            >
+                                {msg.role === "model" && (
+                                    <View style={s.avatarModel}>
+                                        <Ionicons name="medical" size={13} color="#fff" />
+                                    </View>
+                                )}
+
+                                {msg.role === "user" ? (
+                                    /* User bubble: solid gradient */
+                                    <LinearGradient
+                                        colors={["#3B82F6", "#2563EB"]}
+                                        style={[s.messageBubble, s.bubbleUser]}
+                                    >
+                                        <Text style={[s.messageText, s.textUser]}>{msg.content}</Text>
+                                    </LinearGradient>
+                                ) : (
+                                    /* AI bubble: frosted glass */
+                                    <BlurView intensity={50} tint="dark" style={[s.messageBubble, s.bubbleModel]}>
+                                        <Text style={[s.messageText, s.textModel]}>{msg.content}</Text>
+                                    </BlurView>
+                                )}
+
+                                {msg.role === "user" && (
+                                    <View style={s.avatarUser}>
+                                        <Ionicons name="person" size={13} color="#fff" />
+                                    </View>
+                                )}
+                            </View>
+                        ))}
+
+                        {isLoading && (
+                            <View style={[s.messageRow, s.rowModel]}>
+                                <View style={s.avatarModel}>
+                                    <Ionicons name="medical" size={13} color="#fff" />
+                                </View>
+                                <BlurView intensity={50} tint="dark" style={[s.messageBubble, s.bubbleModel]}>
+                                    <ActivityIndicator size="small" color="#60A5FA" />
+                                </BlurView>
+                            </View>
+                        )}
+                    </ScrollView>
+
+                    {/* ─── INPUT BAR ─── */}
+                    <BlurView intensity={60} tint="dark" style={s.inputArea}>
+                        <TextInput
+                            style={s.textInput}
+                            placeholder="Type a message..."
+                            placeholderTextColor="#475569"
+                            value={input}
+                            onChangeText={setInput}
+                            onSubmitEditing={handleSend}
+                            maxLength={500}
+                            multiline
+                        />
+                        <TouchableOpacity
+                            style={[s.sendButton, (!input.trim() || isLoading) && s.sendDisabled]}
+                            onPress={handleSend}
+                            disabled={!input.trim() || isLoading}
+                        >
+                            <LinearGradient
+                                colors={input.trim() && !isLoading ? ["#3B82F6", "#2563EB"] : ["#1E293B", "#1E293B"]}
+                                style={s.sendGradient}
+                            >
+                                <Ionicons name="send" size={17} color="#fff" />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </BlurView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0F172A" },
+const s = StyleSheet.create({
+    blob1: { position: "absolute", top: -60, left: -40, width: 250, height: 250, borderRadius: 125, backgroundColor: "rgba(96,165,250,0.08)" },
+    blob2: { position: "absolute", bottom: 100, right: -60, width: 220, height: 220, borderRadius: 110, backgroundColor: "rgba(167,139,250,0.07)" },
+
     header: {
         flexDirection: "row", alignItems: "center", gap: 12,
-        paddingHorizontal: 20, paddingTop: 56, paddingBottom: 16,
-        borderBottomWidth: 1, borderBottomColor: "#1E293B",
-        backgroundColor: "#0F172A",
+        paddingHorizontal: 20, paddingTop: 12, paddingBottom: 16,
+        borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)",
+        overflow: "hidden",
     },
     iconBg: {
-        width: 44, height: 44, borderRadius: 12, backgroundColor: "#172554",
-        justifyContent: "center", alignItems: "center"
+        width: 44, height: 44, borderRadius: 14,
+        backgroundColor: "rgba(96,165,250,0.18)",
+        borderWidth: 1, borderColor: "rgba(96,165,250,0.25)",
+        justifyContent: "center", alignItems: "center",
     },
-    title: { fontSize: 18, fontWeight: "800", color: "#F8FAFC" },
-    subtitle: { fontSize: 13, color: "#64748B", marginTop: 2 },
+    title: { fontSize: 17, fontWeight: "800", color: "#F8FAFC" },
+    subtitle: { fontSize: 12, color: "#64748B", marginTop: 1 },
 
-    chatArea: { padding: 16, paddingBottom: 32, gap: 16 },
+    chatArea: { padding: 16, paddingBottom: 24, gap: 12 },
 
-    messageRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginBottom: 4 },
+    messageRow: { flexDirection: "row", alignItems: "flex-end", gap: 8 },
     rowUser: { justifyContent: "flex-end" },
     rowModel: { justifyContent: "flex-start" },
 
     avatarModel: {
-        width: 28, height: 28, borderRadius: 14, backgroundColor: "#3B82F6",
-        justifyContent: "center", alignItems: "center", marginBottom: 4
+        width: 28, height: 28, borderRadius: 14,
+        backgroundColor: "#3B82F6",
+        justifyContent: "center", alignItems: "center",
     },
     avatarUser: {
-        width: 28, height: 28, borderRadius: 14, backgroundColor: "#64748B",
-        justifyContent: "center", alignItems: "center", marginBottom: 4
+        width: 28, height: 28, borderRadius: 14,
+        backgroundColor: "rgba(99,102,241,0.7)",
+        justifyContent: "center", alignItems: "center",
     },
 
-    messageBubble: { maxWidth: "75%", padding: 12, paddingHorizontal: 16 },
+    messageBubble: { maxWidth: "76%", paddingVertical: 10, paddingHorizontal: 14 },
     bubbleUser: {
-        backgroundColor: "#3B82F6",
         borderTopLeftRadius: 18, borderTopRightRadius: 4,
-        borderBottomLeftRadius: 18, borderBottomRightRadius: 18
+        borderBottomLeftRadius: 18, borderBottomRightRadius: 18,
+        overflow: "hidden",
     },
     bubbleModel: {
-        backgroundColor: "#1E293B", borderWidth: 1, borderColor: "#334155",
         borderTopLeftRadius: 4, borderTopRightRadius: 18,
-        borderBottomLeftRadius: 18, borderBottomRightRadius: 18
+        borderBottomLeftRadius: 18, borderBottomRightRadius: 18,
+        overflow: "hidden",
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.08)",
     },
 
-    messageText: { fontSize: 15, lineHeight: 22 },
+    messageText: { fontSize: 14, lineHeight: 21 },
     textUser: { color: "#fff" },
-    textModel: { color: "#E2E8F0" },
+    textModel: { color: "#CBD5E1" },
 
     inputArea: {
         flexDirection: "row", alignItems: "center", gap: 10,
-        padding: 16, paddingBottom: Platform.OS === "ios" ? 32 : 16,
-        backgroundColor: "#0F172A", borderTopWidth: 1, borderTopColor: "#1E293B"
+        paddingHorizontal: 14, paddingVertical: 10,
+        paddingBottom: Platform.OS === "ios" ? 28 : 14,
+        borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.07)",
+        overflow: "hidden",
     },
     textInput: {
-        flex: 1, backgroundColor: "#1E293B", color: "#F8FAFC",
-        borderRadius: 24, paddingHorizontal: 16, paddingVertical: 12,
-        fontSize: 15, borderWidth: 1, borderColor: "#334155"
+        flex: 1,
+        color: "#F8FAFC", fontSize: 14,
+        borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10,
+        maxHeight: 120,
+        backgroundColor: "rgba(255,255,255,0.06)",
+        borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
     },
-    sendButton: {
-        width: 44, height: 44, borderRadius: 22, backgroundColor: "#3B82F6",
-        justifyContent: "center", alignItems: "center"
-    },
-    sendDisabled: { backgroundColor: "#1E293B", borderColor: "#334155", borderWidth: 1 }
+    sendButton: { borderRadius: 22, overflow: "hidden" },
+    sendGradient: { width: 44, height: 44, justifyContent: "center", alignItems: "center", borderRadius: 22 },
+    sendDisabled: { opacity: 0.5 },
 });
