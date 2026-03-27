@@ -17,7 +17,7 @@ const features = [
     { title: "Vision Scan", icon: "eye-outline", color: "#A78BFA", route: "/vision-scan", desc: "Check eye fatigue" },
     { title: "Govt Schemes", icon: "business-outline", color: "#F97316", route: "/govt-schemes", desc: "Find health schemes" },
     { title: "Reminders", icon: "notifications-outline", color: "#34D399", route: "/reminders", desc: "Pills & Appointments" },
-    { title: "Find Doctors", icon: "people-outline", color: "#14B8A6", route: "/people", desc: "Nearby specialists" },
+    { title: "Nearby Hospitals", icon: "medkit-outline", color: "#14B8A6", route: "/nearby-hospitals", desc: "Find nearest help" },
 ];
 
 const TIPS = [

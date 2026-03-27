@@ -5,6 +5,7 @@ import { Audio } from "expo-av";
 import { useAuthContext } from "../../src/context/AuthProvider";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../src/firebase/firebaseConfig";
+import { useRouter } from "expo-router";
 
 const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
 
@@ -25,6 +26,7 @@ const ANSWER_OPTIONS = [
 ];
 
 export default function MentalHealthScreen() {
+    const router = useRouter();
     const { user } = useAuthContext();
     const [step, setStep] = useState<"questions" | "voice" | "analyzing" | "results">("questions");
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -111,10 +113,22 @@ export default function MentalHealthScreen() {
 
             // Save automatically to history
             if (user && data) {
-                await addDoc(collection(db, `users/${user.uid}/mentalHealthScreens`), {
-                    ...data,
-                    timestamp: new Date().toISOString(),
-                    type: "self"
+                const severityLevel = data.seekProfessionalHelp ? "high" : data.wellnessScore < 60 ? "moderate" : "low";
+                const verdictStr = data.seekProfessionalHelp ? "doctor_today" : data.wellnessScore < 60 ? "monitor" : "rest";
+
+                await addDoc(collection(db, `users/${user.uid}/healthRecords`), {
+                    type: "mental",
+                    title: "Mental Health Screen",
+                    severity: severityLevel,
+                    verdict: verdictStr,
+                    summary: data.summary,
+                    details: {
+                        condition: data.perceivedMood,
+                        medicines: [],
+                        homecare: data.recommendations
+                    },
+                    date: new Date(),
+                    saved: true
                 });
             }
         } catch (error: any) {
@@ -248,11 +262,17 @@ export default function MentalHealthScreen() {
                         ))}
 
                         {results.seekProfessionalHelp && (
-                            <View style={styles.alertBox}>
-                                <Ionicons name="warning" size={24} color="#EF4444" />
-                                <Text style={styles.alertText}>
-                                    Please consult a {results.clinicType} soon. You can find nearby specialists in the App.
-                                </Text>
+                            <View>
+                                <View style={styles.alertBox}>
+                                    <Ionicons name="warning" size={24} color="#EF4444" />
+                                    <Text style={styles.alertText}>
+                                        Please consult a {results.clinicType} soon. You can find nearby specialists using our locator.
+                                    </Text>
+                                </View>
+                                <TouchableOpacity style={styles.findButton} onPress={() => router.push("/nearby-hospitals" as any)}>
+                                    <Ionicons name="map" size={18} color="#FFF" />
+                                    <Text style={styles.findButtonText}>Find {results.clinicType} Near Me</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                     </View>
@@ -308,6 +328,9 @@ const styles = StyleSheet.create({
 
     alertBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#3F2728", padding: 16, borderRadius: 12, marginTop: 24, gap: 12 },
     alertText: { flex: 1, color: "#FECACA", fontSize: 14, lineHeight: 20 },
+    
+    findButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#3B82F6", paddingVertical: 14, borderRadius: 12, marginTop: 16, gap: 8 },
+    findButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600" },
 
     resetButton: { backgroundColor: "transparent", borderWidth: 1, borderColor: "#334155", padding: 16, borderRadius: 12, alignItems: "center", marginTop: 24 },
     resetButtonText: { color: "#F8FAFC", fontSize: 16, fontWeight: "600" },

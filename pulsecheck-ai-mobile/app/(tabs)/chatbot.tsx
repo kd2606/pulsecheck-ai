@@ -35,11 +35,10 @@ export default function ChatbotScreen() {
         setIsLoading(true);
 
         try {
-            const history = newMessages.slice(0, -1);
-            const res = await fetch(`${VERCEL_API}/api/chat`, {
+            const res = await fetch(`${VERCEL_API}/api/pulse?stream=false`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ history, message: userMessage }),
+                body: JSON.stringify({ messages: newMessages }),
             });
 
             if (!res.ok) {

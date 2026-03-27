@@ -17,7 +17,7 @@ const ABOUT_SECTIONS = [
         subtitle: "Version 1.0.0",
         icon: "pulse-outline",
         color: "#34D399",
-        content: `PulseCheck AI is an AI-powered health monitoring platform built to make quality healthcare accessible to everyone, regardless of location or resources. By combining advanced artificial intelligence with an intuitive user experience, PulseCheck AI empowers individuals to take control of their health through early detection, symptom analysis, and real-time health insights.`,
+        content: `PulseCheck AI was built with a simple conviction: Every life in rural India deserves access to precise, timely, and affordable healthcare. Designed for Bharat, our AI-powered health monitoring platform empowers individuals to take control of their health through early detection and real-time health insights.`,
     },
     {
         title: "Our Platform Offers",
@@ -26,10 +26,10 @@ const ABOUT_SECTIONS = [
         content: `A comprehensive suite of health tools including AI-driven symptom analysis, skin condition monitoring, respiratory cough assessment, mental health screening, and access to nearby healthcare professionals — all within a single, unified platform.`,
     },
     {
-        title: "Our Mission",
-        icon: "heart-outline",
+        title: "Team Hackboard",
+        icon: "people-outline",
         color: "#F472B6",
-        content: `At PulseCheck AI, we are committed to bridging the gap between individuals and quality healthcare. We believe that early detection and consistent health monitoring are fundamental rights, not privileges. Our platform is designed to bring that vision to life.`,
+        content: `We are Team Hackboard. We believe that technology should serve humanity. By combining advanced artificial intelligence with an intuitive user experience, we are dedicated to bridging the gap between individuals and quality healthcare.`,
     },
     {
         title: "Medical Disclaimer",
@@ -266,10 +266,10 @@ export default function ProfileScreen() {
             <BottomModal visible={activeModal === "privacy"} onClose={close} title="Privacy & Security">
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
                     {[
-                        { icon: "shield-checkmark-outline", color: "#34D399", title: "End-to-End Encryption", body: "All health data is encrypted in transit and at rest using industry-standard AES-256 encryption." },
-                        { icon: "server-outline", color: "#60A5FA", title: "Firebase Secure Storage", body: "Your health records are stored securely in Google Firebase with access restricted exclusively to your account." },
-                        { icon: "eye-off-outline", color: "#A78BFA", title: "No Data Sharing", body: "PulseCheck AI never sells or shares your personal health data with third parties." },
-                        { icon: "key-outline", color: "#FBBF24", title: "Authentication", body: "Secure sign-in via Google OAuth 2.0. Your credentials are never stored on our servers." },
+                        { icon: "shield-checkmark-outline", color: "#34D399", title: "Your Data Stays With You", body: "We use local-first processing where possible. When cloud analysis is needed, your data is processed, analyzed, and immediately discarded from active memory." },
+                        { icon: "eye-off-outline", color: "#60A5FA", title: "No Ads. Ever.", body: "Your health is not a product. We will never sell your personal information or use it to serve you targeted advertisements." },
+                        { icon: "server-outline", color: "#A78BFA", title: "What We Collect", body: "We only collect what's necessary: Basic Profile Info, Audio clips (for cough/voice analysis), and Images (for skin scans). All media is securely handled." },
+                        { icon: "key-outline", color: "#FBBF24", title: "Your Rights", body: "You have complete control over your health data. You can export, delete, or manage your records at any time from your account settings." },
                     ].map(item => (
                         <View key={item.title} style={m.infoRow}>
                             <View style={[m.infoIcon, { backgroundColor: item.color + "20" }]}>

@@ -33,8 +33,9 @@ export async function analyzeMentalHealth(input: z.infer<typeof MentalHealthInpu
 
     const totalScore = input.answers.reduce((sum, a) => sum + a.answer, 0);
 
-    const { output } = await ai.generate({
-        prompt: `You are an empathetic, highly-trained psychiatrist analyzing a patient's Deep Emotional Intelligence (EQ) assessment and Voice Biomarkers.
+    try {
+        const { output } = await ai.generate({
+            prompt: `You are an empathetic, highly-trained psychiatrist analyzing a patient's Deep Emotional Intelligence (EQ) assessment and Voice Biomarkers.
         
 *** SELF-REPORTED ANSWERS ***
 ${answersText}
@@ -55,8 +56,30 @@ Provide a JSON response with:
 6. "clinicType": suggested professional to consult if needed (e.g., "Psychologist", "Psychiatrist", "Trauma Specialist")
 
 Important: Maintain an immensely empathetic, clinical yet human tone. Read between the lines of what they are saying and the physical cues of their voice parameters.`,
-        output: { schema: MentalHealthOutputSchema },
-    });
+            output: { schema: MentalHealthOutputSchema },
+        });
 
-    return output;
+        if (!output) throw new Error("Genkit returned empty output");
+        return output;
+
+    } catch (error) {
+        console.error("Failed to generate mental health analysis:", error);
+        
+        // Provide a highly empathetic safety fallback matching the schema
+        // so the frontend doesn't hang forever
+        const isHighDistress = totalScore >= 12;
+        
+        return {
+            wellnessScore: Math.max(20, 100 - (totalScore * 5)),
+            perceivedMood: isHighDistress ? "Highly Overwhelmed / High Stress" : "Stressed / Anxious",
+            summary: "I care about what you're going through. My deeper analysis system is temporarily unavailable or your responses indicated deep distress that requires human care. Please know that your feelings are completely valid and you do not have to carry this heavy burden alone.",
+            recommendations: [
+                "Please reach out to an emergency helpline or a trusted loved one immediately if you feel unsafe.",
+                "Practice the 4-7-8 breathing technique right now: Inhale for 4s, hold for 7s, exhale slowly for 8s.",
+                "Ground yourself using the 5-4-3-2-1 method by naming things you can see, touch, and hear around you."
+            ],
+            seekProfessionalHelp: isHighDistress,
+            clinicType: isHighDistress ? "Emergency Crisis Counselor" : "General Therapist"
+        };
+    }
 }

@@ -4,6 +4,8 @@ import { chatWithPulse } from "@/ai/flows/pulse-chat";
 export async function POST(req: NextRequest) {
     try {
         const { messages, userContext } = await req.json();
+        const url = new URL(req.url);
+        const shouldStream = url.searchParams.get("stream") !== "false";
 
         if (!messages || messages.length === 0) {
             return NextResponse.json({ error: "No messages provided" }, { status: 400 });
@@ -27,6 +29,14 @@ export async function POST(req: NextRequest) {
         // Call the dedicated Pulse Genkit flow
         const result = await chatWithPulse(previousHistory, lastUserContent, userContext);
         const responseText = result.content;
+
+        if (!shouldStream) {
+            return NextResponse.json({
+                role: "model",
+                content: responseText,
+                timestamp: new Date().toISOString()
+            });
+        }
 
         // Stream word by word for the natural typing effect
         const encoder = new TextEncoder();
@@ -60,9 +70,21 @@ export async function POST(req: NextRequest) {
 
     } catch (error: any) {
         console.error("[Pulse Route] Unexpected error:", error);
+        
+        const fallbackMsg = "Pulse abhi rest kar raha hai 😴 Thodi der baad try karo.";
+        
+        try {
+            const url = new URL(req.url);
+            if (url.searchParams.get("stream") === "false") {
+                return NextResponse.json({ role: "model", content: fallbackMsg }, { status: 200 });
+            }
+        } catch (e) {
+            // Ignore URL parsing errors here
+        }
+
         // Always return 200 SSE so the client never throws
         const encoder = new TextEncoder();
-        const msg = { choices: [{ delta: { content: "Pulse abhi rest kar raha hai 😴 Thodi der baad try karo." } }] };
+        const msg = { choices: [{ delta: { content: fallbackMsg } }] };
         const stream = new ReadableStream({
             start(controller) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(msg)}\n\n`));
