@@ -1,4 +1,4 @@
-and import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { generateMentalHealthQuestions } from "@/ai/flows/mental-health";
 
 export async function GET() {
