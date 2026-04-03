@@ -56,12 +56,18 @@ function LoginContent() {
         setLoading(true);
         try {
             const userCred = await signInWithEmailAndPassword(auth, email, password);
-            const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
             toast.success("Login successful!");
-            if (userDoc.exists() && userDoc.data().onboardingDone) {
+            // Try to check onboarding status, but don't block login if Firestore is offline
+            try {
+                const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
+                if (userDoc.exists() && userDoc.data().onboardingDone) {
+                    router.push(`/${locale}/dashboard`);
+                } else {
+                    router.push(`/${locale}/onboarding`);
+                }
+            } catch (firestoreError) {
+                console.warn("Firestore check failed, redirecting to dashboard:", firestoreError);
                 router.push(`/${locale}/dashboard`);
-            } else {
-                router.push(`/${locale}/onboarding`);
             }
         } catch (error: any) {
             toast.error(error.message || "Failed to login");
@@ -106,11 +112,18 @@ function LoginContent() {
         try {
             const userCred = await signInWithGoogle();
             if (userCred && userCred.user) {
-                const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
-                if (userDoc.exists() && userDoc.data().onboardingDone) {
+                toast.success("Google sign in successful!");
+                // Try to check onboarding status, but don't block login if Firestore is offline
+                try {
+                    const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
+                    if (userDoc.exists() && userDoc.data().onboardingDone) {
+                        router.push(`/${locale}/dashboard`);
+                    } else {
+                        router.push(`/${locale}/onboarding`);
+                    }
+                } catch (firestoreError) {
+                    console.warn("Firestore check failed, redirecting to dashboard:", firestoreError);
                     router.push(`/${locale}/dashboard`);
-                } else {
-                    router.push(`/${locale}/onboarding`);
                 }
             }
         } catch (error: any) {
