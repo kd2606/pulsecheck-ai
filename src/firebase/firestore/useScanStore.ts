@@ -5,7 +5,8 @@ export type ScanType =
     | "visionScans"
     | "coughAnalyses"
     | "skinScans"
-    | "mentalHealthScreens";
+    | "mentalHealthScreens"
+    | "cardioScreens";
 
 export function useScanStore() {
     const saveScan = async (userId: string, personId: string, scanType: ScanType, data: any) => {

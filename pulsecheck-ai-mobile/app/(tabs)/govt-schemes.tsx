@@ -6,7 +6,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 // Use the Vercel URL directly to avoid local network issues from Expo device testing
-const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
+const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
 
 type Scheme = {
     name: string;

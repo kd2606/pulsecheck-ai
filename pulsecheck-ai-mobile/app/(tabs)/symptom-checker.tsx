@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
+const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
 
 type Medicine = { name: string; purpose: string; searchQuery: string };
 type Result = {

@@ -36,10 +36,10 @@ interface RecordDetails {
 
 interface HealthRecord {
     id: string;
-    type: "symptom" | "skin" | "vision" | "cough" | "mental";
+    type: "symptom" | "skin" | "vision" | "cough" | "mental" | "stress" | "wellness";
     title: string;
     severity: "low" | "moderate" | "high";
-    verdict: "rest" | "monitor" | "doctor_today";
+    verdict: "rest" | "monitor" | "doctor_today" | "urgent_support";
     summary: string;
     details?: RecordDetails;
     date?: { toMillis: () => number };
@@ -52,7 +52,7 @@ const filterOptions = [
     { id: "skin", label: "Skin" },
     { id: "vision", label: "Vision" },
     { id: "cough", label: "Cough" },
-    { id: "mental", label: "Mental Health" },
+    { id: "stress", label: "Wellness" },
 ];
 
 const typeIcons: Record<string, React.ReactNode> = {
@@ -61,6 +61,8 @@ const typeIcons: Record<string, React.ReactNode> = {
     vision: <Eye className="h-4 w-4" />,
     cough: <Mic className="h-4 w-4" />,
     mental: <Brain className="h-4 w-4" />,
+    stress: <Brain className="h-4 w-4" />,
+    wellness: <Brain className="h-4 w-4" />,
 };
 
 const typeLabels: Record<string, string> = {
@@ -69,6 +71,8 @@ const typeLabels: Record<string, string> = {
     vision: "Vision Scan",
     cough: "Cough Analysis",
     mental: "Mental Health",
+    stress: "Wellness Screen",
+    wellness: "Wellness Screen",
 };
 
 function getSeverityBadge(severity: string) {
@@ -79,10 +83,10 @@ function getSeverityBadge(severity: string) {
 }
 
 function VerdictCard({ verdict }: { verdict: string }) {
-    if (verdict === "doctor_today") {
+    if (verdict === "doctor_today" || verdict === "urgent_support") {
         return (
             <div className="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-lg mb-4">
-                <h4 className="font-bold text-red-500">🔴 Visit doctor TODAY</h4>
+                <h4 className="font-bold text-red-500">{verdict === "urgent_support" ? "🔴 Urgent Support Recommended" : "🔴 Visit doctor TODAY"}</h4>
                 <p className="text-sm text-red-500/80 mt-1">Your results need immediate attention</p>
             </div>
         );
@@ -106,6 +110,7 @@ function VerdictCard({ verdict }: { verdict: string }) {
 function VerdictDot({ verdict }: { verdict: string }) {
     const colors: Record<string, string> = {
         doctor_today: "bg-red-500",
+        urgent_support: "bg-red-500",
         monitor: "bg-yellow-500",
         rest: "bg-green-500",
     };
@@ -173,7 +178,7 @@ export default function HealthRecordsPage() {
     // ── Share handler ──────────────────────────────────────────────────
     const handleShare = (r: HealthRecord) => {
         const verdictText =
-            r.verdict === "doctor_today" ? "Visit doctor today" :
+            (r.verdict === "doctor_today" || r.verdict === "urgent_support") ? "Urgent Support / Medical Attention Recommended" :
                 r.verdict === "monitor" ? "Monitor for 24-48 hours" : "Rest at home";
         const text = `*Health Record – PulseCheck AI*\n\nCondition: ${r.title}\nSeverity: ${r.severity.toUpperCase()}\nVerdict: ${verdictText}\n\nSummary:\n${r.summary}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
@@ -396,7 +401,7 @@ export default function HealthRecordsPage() {
                                         className="bg-[#25D366] hover:bg-[#128C7E] text-white"
                                         onClick={() => handleShare(selectedRecord)}
                                     >
-                                        <MessageCircle className="w-4 h-4 mr-2" /> Share with Doctor
+                                        <MessageCircle className="w-4 h-4 mr-2" /> Share Report
                                     </Button>
                                 </div>
                             </div>

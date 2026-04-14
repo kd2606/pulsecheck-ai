@@ -20,7 +20,8 @@ import {
     ShieldCheck,
     Info,
     Smartphone,
-    HelpCircle
+    HelpCircle,
+    HeartPulse
 } from "lucide-react";
 import {
     Sidebar,
@@ -59,6 +60,7 @@ export function AppSidebar({ locale }: { locale: string }) {
         { title: t("coughAnalysis"), url: `/${locale}/cough-analysis`, icon: Mic },
         { title: t("skinScan"), url: `/${locale}/skin-scan`, icon: Scan },
         { title: t("mentalHealth"), url: `/${locale}/mental-health-screen`, icon: Brain },
+        { title: t("cardioCheck"), url: `/${locale}/cardio-check`, icon: HeartPulse },
         { title: t("trends"), url: `/${locale}/health-trends`, icon: TrendingUp },
         { title: "Health Records", url: `/${locale}/health-records`, icon: ClipboardList },
         { title: "Govt Schemes", url: `/${locale}/govt-schemes`, icon: Landmark },

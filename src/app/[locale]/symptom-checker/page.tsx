@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import { FadeIn } from "@/components/ui/fade-in";
-import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck, Info } from "lucide-react";
+import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck, Info, Heart, Activity } from "lucide-react";
 import { checkSymptoms } from "@/ai/flows/symptom-checker";
 import { toast } from "sonner";
 import { useUser } from "@/firebase/auth/useUser";
@@ -19,33 +19,42 @@ import { saveHealthRecord } from "@/firebase/healthRecords";
 
 type Results = Awaited<ReturnType<typeof checkSymptoms>>;
 
-const severityConfig: Record<string, { variant: "destructive" | "default" | "secondary"; icon: React.ReactNode; color: string }> = {
-    Severe: { variant: "destructive", icon: <AlertTriangle className="h-4 w-4" />, color: "text-destructive" },
-    Moderate: { variant: "default", icon: <Info className="h-4 w-4" />, color: "text-primary" },
-    Mild: { variant: "secondary", icon: <ShieldCheck className="h-4 w-4" />, color: "text-green-600 dark:text-green-400" },
-};
-
 export default function SymptomCheckerPage() {
     const t = useTranslations("symptomChecker");
     const { user } = useUser();
 
+    const [step, setStep] = useState<"symptoms" | "metadata" | "analyzing" | "results">("symptoms");
     const [symptoms, setSymptoms] = useState("");
     const quickSymptoms = ["🤒 Fever", "🤕 Headache", "🤢 Stomach Pain", "🤧 Cold & Cough", "😴 Body Ache", "👁️ Eye Problem", "🫀 Chest Pain", "💊 Skin Issue"];
+    
+    // Metadata
+    const [duration, setDuration] = useState("Recent (3-7 days)");
+    const [painScale, setPainScale] = useState(5);
+    const [fever, setFever] = useState("None");
     const [age, setAge] = useState("");
     const [gender, setGender] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<Results | null>(null);
 
-    const handleCheck = async () => {
+    const handleNextStep = () => {
         if (!symptoms.trim()) {
-            toast.error(t("enterSymptoms"));
+            toast.error(t("enterSymptoms") || "Please enter your symptoms.");
             return;
         }
+        setStep("metadata");
+    };
+
+    const handleCheck = async () => {
+        setStep("analyzing");
         setLoading(true);
         setResults(null);
         try {
             const result = await checkSymptoms({
                 symptoms: symptoms.trim(),
+                duration,
+                painScale,
+                fever,
                 age: age ? parseInt(age, 10) : undefined,
                 gender: gender || undefined,
             });
@@ -53,30 +62,43 @@ export default function SymptomCheckerPage() {
             if (!result) return;
 
             // Auto-save the health record
-            const severityLevel = result.severity === "Severe" ? "high" : result.severity === "Moderate" ? "moderate" : "low";
-            const verdictStr = result.severity === "Severe" ? "doctor_today" : result.severity === "Moderate" ? "monitor" : "rest";
+            const isHighPriority = result.triagePriority === "High Triage Priority";
+            const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Triage Priority" ? "moderate" : "low";
+            const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
             await saveHealthRecord(user?.uid, {
                 type: "symptom",
-                title: "Symptom Analysis",
+                title: "Symptom Assessment",
                 severity: severityLevel,
                 verdict: verdictStr,
                 summary: result.simpleExplanation,
                 details: {
-                    condition: result.likelyCondition,
+                    condition: result.symptomCluster,
                     medicines: result.otcMedicines.map(m => m.name),
                     homecare: result.precautions
                 }
             });
+
+            setStep("results");
         } catch (error) {
             console.error("Symptom check error:", error);
+            setStep("metadata");
             toast.error("Analysis failed. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
-    const severityInfo = results ? severityConfig[results.severity] ?? severityConfig.Mild : null;
+    const resetWizard = () => {
+        setSymptoms("");
+        setDuration("Recent (3-7 days)");
+        setPainScale(5);
+        setFever("None");
+        setAge("");
+        setGender("");
+        setResults(null);
+        setStep("symptoms");
+    };
 
     return (
         <div className="space-y-6">
@@ -86,168 +108,190 @@ export default function SymptomCheckerPage() {
                         <Stethoscope className="h-5 w-5" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-                        <p className="text-muted-foreground">{t("description")}</p>
+                        <h1 className="text-3xl font-bold tracking-tight">Symptom Assessment</h1>
+                        <p className="text-muted-foreground">Describe your symptoms for an AI-powered triage evaluation.</p>
                     </div>
                 </div>
             </FadeIn>
 
-            <FadeIn delay={0.1}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t("enterSymptomsTitle")}</CardTitle>
-                        <CardDescription>{t("enterSymptomsDescription")}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {/* Symptoms Textarea */}
-                        <div className="space-y-2">
-                            <Label htmlFor="symptoms">{t("symptomsLabel")}</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none w-full">
-                                {quickSymptoms.map(s => (
-                                    <button
-                                        key={s}
-                                        onClick={() => setSymptoms(prev => prev ? prev + ", " + s : s)}
-                                        className="whitespace-nowrap rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-700 dark:text-teal-400 transition-colors hover:bg-teal-500/20"
-                                    >
-                                        {s}
-                                    </button>
-                                ))}
-                            </div>
-                            <Textarea
-                                id="symptoms"
-                                placeholder={t("symptomsPlaceholder")}
-                                className="min-h-[120px] resize-none"
-                                value={symptoms}
-                                onChange={(e) => setSymptoms(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Optional Fields */}
-                        <div className="grid grid-cols-2 gap-4">
+            {step === "symptoms" && (
+                <FadeIn delay={0.1}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Step 1: Document Symptoms</CardTitle>
+                            <CardDescription>Describe how you are feeling in detail.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="age">{t("age")} <span className="text-muted-foreground text-xs">({t("optional")})</span></Label>
-                                <Input
-                                    id="age"
-                                    type="number"
-                                    min={1}
-                                    max={120}
-                                    placeholder="e.g. 35"
-                                    value={age}
-                                    onChange={(e) => setAge(e.target.value)}
+                                <Label htmlFor="symptoms">Symptoms</Label>
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none w-full">
+                                    {quickSymptoms.map(s => (
+                                        <button
+                                            key={s}
+                                            onClick={() => setSymptoms(prev => prev ? prev + ", " + s : s)}
+                                            className="whitespace-nowrap rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-700 dark:text-teal-400 transition-colors hover:bg-teal-500/20"
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
+                                <Textarea
+                                    id="symptoms"
+                                    placeholder="e.g. I have a fever since 2 days, headache, sore throat and body aches..."
+                                    className="min-h-[120px] resize-none"
+                                    value={symptoms}
+                                    onChange={(e) => setSymptoms(e.target.value)}
                                 />
                             </div>
+                            <Button onClick={handleNextStep} className="w-full">Continue to Clinical Details</Button>
+                        </CardContent>
+                    </Card>
+                </FadeIn>
+            )}
+
+            {step === "metadata" && (
+                <FadeIn delay={0.1}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Step 2: Clinical Details</CardTitle>
+                            <CardDescription>Please provide a few more details to help us assess your triage priority accurately.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
                             <div className="space-y-2">
-                                <Label>{t("gender")} <span className="text-muted-foreground text-xs">({t("optional")})</span></Label>
-                                <Select value={gender} onValueChange={setGender}>
+                                <Label>Duration of Symptoms</Label>
+                                <Select value={duration} onValueChange={setDuration}>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={t("selectGender")} />
+                                        <SelectValue placeholder="Select duration" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Male">{t("male")}</SelectItem>
-                                        <SelectItem value="Female">{t("female")}</SelectItem>
-                                        <SelectItem value="Other">{t("other")}</SelectItem>
+                                        <SelectItem value="Acute (<3 days)">Acute (&lt;3 days)</SelectItem>
+                                        <SelectItem value="Recent (3-7 days)">Recent (3-7 days)</SelectItem>
+                                        <SelectItem value="Persistent (1-2 weeks)">Persistent (1-2 weeks)</SelectItem>
+                                        <SelectItem value="Chronic (>2 weeks)">Chronic (&gt;2 weeks)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
-                        </div>
 
-                        <Button
-                            onClick={handleCheck}
-                            disabled={loading}
-                            className="w-full bg-[#00BFA5] hover:bg-[#00BFA5]/90 hover:shadow-[0_0_15px_rgba(0,191,165,0.4)] transition-all duration-300 text-white font-medium"
-                            size="lg"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    {t("analyzing")}
-                                </>
-                            ) : (
-                                <>
-                                    <Stethoscope className="mr-2 h-4 w-4" />
-                                    {t("checkButton")}
-                                </>
-                            )}
-                        </Button>
-                    </CardContent>
-                </Card>
-            </FadeIn>
+                            <div className="space-y-2">
+                                <Label>Select Fever Presence</Label>
+                                <Select value={fever} onValueChange={setFever}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select fever presence" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="None">None</SelectItem>
+                                        <SelectItem value="Low-grade (99-100.4°F)">Low-grade (99-100.4°F)</SelectItem>
+                                        <SelectItem value="High (>100.4°F)">High (&gt;100.4°F)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-            {results && severityInfo && (
-                <FadeIn delay={0.2} className="space-y-4">
-                    {/* Verdict Card */}
-                    {results.severity === "Severe" && (
-                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div>
-                                    <p className="font-bold text-base flex items-center gap-2">
-                                        <span className="text-lg">🔴</span> Visit a doctor TODAY
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Your results need immediate attention</p>
+                            <div className="space-y-3 p-4 border rounded-xl bg-muted/20">
+                                <Label className="flex justify-between">
+                                    <span>Pain/Discomfort Scale</span>
+                                    <span className="font-bold text-teal-600">{painScale}/10</span>
+                                </Label>
+                                <input 
+                                    type="range" 
+                                    min="1" max="10" 
+                                    value={painScale} 
+                                    onChange={(e) => setPainScale(parseInt(e.target.value))}
+                                    className="w-full accent-teal-600"
+                                />
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                    <span>Mild</span>
+                                    <span>Moderate</span>
+                                    <span>Severe</span>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {results.severity === "Moderate" && (
-                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500" />
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div>
-                                    <p className="font-bold text-base flex items-center gap-2">
-                                        <span className="text-lg">🟡</span> Monitor for 24-48 hours
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Watch symptoms, visit doctor if worsens</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {results.severity === "Mild" && (
-                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div>
-                                    <p className="font-bold text-base flex items-center gap-2">
-                                        <span className="text-lg">🟢</span> Rest at home
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Home care should be enough</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                            </div>
 
-                    <Card className="border-teal-500/20 shadow-sm bg-teal-500/5 dark:bg-teal-900/10">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-lg flex items-center gap-2 text-teal-700 dark:text-teal-400">
-                                💬 In Simple Words
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm dark:text-teal-100">{results.simpleExplanation}</p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="age">Age <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                                    <Input
+                                        id="age"
+                                        type="number"
+                                        min={1}
+                                        max={120}
+                                        placeholder="e.g. 35"
+                                        value={age}
+                                        onChange={(e) => setAge(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Gender <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                                    <Select value={gender} onValueChange={setGender}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select gender" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Male">Male</SelectItem>
+                                            <SelectItem value="Female">Female</SelectItem>
+                                            <SelectItem value="Other">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => setStep("symptoms")}>Back</Button>
+                                <Button
+                                    onClick={handleCheck}
+                                    disabled={loading}
+                                    className="flex-1 bg-[#00BFA5] hover:bg-[#00BFA5]/90 hover:shadow-[0_0_15px_rgba(0,191,165,0.4)] transition-all duration-300 text-white font-medium"
+                                >
+                                    Analyze Details
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
+                </FadeIn>
+            )}
 
-                    {/* Main Condition Card */}
-                    <Card className="border-2">
-                        <CardHeader>
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">{t("likelyCondition")}</p>
-                                    <CardTitle className="text-2xl">{results.likelyCondition}</CardTitle>
-                                </div>
-                                <Badge variant={severityInfo.variant} className="flex items-center gap-1.5 text-sm px-3 py-1">
-                                    {severityInfo.icon}
-                                    {results.severity}
+            {step === "analyzing" && (
+                <Card>
+                    <CardContent className="flex flex-col items-center gap-4 p-12">
+                        <Loader2 className="h-12 w-12 animate-spin text-teal-600" />
+                        <p className="text-muted-foreground">Synthesizing clinical metadata & symptoms...</p>
+                    </CardContent>
+                </Card>
+            )}
+
+            {step === "results" && results && (
+                <FadeIn delay={0.2} className="space-y-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>Triage Assessment Report</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            
+                            {/* Triage Priority */}
+                            <div className="flex items-center justify-center gap-2">
+                                <Activity className="h-5 w-5" />
+                                <span className="font-medium">Triage Priority:</span>
+                                <Badge variant={results.triagePriority === "High Triage Priority" ? "destructive" : results.triagePriority === "Elevated Triage Priority" ? "default" : "secondary"}>
+                                    {results.triagePriority === "High Triage Priority" ? "🔴" : results.triagePriority === "Elevated Triage Priority" ? "🟡" : "🟢"} {results.triagePriority}
                                 </Badge>
                             </div>
-                            <CardDescription className="mt-2 text-sm leading-relaxed">{results.conditionDescription}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-5">
-                            {/* Precautions */}
+
+                            {/* State */}
+                            <div className="flex items-center justify-center gap-2">
+                                <Stethoscope className="h-5 w-5" />
+                                <span className="font-medium">Symptom Cluster:</span>
+                                <Badge variant="secondary">{results.symptomCluster}</Badge>
+                            </div>
+
+                            <Card className="border-teal-500/20 shadow-sm bg-teal-500/5 dark:bg-teal-900/10">
+                                <CardContent className="p-4">
+                                    <p className="text-sm dark:text-teal-100">{results.clusterDescription}</p>
+                                    <p className="text-sm mt-2 dark:text-teal-100 font-medium">{results.simpleExplanation}</p>
+                                </CardContent>
+                            </Card>
+
                             <div className="space-y-3">
                                 <h4 className="font-semibold flex items-center gap-2">
                                     <ShieldCheck className="h-4 w-4 text-green-500" />
-                                    {t("precautions")}
+                                    Care Recommendations
                                 </h4>
                                 <ul className="space-y-2">
                                     {results.precautions.map((p, i) => (
@@ -264,7 +308,7 @@ export default function SymptomCheckerPage() {
                             {/* OTC Medicines */}
                             {results.otcMedicines.length > 0 && (
                                 <div className="space-y-3">
-                                    <h4 className="font-semibold">{t("otcMedicines")}</h4>
+                                    <h4 className="font-semibold p-1">Wellness Supplements</h4>
                                     <div className="space-y-2">
                                         {results.otcMedicines.map((med, i) => (
                                             <div key={i} className="flex items-center justify-between rounded-lg border p-3 gap-3">
@@ -279,7 +323,7 @@ export default function SymptomCheckerPage() {
                                                         rel="noopener noreferrer"
                                                     >
                                                         <ExternalLink className="mr-1.5 h-3 w-3" />
-                                                        {t("findOnline")}
+                                                        Find
                                                     </a>
                                                 </Button>
                                             </div>
@@ -288,27 +332,29 @@ export default function SymptomCheckerPage() {
                                 </div>
                             )}
 
-                            {/* AI Disclaimer text */}
-                            <p className="text-xs text-muted-foreground italic border-l-2 border-muted pl-3">{results.disclaimer}</p>
-
-                            <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-700 dark:text-yellow-400 text-center">
-                                <span>⚠️</span>
-                                <span>AI suggestion only — Not a medical diagnosis. Always consult a real doctor for serious concerns.</span>
-                            </div>
-
-                            {/* Find Doctor button */}
-                            {results.seekDoctor && results.clinicType !== "Not required" && (
-                                <Button variant="destructive" className="w-full" asChild>
-                                    <a
-                                        href={`https://www.google.com/maps/search/${encodeURIComponent(results.clinicType + " near me")}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <MapPin className="mr-2 h-4 w-4" />
-                                        {t("findDoctor")} ({results.clinicType})
-                                    </a>
-                                </Button>
+                            {results.triagePriority === "High Triage Priority" && (
+                                <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 space-y-3 mt-6">
+                                    <h4 className="flex items-center gap-2 font-medium text-red-600 dark:text-red-400">
+                                        <AlertTriangle className="h-5 w-5" /> Urgent Medical Support Recommended
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        Your severe symptom profile indicates a need for professional medical intervention. Please visit a nearby clinic or emergency room immediately.
+                                    </p>
+                                    <Button variant="destructive" className="w-full" asChild>
+                                        <a
+                                            href="https://www.google.com/maps/search/Hospitals+and+Clinics+near+me"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <MapPin className="mr-2 h-4 w-4" /> Find Local Emergency Room
+                                        </a>
+                                    </Button>
+                                </div>
                             )}
+
+                            <Button onClick={resetWizard} variant="outline" className="w-full">
+                                Retake Assessment
+                            </Button>
                         </CardContent>
                     </Card>
 

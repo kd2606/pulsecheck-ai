@@ -4,13 +4,13 @@ import { analyzeVisionScan } from "@/ai/flows/vision-scan";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { imageBase64 } = body;
+        const { imageBase64, screenTime, sleepHours, stressLevel } = body;
 
         if (!imageBase64) {
             return NextResponse.json({ error: "Missing image" }, { status: 400 });
         }
 
-        const result = await analyzeVisionScan(imageBase64);
+        const result = await analyzeVisionScan({ imageBase64, screenTime, sleepHours, stressLevel });
 
         return NextResponse.json(result);
     } catch (error: any) {

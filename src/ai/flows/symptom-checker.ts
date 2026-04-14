@@ -5,15 +5,22 @@ import { z } from "genkit";
 
 const SymptomCheckerInputSchema = z.object({
     symptoms: z.string(),
+    duration: z.string(),
+    painScale: z.number(),
+    fever: z.string(),
     age: z.number().optional(),
     gender: z.string().optional(),
 });
 
 const SymptomCheckerOutputSchema = z.object({
-    likelyCondition: z.string(),
-    conditionDescription: z.string(),
+    symptomCluster: z.string(),
+    clusterDescription: z.string(),
     simpleExplanation: z.string(),
-    severity: z.enum(["Mild", "Moderate", "Severe"]),
+    triagePriority: z.enum([
+        "Routine Care Needed",
+        "Elevated Triage Priority",
+        "High Triage Priority"
+    ]),
     precautions: z.array(z.string()),
     otcMedicines: z.array(
         z.object({
@@ -21,10 +28,7 @@ const SymptomCheckerOutputSchema = z.object({
             purpose: z.string(),
             searchQuery: z.string(),
         })
-    ),
-    seekDoctor: z.boolean(),
-    clinicType: z.string(),
-    disclaimer: z.string(),
+    )
 });
 
 export async function checkSymptoms(input: z.infer<typeof SymptomCheckerInputSchema>) {
@@ -35,24 +39,30 @@ export async function checkSymptoms(input: z.infer<typeof SymptomCheckerInputSch
         .filter(Boolean)
         .join(", ");
 
+    const clinicalMetadata = `
+Duration: ${input.duration}
+Pain Scale (1-10): ${input.painScale}
+Fever Presence: ${input.fever}
+`;
+
     const { output } = await ai.generate({
-        prompt: `You are a knowledgeable medical AI assistant helping rural communities in India understand their health symptoms. Analyze the reported symptoms and provide a helpful, clear assessment.
+        prompt: `You are an analytical health synthesizer acting as a triage assessment tool for communities in rural India. You must analyze the reported symptoms and structured clinical metadata to output a dataset-backed triage priority.
 
 ${patientProfile ? `Patient Profile: ${patientProfile}` : ""}
+Clinical Metadata: ${clinicalMetadata}
 Reported Symptoms: ${input.symptoms}
 
-Provide a JSON response with:
-1. "likelyCondition": the most probable condition or illness based on the symptoms (be specific, e.g., "Common Cold", "Viral Fever", "Tension Headache", "Gastroenteritis").
-2. "conditionDescription": a clear, simple 2–3 sentence description of this condition in plain language that a rural patient can understand.
-3. "severity": classify as "Mild", "Moderate", or "Severe" based on the symptoms described.
-4. "simpleExplanation": 1-2 lines explaining the result in simple language a non-medical person can understand.
-5. "precautions": an array of 4–6 specific, actionable precautions the patient should take at home (rest, hydration, diet tips, what to avoid, etc.).
-5. "otcMedicines": an array of 1–3 safe over-the-counter medicines that may help. Each with "name" (medicine name), "purpose" (what it helps with), and "searchQuery" (a Google search query string to find it online, e.g., "Paracetamol 500mg tablet India").
-6. "seekDoctor": true if the symptoms suggest something that requires professional evaluation (high fever, chest pain, difficulty breathing, symptoms lasting more than a week, etc.). Otherwise false.
-7. "clinicType": if seekDoctor is true, suggest the type of doctor (e.g., "General Physician", "Gastroenterologist", "ENT Specialist"). If seekDoctor is false, respond with "Not required".
-8. "disclaimer": a brief, empathetic 1-sentence disclaimer reminding them this is AI-generated information and not a medical diagnosis.
+CRITICAL RULES:
+1. DO NOT use the words "diagnose", "diagnosis", "disease", or "patient". Use "assessment", "symptom cluster", and "user".
+2. Synthesize the text symptoms with the clinical metadata (duration, pain scale, fever) to accurately place the user into one of three triage tiers.
 
-IMPORTANT: Be conservative with severity. Always err on the side of caution. If symptoms could indicate something serious, mark seekDoctor as true. Provide culturally relevant advice for rural India (mention home remedies where appropriate alongside OTC medicines).`,
+Provide a JSON response with:
+1. "symptomCluster": A general grouping of the reported symptoms (e.g., "Upper Respiratory Symptoms", "Gastric Discomfort", "Musculoskeletal Tension"). Do not give a single diagnostic medical condition.
+2. "clusterDescription": A clear, simple 2-3 sentence description of this cluster in plain language.
+3. "triagePriority": Classify as exactly "Routine Care Needed", "Elevated Triage Priority", or "High Triage Priority" based on the severity of the metadata and symptoms. A pain scale of 8+, chronic duration, or specific concerning text should elevate priority.
+4. "simpleExplanation": 1-2 lines explaining the result in simple language a non-medical person can understand.
+5. "precautions": an array of 4-6 specific, actionable home-care or lifestyle steps.
+6. "otcMedicines": an array of 1-3 safe over-the-counter wellness supplements or medicines that may help manage symptoms. Each with "name", "purpose", and "searchQuery" for Google search in India.`,
         output: { schema: SymptomCheckerOutputSchema },
     });
 

@@ -8,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
+const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
 
 type ChatMessage = {
     role: "user" | "model" | "system";

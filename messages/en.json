@@ -21,7 +21,8 @@
         "visionScan": "Vision Scan",
         "coughAnalysis": "Cough Analysis",
         "skinScan": "Skin Scan",
-        "mentalHealth": "Mental Health",
+        "mentalHealth": "Wellness Screener",
+        "cardioCheck": "Cardio Wellness",
         "trends": "Health Trends",
         "people": "Family Members",
         "nearbyHospitals": "Nearby Hospitals",
@@ -87,8 +88,8 @@
             "results": "Skin Analysis Report"
         },
         "mentalHealth": {
-            "title": "Mental Health Screening",
-            "description": "Answer a few quick questions based on the PHQ-4 standard for a wellness assessment.",
+            "title": "Wellness Screener",
+            "description": "Answer a few quick questions based on lifestyle and stress factors for a wellness assessment.",
             "question": "Question {number} of {total}",
             "options": {
                 "never": "Never",
@@ -97,10 +98,18 @@
                 "often": "Often",
                 "constantly": "Almost Constantly"
             },
-            "results": "Mental Wellness Report",
+            "results": "Wellness Assessment Report",
             "wellnessScore": "Wellness Score",
-            "mood": "Perceived Mood",
-            "summary": "Summary & Recommendations"
+            "perceivedState": "Perceived State",
+            "wellnessPriority": "Wellness Priority",
+            "summary": "Summary & Recommendations",
+            "categories": {
+                "routineSupport": "Routine Support Needed",
+                "elevatedStress": "Elevated Stress Profile",
+                "highPriority": "High Wellness Priority"
+            },
+            "urgentSupportTitle": "Urgent Wellness Support Recommended",
+            "urgentSupportDesc": "Your responses indicate a high level of stress or emotional burden. Please connect with immediate support resources in your area."
         }
     },
     "trends": {
@@ -159,5 +168,42 @@
         "otcMedicines": "OTC Medicine Suggestions",
         "findOnline": "Find Online",
         "findDoctor": "Find Doctor Near Me"
+    },
+    "cardioCheck": {
+        "title": "Cardio Wellness Assessor",
+        "description": "Assess your cardiovascular wellness using your biometrics and lifestyle data.",
+        "emergencyBanner": "🚨 EMERGENCY: If you are currently experiencing severe, crushing chest pain, sweating, or pain radiating to your left arm/jaw, stop and call emergency services (e.g., 108) immediately.",
+        "step1Title": "Bio-Metrics",
+        "step1Desc": "Basic bio-metric inputs (Resting HR is optional).",
+        "age": "Age",
+        "gender": "Gender",
+        "selectGender": "Select Gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "bmi": "BMI (optional)",
+        "restingHR": "Resting Heart Rate BPM (optional)",
+        "step2Title": "Lifestyle & Symptoms",
+        "step2Desc": "Tell us about any specific strain or symptoms.",
+        "chestPainType": "Chest Pain Type",
+        "selectChestPain": "Select Chest Pain...",
+        "cpNone": "None",
+        "cpMild": "Mild / Occasional",
+        "cpAtypical": "Atypical Angina",
+        "cpTypical": "Typical Angina",
+        "exerciseAngina": "Exercise-Induced Angina (Pain during effort?)",
+        "yes": "Yes",
+        "no": "No",
+        "unknown": "Unknown",
+        "bloodSugar": "Fasting Blood Sugar > 120 mg/dl?",
+        "smoker": "Current Smoker?",
+        "results": "Cardio Wellness Report",
+        "wellnessScore": "Wellness Score",
+        "overallAssessment": "Overall Assessment",
+        "precautions": "Precautions",
+        "recommendations": "Recommendations",
+        "urgentSupportTitle": "Urgent Cardiovascular Response Needed",
+        "urgentSupportDesc": "Your responses indicate high cardiovascular strain or priority symptoms. Seek professional medical evaluation without delay.",
+        "analyzing": "Synthesizing cardio wellness..."
     }
 }

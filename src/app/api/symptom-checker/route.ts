@@ -4,11 +4,11 @@ import { checkSymptoms } from "@/ai/flows/symptom-checker";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { symptoms, age, gender } = body;
+        const { symptoms, painScale, duration, fever, age, gender } = body;
         if (!symptoms) {
             return NextResponse.json({ error: "symptoms field is required" }, { status: 400 });
         }
-        const result = await checkSymptoms({ symptoms, age, gender });
+        const result = await checkSymptoms({ symptoms, painScale, duration, fever, age, gender });
         return NextResponse.json(result);
     } catch (error: any) {
         console.error("Symptom checker error:", error);

@@ -2,10 +2,10 @@ import { collection, addDoc, query, where, getDocs, Timestamp } from "firebase/f
 import { db } from "./clientApp";
 
 export interface HealthRecordData {
-    type: "symptom" | "skin" | "vision" | "cough" | "mental";
+    type: "symptom" | "skin" | "vision" | "cough" | "mental" | "wellness" | "stress" | "cardio" | "heart";
     title: string;
     severity: "low" | "moderate" | "high";
-    verdict?: "rest" | "monitor" | "doctor_today";
+    verdict?: "rest" | "monitor" | "doctor_today" | "urgent_support";
     summary: string;
     details: any;
 }

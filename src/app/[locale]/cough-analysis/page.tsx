@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
-import { Mic, MicOff, Loader2, ExternalLink, MapPin, AlertTriangle, Save } from "lucide-react";
+import { Mic, MicOff, Loader2, ExternalLink, MapPin, AlertTriangle, Activity, ShieldCheck } from "lucide-react";
 import { analyzeCough } from "@/ai/flows/cough-analysis";
 import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
@@ -15,20 +17,30 @@ import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
 import { saveHealthRecord } from "@/firebase/healthRecords";
 
+type Results = Awaited<ReturnType<typeof analyzeCough>>;
+
 export default function CoughAnalysisPage() {
     const t = useTranslations("scan.cough");
+    const { user } = useUser();
+    const { saveScan } = useScanStore();
+
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
 
+    const [step, setStep] = useState<"audio" | "metadata" | "analyzing" | "results">("audio");
+    
+    // Audio State
     const [recording, setRecording] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const [audioData, setAudioData] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [results, setResults] = useState<Awaited<ReturnType<typeof analyzeCough>> | null>(null);
+    
+    // Metadata State
+    const [duration, setDuration] = useState("Recent (3-7 days)");
+    const [fever, setFever] = useState("None");
+    const [breathingDifficulty, setBreathingDifficulty] = useState("None");
 
-    const { user } = useUser();
-    const { saveScan } = useScanStore();
+    const [loading, setLoading] = useState(false);
+    const [results, setResults] = useState<Results | null>(null);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -74,6 +86,7 @@ export default function CoughAnalysisPage() {
             setResults(null);
         } catch (error) {
             console.error("Microphone error:", error);
+            toast.error("Could not access microphone.");
         }
     }, []);
 
@@ -84,35 +97,68 @@ export default function CoughAnalysisPage() {
         setRecording(false);
     }, []);
 
+    const handleNextStep = () => {
+        if (!audioData) {
+            toast.error("Please record audio before proceeding.");
+            return;
+        }
+        setStep("metadata");
+    };
+
     const handleAnalyze = async () => {
         if (!audioData) return;
+        setStep("analyzing");
         setLoading(true);
         try {
-            const result = await analyzeCough(audioData);
+            const result = await analyzeCough({
+                audioBase64: audioData,
+                duration,
+                fever,
+                breathingDifficulty,
+            });
             setResults(result);
             if (!result) return;
 
             // Auto-save the health record
-            const severityLevel = result.seekMedicalAttention ? "high" : "moderate";
-            const verdictStr = result.seekMedicalAttention ? "doctor_today" : "monitor";
+            const isHighPriority = result.triagePriority === "High Triage Priority";
+            const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Triage Priority" ? "moderate" : "low";
+            const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
             await saveHealthRecord(user?.uid, {
                 type: "cough",
-                title: "Cough Analysis",
+                title: "Respiratory Assessment",
                 severity: severityLevel,
                 verdict: verdictStr,
                 summary: result.simpleExplanation,
                 details: {
                     condition: result.coughType,
                     medicines: result.otcMedicines.map(m => m.name),
-                    homecare: result.homeRemedies
+                    homecare: result.precautions
                 }
             });
+            
+            // Also save specifically to scan store
+            if (user) {
+                await saveScan(user.uid, "self", "coughAnalyses", result);
+            }
+
+            setStep("results");
         } catch (error) {
             console.error("Analysis error:", error);
+            toast.error("Analysis failed. Please try again.");
+            setStep("metadata");
         } finally {
             setLoading(false);
         }
+    };
+
+    const resetWizard = () => {
+        setAudioData(null);
+        setDuration("Recent (3-7 days)");
+        setFever("None");
+        setBreathingDifficulty("None");
+        setResults(null);
+        setStep("audio");
     };
 
     const coughTypeColors: Record<string, string> = {
@@ -126,218 +172,251 @@ export default function CoughAnalysisPage() {
     return (
         <div className="space-y-6">
             <FadeIn direction="down">
-                <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-                <p className="text-muted-foreground">{t("description")}</p>
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Mic className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Respiratory Assessment</h1>
+                        <p className="text-muted-foreground">Analyze your cough audio to determine triage priority.</p>
+                    </div>
+                </div>
             </FadeIn>
 
-            <FadeIn delay={0.1}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t("record")}</CardTitle>
-                        <CardDescription>{t("description")}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex flex-col items-center gap-4">
-                            <div
-                                className={`flex h-32 w-32 items-center justify-center rounded-full border-4 transition-colors ${recording ? "border-destructive animate-pulse bg-destructive/10" : "border-muted"
-                                    }`}
-                            >
-                                {recording ? (
-                                    <MicOff className="h-12 w-12 text-destructive" />
-                                ) : (
-                                    <Mic className="h-12 w-12 text-muted-foreground" />
+            {step === "audio" && (
+                <FadeIn delay={0.1}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Step 1: Record Cough</CardTitle>
+                            <CardDescription>Record a 5-second sample of your cough.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="flex flex-col items-center gap-4 py-4">
+                                <div
+                                    className={`flex h-32 w-32 items-center justify-center rounded-full border-4 transition-colors ${recording ? "border-destructive animate-pulse bg-destructive/10" : "border-muted"
+                                        }`}
+                                >
+                                    {recording ? (
+                                        <MicOff className="h-12 w-12 text-destructive" />
+                                    ) : (
+                                        <Mic className="h-12 w-12 text-muted-foreground" />
+                                    )}
+                                </div>
+
+                                {recording && (
+                                    <div className="w-full max-w-xs space-y-2">
+                                        <Progress value={(seconds / 5) * 100} />
+                                        <p className="text-center text-sm text-muted-foreground">
+                                            Recording: {seconds}/5s
+                                        </p>
+                                    </div>
+                                )}
+
+                                {audioData && !recording && (
+                                    <Badge variant="secondary" className="px-4 py-2 text-sm bg-green-500/10 text-green-600 dark:text-green-400">
+                                        ✓ Audio recorded successfully
+                                    </Badge>
                                 )}
                             </div>
 
-                            {recording && (
-                                <div className="w-full max-w-xs space-y-2">
-                                    <Progress value={(seconds / 5) * 100} />
-                                    <p className="text-center text-sm text-muted-foreground">
-                                        {t("timer", { seconds })}
-                                    </p>
-                                </div>
-                            )}
-
-                            {audioData && !recording && (
-                                <Badge variant="secondary">✓ Audio recorded successfully</Badge>
-                            )}
-                        </div>
-
-                        <div className="flex justify-center gap-2">
-                            {!recording ? (
-                                <Button onClick={startRecording} size="lg">
-                                    <Mic className="mr-2 h-4 w-4" /> {t("record")}
-                                </Button>
-                            ) : (
-                                <Button onClick={stopRecording} variant="destructive" size="lg">
-                                    <MicOff className="mr-2 h-4 w-4" /> {t("stop")}
-                                </Button>
-                            )}
-                        </div>
-
-                        {audioData && !recording && (
-                            <Button onClick={handleAnalyze} disabled={loading} className="w-full">
-                                {loading ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("analyzing")}</>
+                            <div className="flex flex-col gap-3">
+                                {!recording ? (
+                                    <Button onClick={startRecording} variant={audioData ? "outline" : "default"} size="lg" className="w-full">
+                                        <Mic className="mr-2 h-4 w-4" /> {audioData ? "Record Again" : "Start Voice Recording"}
+                                    </Button>
                                 ) : (
-                                    "Analyze Cough"
+                                    <Button onClick={stopRecording} variant="destructive" size="lg" className="w-full">
+                                        <MicOff className="mr-2 h-4 w-4" /> Stop Recording
+                                    </Button>
                                 )}
-                            </Button>
-                        )}
+
+                                {audioData && !recording && (
+                                    <Button onClick={handleNextStep} className="w-full bg-[#00BFA5] hover:bg-[#00BFA5]/90 text-white" size="lg">
+                                        Continue to Clinical Details
+                                    </Button>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </FadeIn>
+            )}
+
+            {step === "metadata" && (
+                <FadeIn delay={0.1}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Step 2: Respiratory Details</CardTitle>
+                            <CardDescription>Provide context to aid the audio analysis.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label>Duration of Cough</Label>
+                                <Select value={duration} onValueChange={setDuration}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select duration" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Acute (<3 days)">Acute (&lt;3 days)</SelectItem>
+                                        <SelectItem value="Recent (3-7 days)">Recent (3-7 days)</SelectItem>
+                                        <SelectItem value="Persistent (1-2 weeks)">Persistent (1-2 weeks)</SelectItem>
+                                        <SelectItem value="Chronic (>2 weeks)">Chronic (&gt;2 weeks)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Breathing Difficulty Status</Label>
+                                <Select value={breathingDifficulty} onValueChange={setBreathingDifficulty}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select breathing status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="None">None (Normal breathing)</SelectItem>
+                                        <SelectItem value="Mild (Out of breath on exertion)">Mild (Out of breath on exertion)</SelectItem>
+                                        <SelectItem value="Moderate (Noticeable effort when resting)">Moderate (Noticeable effort when resting)</SelectItem>
+                                        <SelectItem value="Severe (Gasping, inability to speak full sentences)">Severe (Gasping, inability to speak full sentences)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Fever Presence</Label>
+                                <Select value={fever} onValueChange={setFever}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select fever status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="None">None</SelectItem>
+                                        <SelectItem value="Low-grade (99-100.4°F)">Low-grade (99-100.4°F)</SelectItem>
+                                        <SelectItem value="High (>100.4°F)">High (&gt;100.4°F)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => setStep("audio")}>Back</Button>
+                                <Button
+                                    onClick={handleAnalyze}
+                                    disabled={loading}
+                                    className="flex-1 bg-[#00BFA5] hover:bg-[#00BFA5]/90 hover:shadow-[0_0_15px_rgba(0,191,165,0.4)] transition-all duration-300 text-white font-medium"
+                                >
+                                    Analyze Respiratory Audio
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </FadeIn>
+            )}
+
+            {step === "analyzing" && (
+                <Card>
+                    <CardContent className="flex flex-col items-center gap-4 p-12">
+                        <Loader2 className="h-12 w-12 animate-spin text-teal-600" />
+                        <p className="text-muted-foreground">Analyzing audio signature and respiratory metadata...</p>
                     </CardContent>
                 </Card>
-            </FadeIn>
+            )}
 
-            {results && (
+            {step === "results" && results && (
                 <FadeIn delay={0.2} className="space-y-4">
-                    {/* Verdict Card */}
-                    {results.confidence === "High" && results.seekMedicalAttention && (
-                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div>
-                                    <p className="font-bold text-base flex items-center gap-2">
-                                        <span className="text-lg">🔴</span> Visit a doctor TODAY
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Your results need immediate attention</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {((results.confidence === "Medium" && results.seekMedicalAttention) || (results.confidence === "High" && !results.seekMedicalAttention)) && (
-                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500" />
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div>
-                                    <p className="font-bold text-base flex items-center gap-2">
-                                        <span className="text-lg">🟡</span> Monitor for 24-48 hours
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Watch symptoms, visit doctor if worsens</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {((results.confidence === "Low") || (results.confidence === "Medium" && !results.seekMedicalAttention)) && (
-                        <Card className="w-full bg-card border-none rounded-xl overflow-hidden shadow-sm relative pl-4">
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
-                            <CardContent className="p-4 flex items-center gap-3">
-                                <div>
-                                    <p className="font-bold text-base flex items-center gap-2">
-                                        <span className="text-lg">🟢</span> Rest at home
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">Home care should be enough</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    <Card className="border-teal-500/20 shadow-sm bg-teal-500/5 dark:bg-teal-900/10">
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-lg flex items-center gap-2 text-teal-700 dark:text-teal-400">
-                                💬 In Simple Words
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm dark:text-teal-100">{results.simpleExplanation}</p>
-                        </CardContent>
-                    </Card>
-
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle>{t("results")}</CardTitle>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={saving || !user}
-                                onClick={async () => {
-                                    if (!user) return toast.error("Please login to save");
-                                    setSaving(true);
-                                    try {
-                                        await saveScan(user.uid, "self", "coughAnalyses", results);
-                                        toast.success("Scan saved successfully");
-                                    } catch (e) {
-                                        toast.error("Failed to save scan");
-                                    } finally {
-                                        setSaving(false);
-                                    }
-                                }}
-                            >
-                                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Save Report
-                            </Button>
+                            <CardTitle>Respiratory Assessment Report</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center gap-3">
+                        <CardContent className="space-y-6">
+                            
+                            {/* Triage Priority */}
+                            <div className="flex items-center justify-center gap-2">
+                                <Activity className="h-5 w-5" />
+                                <span className="font-medium">Triage Priority:</span>
+                                <Badge variant={results.triagePriority === "High Triage Priority" ? "destructive" : results.triagePriority === "Elevated Triage Priority" ? "default" : "secondary"}>
+                                    {results.triagePriority === "High Triage Priority" ? "🔴" : results.triagePriority === "Elevated Triage Priority" ? "🟡" : "🟢"} {results.triagePriority}
+                                </Badge>
+                            </div>
+
+                            {/* State */}
+                            <div className="flex items-center justify-center gap-3 border rounded-xl p-4 bg-muted/20">
                                 <div className={`h-4 w-4 rounded-full ${coughTypeColors[results.coughType]}`} />
-                                <span className="text-lg font-semibold capitalize">{results.coughType} Cough</span>
-                                <Badge variant="outline">{results.confidence} Confidence</Badge>
+                                <span className="text-lg font-semibold capitalize">{results.coughType} Cough Signature</span>
                             </div>
 
-                            <p className="text-sm">{results.description}</p>
+                            <Card className="border-teal-500/20 shadow-sm bg-teal-500/5 dark:bg-teal-900/10">
+                                <CardContent className="p-4">
+                                    <p className="text-sm dark:text-teal-100">{results.description}</p>
+                                    <p className="text-sm mt-2 dark:text-teal-100 font-medium">{results.simpleExplanation}</p>
+                                </CardContent>
+                            </Card>
 
-                            {results.seekMedicalAttention && (
-                                <div className="flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                                    <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
-                                    <p className="text-sm">{results.medicalNote}</p>
-                                </div>
-                            )}
-
-                            <div className="space-y-2">
-                                <h4 className="font-medium">Possible Causes</h4>
-                                <ul className="space-y-1">
-                                    {results.possibleCauses.map((cause, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm">
-                                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-500" />
-                                            {cause}
+                            <div className="space-y-3">
+                                <h4 className="font-semibold flex items-center gap-2">
+                                    <ShieldCheck className="h-4 w-4 text-green-500" />
+                                    Respiratory Care Steps
+                                </h4>
+                                <ul className="space-y-2">
+                                    {results.precautions.map((p, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-sm rounded-lg bg-muted/50 p-2.5">
+                                            <span className="mt-0.5 h-5 w-5 shrink-0 flex items-center justify-center rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold">
+                                                {i + 1}
+                                            </span>
+                                            {p}
                                         </li>
                                     ))}
                                 </ul>
                             </div>
 
-                            <div className="space-y-2">
-                                <h4 className="font-medium">Home Remedies</h4>
-                                <ul className="space-y-1">
-                                    {results.homeRemedies.map((remedy, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm">
-                                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
-                                            {remedy}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
+                            {/* OTC Medicines */}
                             {results.otcMedicines.length > 0 && (
-                                <div className="space-y-2">
-                                    <h4 className="font-medium">OTC Medicines</h4>
-                                    {results.otcMedicines.map((med, i) => (
-                                        <div key={i} className="flex items-center justify-between rounded-lg border p-3">
-                                            <div>
-                                                <p className="font-medium">{med.name}</p>
-                                                <p className="text-sm text-muted-foreground">{med.purpose}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <Button variant="outline" size="sm" asChild>
-                                                    <a href={`https://www.google.com/search?q=${encodeURIComponent(med.searchQuery)}`} target="_blank" rel="noopener noreferrer">
-                                                        <ExternalLink className="mr-1 h-3 w-3" /> Find Online
+                                <div className="space-y-3">
+                                    <h4 className="font-semibold p-1">Supportive Items</h4>
+                                    <div className="space-y-2">
+                                        {results.otcMedicines.map((med, i) => (
+                                            <div key={i} className="flex items-center justify-between rounded-lg border p-3 gap-3">
+                                                <div>
+                                                    <p className="font-medium text-sm">{med.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{med.purpose}</p>
+                                                </div>
+                                                <Button variant="outline" size="sm" asChild className="shrink-0">
+                                                    <a
+                                                        href={`https://www.google.com/search?q=${encodeURIComponent(med.searchQuery)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <ExternalLink className="mr-1.5 h-3 w-3" />
+                                                        Find
                                                     </a>
                                                 </Button>
-                                                <Button variant="outline" size="sm" asChild>
-                                                    <a href="https://www.google.com/maps/search/pharmacy+near+me" target="_blank" rel="noopener noreferrer">
-                                                        <MapPin className="mr-1 h-3 w-3" /> Find Clinic
-                                                    </a>
-                                                </Button>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1.5 text-xs text-yellow-700 dark:text-yellow-400 text-center">
-                                <span>⚠️</span>
-                                <span>AI suggestion only — Not a medical diagnosis. Always consult a real doctor for serious concerns.</span>
-                            </div>
+                            {results.triagePriority === "High Triage Priority" && (
+                                <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 space-y-3 mt-6">
+                                    <h4 className="flex items-center gap-2 font-medium text-red-600 dark:text-red-400">
+                                        <AlertTriangle className="h-5 w-5" /> Urgent Medical Support Recommended
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        Your respiratory analysis indicates a need for professional medical intervention. Please visit a nearby clinic or emergency room immediately.
+                                    </p>
+                                    <Button variant="destructive" className="w-full" asChild>
+                                        <a
+                                            href="https://www.google.com/maps/search/Hospitals+and+Clinics+near+me"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <MapPin className="mr-2 h-4 w-4" /> Find Local Emergency Room
+                                        </a>
+                                    </Button>
+                                </div>
+                            )}
+
+                            <Button onClick={resetWizard} variant="outline" className="w-full">
+                                Retake Assessment
+                            </Button>
                         </CardContent>
                     </Card>
+
                     <MedicalDisclaimer />
                 </FadeIn>
             )}

@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import { Brain, Loader2, MapPin, Heart, SmilePlus, Save, Mic, Square } from "lucide-react";
 import { analyzeMentalHealth } from "@/ai/flows/mental-health";
 import { DEEP_PSYCH_QUESTIONS } from "@/ai/flows/constants";
@@ -134,17 +133,18 @@ export default function MentalHealthPage() {
             if (!result) return;
 
             // Auto-save the health record
-            const severityLevel = result.seekProfessionalHelp ? "high" : result.wellnessScore < 60 ? "moderate" : "low";
-            const verdictStr = result.seekProfessionalHelp ? "doctor_today" : result.wellnessScore < 60 ? "monitor" : "rest";
+            const isHighPriority = result.riskCategory === "High Wellness Priority";
+            const severityLevel = isHighPriority ? "high" : result.wellnessScore < 60 ? "moderate" : "low";
+            const verdictStr = isHighPriority ? "urgent_support" : result.wellnessScore < 60 ? "monitor" : "rest";
 
             await saveHealthRecord(user?.uid, {
-                type: "mental",
-                title: "Mental Health Screen",
+                type: "stress",
+                title: "Wellness Screen",
                 severity: severityLevel,
                 verdict: verdictStr,
                 summary: result.summary,
                 details: {
-                    condition: result.perceivedMood,
+                    condition: result.perceivedState,
                     medicines: [],
                     homecare: result.recommendations
                 }
@@ -276,7 +276,7 @@ export default function MentalHealthPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center gap-4 p-12">
                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                        <p className="text-muted-foreground">Fusing psychiatric texts and voice biomarkers...</p>
+                        <p className="text-muted-foreground">Synthesizing lifestyle and stress metrics...</p>
                     </CardContent>
                 </Card>
             )}
@@ -318,11 +318,20 @@ export default function MentalHealthPage() {
                                 <p className="text-sm text-muted-foreground">{t("wellnessScore")}</p>
                             </div>
 
-                            {/* Mood */}
+                            {/* State */}
                             <div className="flex items-center justify-center gap-2">
                                 <SmilePlus className="h-5 w-5" />
-                                <span className="font-medium">{t("mood")}:</span>
-                                <Badge variant="secondary">{results.perceivedMood}</Badge>
+                                <span className="font-medium">{t("perceivedState")}:</span>
+                                <Badge variant="secondary">{results.perceivedState}</Badge>
+                            </div>
+                            
+                            {/* Risk Category */}
+                            <div className="flex items-center justify-center gap-2">
+                                <Brain className="h-5 w-5" />
+                                <span className="font-medium">{t("wellnessPriority")}:</span>
+                                <Badge variant={results.riskCategory === "High Wellness Priority" ? "destructive" : results.riskCategory === "Elevated Stress Profile" ? "default" : "secondary"}>
+                                    {results.riskCategory === "High Wellness Priority" ? `🔴 ${t("categories.highPriority")}` : results.riskCategory === "Elevated Stress Profile" ? `🟡 ${t("categories.elevatedStress")}` : `🟢 ${t("categories.routineSupport")}`}
+                                </Badge>
                             </div>
 
                             {/* Summary */}
@@ -346,16 +355,24 @@ export default function MentalHealthPage() {
                                 </ul>
                             </div>
 
-                            {results.seekProfessionalHelp && (
-                                <Button variant="outline" className="w-full" asChild>
-                                    <a
-                                        href={`https://www.google.com/maps/search/${encodeURIComponent(results.clinicType)}+near+me`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <MapPin className="mr-2 h-4 w-4" /> Find {results.clinicType} Near Me
-                                    </a>
-                                </Button>
+                            {results.riskCategory === "High Wellness Priority" && (
+                                <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-4 space-y-3 mt-6">
+                                    <h4 className="flex items-center gap-2 font-medium text-red-600 dark:text-red-400">
+                                        <Heart className="h-5 w-5" /> {t("urgentSupportTitle")}
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        {t("urgentSupportDesc")}
+                                    </p>
+                                    <Button variant="destructive" className="w-full" asChild>
+                                        <a
+                                            href="https://findahelpline.com/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <MapPin className="mr-2 h-4 w-4" /> Find Local Support Hotlines
+                                        </a>
+                                    </Button>
+                                </div>
                             )}
 
                             <Button onClick={resetQuiz} variant="outline" className="w-full">
@@ -363,7 +380,6 @@ export default function MentalHealthPage() {
                             </Button>
                         </CardContent>
                     </Card>
-                    <MedicalDisclaimer />
                 </FadeIn>
             )}
         </div>

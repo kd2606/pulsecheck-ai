@@ -4,7 +4,7 @@ import { View, StyleSheet, Text, ActivityIndicator, FlatList, Linking, Touchable
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 
-const VERCEL_API = "https://pulsecheckai-orcin.vercel.app";
+const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
 
 interface Facility {
     id: number;

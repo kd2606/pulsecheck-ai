@@ -375,19 +375,35 @@ export default function DashboardPage() {
                     </GlassCard>
                 </motion.div>
 
-                <motion.div variants={staggerItem} className="flex items-center justify-center">
-                    <Link href={`/${locale}/vision-scan`} className="w-full h-full min-h-[200px] flex items-center justify-center">
+                <motion.div variants={staggerItem} className="flex flex-col gap-4">
+                    <Link href={`/${locale}/cardio-check`} className="w-full h-full min-h-[96px] flex items-center justify-center">
                         <motion.div
-                            className="relative flex flex-col items-center justify-center gap-4 w-full h-full rounded-[24px] bg-gradient-to-br from-emerald-500 to-indigo-600 p-1 shadow-xl cursor-pointer group overflow-hidden"
+                            className="relative flex flex-col items-center justify-center gap-2 w-full h-full rounded-[24px] bg-gradient-to-br from-rose-500 to-orange-600 p-1 shadow-xl cursor-pointer group overflow-hidden"
                             whileHover={{ scale: 1.05, rotateZ: 1 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-teal-500 to-indigo-500 opacity-80 group-hover:opacity-100 transition-opacity duration-500 blur-xl group-hover:blur-2xl" />
-                            <div className="relative z-10 flex flex-col items-center justify-center h-full w-full bg-black/20 backdrop-blur-md rounded-[22px] border border-white/20 p-6 text-white text-center">
-                                <div className="h-16 w-16 rounded-full bg-white/20 flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors">
-                                    <Plus className="w-8 h-8" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-rose-400 via-pink-500 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity duration-500 blur-xl group-hover:blur-2xl" />
+                            <div className="relative z-10 flex flex-row items-center justify-center gap-3 h-full w-full bg-black/20 backdrop-blur-md rounded-[22px] border border-white/20 p-4 text-white text-center">
+                                <div className="h-10 w-10 shrink-0 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                    <HeartPulse className="w-5 h-5" />
                                 </div>
-                                <h3 className="text-xl font-bold">New Scan</h3>
+                                <h3 className="text-lg font-bold">Cardio Check</h3>
+                            </div>
+                        </motion.div>
+                    </Link>
+
+                    <Link href={`/${locale}/vision-scan`} className="w-full h-full min-h-[96px] flex items-center justify-center">
+                        <motion.div
+                            className="relative flex flex-col items-center justify-center gap-2 w-full h-full rounded-[24px] bg-gradient-to-br from-emerald-500 to-indigo-600 p-1 shadow-xl cursor-pointer group overflow-hidden"
+                            whileHover={{ scale: 1.05, rotateZ: -1 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-teal-500 to-indigo-500 opacity-80 group-hover:opacity-100 transition-opacity duration-500 blur-xl group-hover:blur-2xl" />
+                            <div className="relative z-10 flex flex-row items-center justify-center gap-3 h-full w-full bg-black/20 backdrop-blur-md rounded-[22px] border border-white/20 p-4 text-white text-center">
+                                <div className="h-10 w-10 shrink-0 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                    <Plus className="w-5 h-5" />
+                                </div>
+                                <h3 className="text-lg font-bold">New Vision Scan</h3>
                             </div>
                         </motion.div>
                     </Link>

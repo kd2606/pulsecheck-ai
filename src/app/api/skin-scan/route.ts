@@ -4,11 +4,11 @@ import { analyzeSkinScan } from "@/ai/flows/skin-scan";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { imageBase64 } = body;
+        const { imageBase64, itchingLevel, spreadRate, recentChanges } = body;
         if (!imageBase64) {
             return NextResponse.json({ error: "imageBase64 field is required" }, { status: 400 });
         }
-        const result = await analyzeSkinScan(imageBase64);
+        const result = await analyzeSkinScan({ imageBase64, itchingLevel, spreadRate, recentChanges });
         return NextResponse.json(result);
     } catch (error: any) {
         console.error("Skin scan error:", error);

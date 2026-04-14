@@ -5,11 +5,10 @@ import { z } from "genkit";
 
 const CoughAnalysisOutputSchema = z.object({
     coughType: z.enum(["dry", "wet", "wheezing", "barking", "unknown"]),
-    confidence: z.enum(["High", "Medium", "Low"]),
+    triagePriority: z.enum(["High Triage Priority", "Elevated Triage Priority", "Routine Triage Priority"]),
     description: z.string(),
     simpleExplanation: z.string(),
-    possibleCauses: z.array(z.string()),
-    homeRemedies: z.array(z.string()),
+    precautions: z.array(z.string()),
     otcMedicines: z.array(
         z.object({
             name: z.string(),
@@ -17,31 +16,41 @@ const CoughAnalysisOutputSchema = z.object({
             searchQuery: z.string(),
         })
     ),
-    seekMedicalAttention: z.boolean(),
-    medicalNote: z.string(),
+    seekDoctor: z.boolean(),
+    disclaimer: z.string(),
 });
 
-export async function analyzeCough(audioBase64: string) {
+export interface CoughAnalysisInput {
+    audioBase64: string;
+    duration: string;
+    fever: string;
+    breathingDifficulty: string;
+}
+
+export async function analyzeCough({ audioBase64, duration, fever, breathingDifficulty }: CoughAnalysisInput) {
     const { output } = await ai.generate({
         prompt: [
             {
                 media: { url: `data:audio/webm;base64,${audioBase64}` },
             },
             {
-                text: `Analyze this cough audio recording. Classify the cough type and provide recommendations.
+                text: `Analyze this cough audio recording alongside the user's clinical metadata. 
+Metadata:
+- Duration: ${duration}
+- Fever: ${fever}
+- Breathing Difficulty: ${breathingDifficulty}
+
+Act as an analytical triage and wellness synthesizer. Do NOT diagnose the user or use medical diagnostic terms (like asthma, bronchitis, disease, patient, etc.). Output a structured health triage priority based strictly on the presented audio and data.
 
 Provide a JSON response with:
 1. "coughType": one of "dry", "wet", "wheezing", "barking", "unknown"
-2. "confidence": "High", "Medium", or "Low"
-3. "description": brief description of the detected cough characteristics
-4. "simpleExplanation": 1-2 lines explaining the result in simple language a non-medical person can understand.
-5. "possibleCauses": array of possible causes for this type of cough
-5. "homeRemedies": array of home remedy suggestions
-6. "otcMedicines": array with "name", "purpose", and "searchQuery" for Google search
-7. "seekMedicalAttention": boolean if the cough sounds concerning
-8. "medicalNote": a note about when to see a doctor
-
-Note: This is for educational purposes only, not a medical diagnosis.`,
+2. "triagePriority": MUST be exactly "High Triage Priority", "Elevated Triage Priority", or "Routine Triage Priority".
+3. "description": brief auditory analysis of the detected cough characteristics (e.g. wet and rattling, dry and hacking).
+4. "simpleExplanation": 1-2 lines explaining the priority level in simple language.
+5. "precautions": array of actionable home care steps and precautions.
+6. "otcMedicines": array with "name", "purpose", and "searchQuery" for wellness/supportive non-prescription items.
+7. "seekDoctor": boolean indicating if they should see a provider soon based on the priority.
+8. "disclaimer": Standard disclaimer that this is an AI wellness triage tool, not a medical diagnosing instrument.`,
             },
         ],
         output: { schema: CoughAnalysisOutputSchema },

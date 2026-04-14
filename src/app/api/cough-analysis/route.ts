@@ -4,11 +4,11 @@ import { analyzeCough } from "@/ai/flows/cough-analysis";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { audioBase64 } = body;
+        const { audioBase64, duration, fever, breathingDifficulty } = body;
         if (!audioBase64) {
             return NextResponse.json({ error: "audioBase64 field is required" }, { status: 400 });
         }
-        const result = await analyzeCough(audioBase64);
+        const result = await analyzeCough({ audioBase64, duration, fever, breathingDifficulty });
         return NextResponse.json(result);
     } catch (error: any) {
         console.error("Cough analysis error:", error);
