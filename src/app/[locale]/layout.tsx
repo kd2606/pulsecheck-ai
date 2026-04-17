@@ -11,6 +11,7 @@ import { AppHeader } from "@/components/app-header";
 import { Toaster } from "@/components/ui/sonner";
 import { FloatingChat } from "@/components/floating-chat";
 import { DemoBanner } from "@/components/demo-banner";
+import "../globals.css";
 
 
 const geistSans = Geist({
