@@ -96,12 +96,13 @@ export default function VisionScanPage() {
         setStep("analyzing");
         setLoading(true);
         try {
-            const result = await analyzeVisionScan({
-                imageBase64: imageData,
-                screenTime,
-                sleepHours,
-                stressLevel
+            const response = await fetch('/api/vision-scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageBase64: imageData, screenTime, sleepHours, stressLevel })
             });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Failed to analyze vision scan");
             setResults(result);
             if (!result) return;
 
@@ -118,7 +119,7 @@ export default function VisionScanPage() {
                 summary: result.simpleExplanation,
                 details: {
                     condition: `Fatigue Index: ${result.fatigueIndex}%`,
-                    medicines: result.otcMedicines.map(m => m.name),
+                    medicines: result.otcMedicines.map((m: any) => m.name),
                     homecare: result.precautions
                 }
             });

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { analyzeVisionScan } from "@/ai/flows/vision-scan";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
