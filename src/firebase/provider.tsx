@@ -39,28 +39,27 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
         handleRedirect();
 
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser && db) {
-                // Sync minimal profile logic
-                try {
-                    const userProfileRef = doc(db, "users", firebaseUser.uid, "profile", "data");
-                    await setDoc(
-                                userProfileRef,
-                                {
-                                    email: firebaseUser.email,
-                                    displayName: firebaseUser.displayName,
-                                    photoURL: firebaseUser.photoURL,
-                                    lastLogin: new Date().toISOString(),
-                                },
-                                { merge: true }
-                            );
-                } catch (e) {
-                    console.warn("Could not sync profile (offline or blocked)", e);
-                }
-            }
-            
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+            // Set user and loading state IMMEDIATELY so UI doesn't hang
             setUser(firebaseUser);
             setLoading(false);
+
+            if (firebaseUser && db) {
+                // Sync minimal profile logic in the background (fire and forget)
+                const userProfileRef = doc(db, "users", firebaseUser.uid, "profile", "data");
+                setDoc(
+                    userProfileRef,
+                    {
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName,
+                        photoURL: firebaseUser.photoURL,
+                        lastLogin: new Date().toISOString(),
+                    },
+                    { merge: true }
+                ).catch((e) => {
+                    console.warn("Could not sync profile (offline or blocked)", e);
+                });
+            }
         });
 
         return () => unsubscribe();
