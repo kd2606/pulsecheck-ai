@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
+
 import { GlassCard } from "@/components/dashboard/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +18,8 @@ import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
 import { saveHealthRecord } from "@/firebase/healthRecords";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 type Results = Awaited<ReturnType<typeof analyzeVisionScan>>;
 

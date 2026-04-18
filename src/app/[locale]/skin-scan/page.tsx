@@ -15,6 +15,8 @@ import { FadeIn } from "@/components/ui/fade-in";
 import { saveHealthRecord } from "@/firebase/healthRecords";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+
 
 export default function SkinScanPage() {
     const t = useTranslations("scan.skin");

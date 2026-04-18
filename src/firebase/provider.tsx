@@ -20,6 +20,11 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
+
         // Handle redirect result (from signInWithRedirect)
         const handleRedirect = async () => {
             try {
@@ -29,15 +34,13 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                 }
             } catch (error: any) {
                 console.error("Critical Redirect sign-in error:", error);
-                // The error will be handled by the specialized login page if we're on it,
-                // but we catch it here to prevent silent failures in the background.
             }
         };
 
         handleRedirect();
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
+            if (firebaseUser && db) {
                 // Sync minimal profile logic
                 try {
                     const userProfileRef = doc(db, "users", firebaseUser.uid, "profile", "data");
@@ -62,6 +65,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
         return () => unsubscribe();
     }, []);
+
 
     return (
         <FirebaseContext.Provider value={{ user, loading }}>

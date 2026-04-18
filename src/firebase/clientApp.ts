@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, initializeFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim(),
@@ -11,9 +11,20 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim(),
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
+// Guard initialization to prevent errors during build time when env vars might be missing
+const isConfigValid = !!firebaseConfig.apiKey;
 
-const db = getFirestore(app);
+let app;
+if (isConfigValid) {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+} else {
+    // During build, we might not have the config. Mock slightly to avoid crashes,
+    // but the app should handle null auth/db gracefully.
+    app = null;
+}
+
+const auth = app ? getAuth(app) : null as any;
+const db = app ? getFirestore(app) : null as any;
 
 export { app, auth, db };
+
