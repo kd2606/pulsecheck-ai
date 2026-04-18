@@ -180,7 +180,7 @@ function LoginContent() {
                             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                         />
                     </div>
-                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] animate-pulse">Syncing Clinical Link...</p>
+                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] animate-pulse">Loading Account...</p>
                 </div>
             </div>
         );
@@ -211,14 +211,14 @@ function LoginContent() {
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-2xl shadow-emerald-500/20 group animate-in zoom-in duration-500">
                             <HeartPulse className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Clinical <span className="text-emerald-400">Luminary</span></CardTitle>
-                        <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">Precision Rural Healthcare AI</CardDescription>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">PulseCheck <span className="text-emerald-400">AI</span></CardTitle>
+                        <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">Simple Health Check</CardDescription>
                     </CardHeader>
 
                     <CardContent className="space-y-6 pt-6 px-8">
                         <form onSubmit={handleEmailLogin} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Email Access</Label>
+                                <Label htmlFor="email" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -230,7 +230,7 @@ function LoginContent() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="password" title="Access Key" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Access Key</Label>
+                                <Label htmlFor="password" title="Password" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Password</Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -242,7 +242,7 @@ function LoginContent() {
                                 />
                             </div>
                             <Button type="submit" className="w-full h-12 rounded-2xl bg-white text-black font-bold hover:bg-emerald-50 transition-all shadow-xl active:scale-[0.98]" disabled={loading}>
-                                {loading ? <Loader2 className="animate-spin" /> : <><Mail className="w-4 h-4 mr-2" /> Authenticate Account</>}
+                                {loading ? <Loader2 className="animate-spin" /> : <><Mail className="w-4 h-4 mr-2" /> Login with Email</>}
                             </Button>
                         </form>
 
@@ -251,7 +251,7 @@ function LoginContent() {
                                 <span className="w-full border-t border-white/5" />
                             </div>
                             <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
-                                <span className="bg-transparent px-4 text-white/30">Secure Gateway</span>
+                                <span className="bg-transparent px-4 text-white/30">OR</span>
                             </div>
                         </div>
 
@@ -287,9 +287,9 @@ function LoginContent() {
 
                     <CardFooter className="flex flex-col items-center justify-center border-t border-white/5 pt-8 pb-10 mt-4">
                         <div className="text-center text-sm">
-                            <span className="text-white/40 mr-2">New Medical Professional?</span>
+                            <span className="text-white/40 mr-2">New Here?</span>
                             <Link href={`/${locale}/signup`} className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
-                                Create Identity
+                                Create Account
                             </Link>
                         </div>
                         <Button 
@@ -298,7 +298,7 @@ function LoginContent() {
                             disabled={loading}
                             className="mt-6 w-full h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 font-bold uppercase tracking-widest transition-all shadow-inner border border-emerald-500/20"
                         >
-                            Guest Diagnostic Access (Demo)
+                            Guest Demo Login
                         </Button>
                     </CardFooter>
                 </Card>

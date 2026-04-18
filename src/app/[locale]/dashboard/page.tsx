@@ -88,11 +88,11 @@ export default function DashboardPage() {
     }
 
     const navItems = [
-        { icon: LayoutDashboard, label: "Archive", active: true },
-        { icon: Activity, label: "Diagnostics", path: `/${locale}/vision-scan` },
-        { icon: ShieldCheck, label: "Protocols" },
-        { icon: Database, label: "Nodes" },
-        { icon: Zap, label: "Live Feed" },
+        { icon: LayoutDashboard, label: "Home", active: true },
+        { icon: Activity, label: "Health Checks", path: `/${locale}/vision-scan` },
+        { icon: ShieldCheck, label: "Govt Schemes" },
+        { icon: Database, label: "Hospitals" },
+        { icon: Zap, label: "Health News" },
     ];
 
     return (
@@ -170,10 +170,10 @@ export default function DashboardPage() {
                             </button>
                             <div className="space-y-1">
                                 <p className="text-[10px] text-emerald-400/60 font-space font-bold tracking-[0.3em] uppercase">
-                                    Registry: Clin-Alpha-9
+                                    Welcome to PulseCheck
                                 </p>
                                 <h1 className="text-4xl font-space font-bold tracking-tighter text-white">
-                                    Diagnostic <span className="text-white/40">Center</span>
+                                    Health <span className="text-white/40">Dashboard</span>
                                 </h1>
                             </div>
                         </div>
@@ -199,23 +199,23 @@ export default function DashboardPage() {
                                 <div className="space-y-10">
                                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">Neural Engine Protocol Active</span>
+                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">AI Helper Ready</span>
                                     </div>
                                     
                                     <div className="space-y-4">
                                         <h2 className="text-6xl md:text-7xl font-space font-bold tracking-tighter leading-[0.9]">
-                                            Initialize <br/> 
-                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-white/40">Diagnostic Scan</span>
+                                            Quick <br/> 
+                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-white/40">Health Check</span>
                                         </h2>
                                         <p className="text-xl text-white/40 font-medium leading-relaxed max-w-lg">
-                                            Deploy precision clinical intelligence to analyze physiological telemetry with 99.8% grade accuracy.
+                                            Use our easy AI tools to check your symptoms, get advice, and stay healthy.
                                         </p>
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-6 pt-4">
                                         <Link href={`/${locale}/skin-scan`}>
                                             <button className="h-16 px-10 rounded-2xl bg-white text-black font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-emerald-500/10 group">
-                                                Execute Vector
+                                                Start Scan
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         </Link>
@@ -225,7 +225,7 @@ export default function DashboardPage() {
                                                     <div key={i} className="h-8 w-8 rounded-full border-2 border-[#0a0a0a] bg-white/10 flex items-center justify-center text-[8px] font-bold">U{i}</div>
                                                 ))}
                                             </div>
-                                            <span className="text-xs font-bold text-white/30 uppercase tracking-widest">3,204 Active Nodes</span>
+                                            <span className="text-xs font-bold text-white/30 uppercase tracking-widest">Connect with doctors</span>
                                         </div>
                                     </div>
                                 </div>
@@ -267,11 +267,10 @@ export default function DashboardPage() {
                     {/* Footer System Status */}
                     <footer className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 opacity-30">
                         <div className="flex items-center gap-6">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Protocol X-01</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Lat: 28.61 n</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Lon: 77.20 e</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Version 1.0</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Location Services Active</span>
                         </div>
-                        <p className="text-[10px] font-bold">© 2026 CLINICAL LUMINARY SYSTEM. ALL RIGHTS RESERVED.</p>
+                        <p className="text-[10px] font-bold">© 2026 PULSECHECK AI. ALL RIGHTS RESERVED.</p>
                     </footer>
 
                 </div>

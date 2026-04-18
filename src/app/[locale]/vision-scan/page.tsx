@@ -135,7 +135,7 @@ export default function VisionScanPage() {
             setStep("results");
         } catch (error) {
             console.error("Analysis error:", error);
-            toast.error("Analysis failed. Please try again.");
+            toast.error("Could not fetch the report. Please try again later.");
             setStep("metadata");
         } finally {
             setLoading(false);
@@ -161,12 +161,12 @@ export default function VisionScanPage() {
                                 <Camera className="h-6 w-6" />
                             </div>
                             <Badge variant="outline" className="bg-indigo-500/5 text-indigo-400 border-indigo-500/20 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase">
-                                System Active
+                                Status Active
                             </Badge>
                         </div>
                         <div className="space-y-1">
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-space text-white">Ocular <span className="text-indigo-400 italic">Telemetry</span></h1>
-                            <p className="text-white/40 font-medium max-w-md">Facial strain analysis utilizing advanced spectral biometric imaging.</p>
+                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-space text-white">Vision & <span className="text-indigo-400 italic">Face Scan</span></h1>
+                            <p className="text-white/40 font-medium max-w-md">Check your face for signs of tiredness and stress.</p>
                         </div>
                     </div>
 
@@ -178,7 +178,7 @@ export default function VisionScanPage() {
                                 </div>
                             ))}
                         </div>
-                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Global Scan Flux</p>
+                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Active Scanning</p>
                     </div>
                 </div>
             </FadeIn>
@@ -190,8 +190,8 @@ export default function VisionScanPage() {
                         
                         <div className="relative z-10 space-y-10">
                             <div className="space-y-2">
-                                <h2 className="text-2xl font-bold font-space text-white tracking-tight uppercase">Initialization</h2>
-                                <p className="text-white/30 text-sm font-medium">Capture a high-fidelity image for biometric processing.</p>
+                                <h2 className="text-2xl font-bold font-space text-white tracking-tight uppercase">Step 1: Photo</h2>
+                                <p className="text-white/30 text-sm font-medium">Take a clear picture of your face to get started.</p>
                             </div>
 
                             <div className="max-w-2xl mx-auto space-y-8">
@@ -200,7 +200,7 @@ export default function VisionScanPage() {
                                     <div className="absolute inset-0 border-[20px] border-black/20 pointer-events-none" />
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-80 border border-white/20 rounded-[3rem] pointer-events-none" />
                                     <Button onClick={capturePhoto} className="absolute bottom-8 left-1/2 -translate-x-1/2 h-16 px-10 bg-white text-black hover:bg-indigo-400 rounded-2xl font-bold font-space transition-all active:scale-95">
-                                        <Camera className="mr-3 h-5 w-5" /> CAPTURE BIOMETRICS
+                                        <Camera className="mr-3 h-5 w-5" /> TAKE PICTURE
                                     </Button>
                                 </div>
 
@@ -232,19 +232,19 @@ export default function VisionScanPage() {
                                     {imageData ? (
                                         <>
                                             <Button variant="outline" onClick={() => setImageData(null)} className="flex-1 h-16 border-white/10 text-white/60 hover:bg-white/5 rounded-2xl font-bold font-space uppercase tracking-widest">
-                                                Recalibrate
+                                                Retake
                                             </Button>
                                             <Button onClick={handleNextStep} className="flex-[2] h-16 bg-white text-black hover:bg-indigo-400 rounded-2xl font-bold font-space uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95">
-                                                Continue Synchronization
+                                                Next Step
                                             </Button>
                                         </>
                                     ) : (
                                         <>
                                             <Button variant="outline" onClick={startCamera} disabled={showCamera} className="flex-1 h-16 border-white/10 text-white/60 hover:bg-white/5 rounded-2xl font-bold font-space uppercase tracking-widest">
-                                                <Camera className="mr-3 h-5 w-5" /> Live Interface
+                                                <Camera className="mr-3 h-5 w-5" /> Start Camera
                                             </Button>
                                             <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="flex-1 h-16 border-white/10 text-white/60 hover:bg-white/5 rounded-2xl font-bold font-space uppercase tracking-widest">
-                                                <Upload className="mr-3 h-5 w-5" /> Import Data
+                                                <Upload className="mr-3 h-5 w-5" /> Upload from Phone
                                             </Button>
                                         </>
                                     )}
@@ -262,8 +262,8 @@ export default function VisionScanPage() {
                         
                         <div className="relative z-10 space-y-10">
                             <div className="space-y-2">
-                                <h2 className="text-2xl font-bold font-space text-white tracking-tight uppercase">Protocol Metadata</h2>
-                                <p className="text-white/30 text-sm font-medium">Provide lifestyle vectors to contextualize ocular telemetry.</p>
+                                <h2 className="text-2xl font-bold font-space text-white tracking-tight uppercase">Tell us More</h2>
+                                <p className="text-white/30 text-sm font-medium">Answer a few questions to help us understand your health better.</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -321,14 +321,14 @@ export default function VisionScanPage() {
 
                             <div className="flex gap-4 pt-6">
                                 <Button variant="outline" onClick={() => setStep("capture")} className="h-16 px-10 border-white/10 text-white/40 hover:bg-white/5 rounded-2xl font-bold font-space uppercase tracking-widest">
-                                    Abort
+                                    Back
                                 </Button>
                                 <Button
                                     onClick={handleAnalyze}
                                     disabled={loading}
                                     className="flex-1 h-16 bg-white text-black hover:bg-indigo-400 rounded-2xl font-bold font-space uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95"
                                 >
-                                    INITIALIZE ANALYSIS FLUX
+                                    SHOW RESULT
                                 </Button>
                             </div>
                         </div>
@@ -341,8 +341,7 @@ export default function VisionScanPage() {
                     <div className="absolute inset-0 bg-indigo-500/5 animate-pulse" />
                     <Loader2 className="h-16 w-16 animate-spin text-indigo-400 relative z-10" />
                     <div className="text-center space-y-2 relative z-10">
-                        <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-white">Synthesizing Ocular Data</p>
-                        <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em]">Cross-referencing fatigue vectors...</p>
+                        <p className="text-[12px] font-bold uppercase tracking-[0.4em] text-white">Checking your photo, please wait...</p>
                     </div>
                 </GlassCard>
             )}
@@ -357,8 +356,8 @@ export default function VisionScanPage() {
                             <div className="space-y-10">
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-1">
-                                        <h3 className="text-3xl font-bold font-space text-white tracking-tighter uppercase shrink-0">Analysis <span className="text-indigo-400">Verdict</span></h3>
-                                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.25em]">Biometric Feedback Loop</p>
+                                        <h3 className="text-3xl font-bold font-space text-white tracking-tighter uppercase shrink-0">Your <span className="text-indigo-400">Result</span></h3>
+                                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.25em]">Based on your photo & details</p>
                                     </div>
                                     <Badge className={`px-4 py-2 rounded-xl text-[10px] font-bold tracking-[0.15em] border ${
                                         results.triagePriority === "High Fatigue Priority" 
@@ -367,7 +366,7 @@ export default function VisionScanPage() {
                                         ? "bg-amber-500/10 text-amber-400 border-amber-500/20" 
                                         : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                                     }`}>
-                                        {results.triagePriority.toUpperCase()}
+                                        {results.triagePriority === "High Fatigue Priority" ? "VERY TIRED" : results.triagePriority === "Elevated Strain Profile" ? "SOMEWHAT TIRED" : "NORMAL"}
                                     </Badge>
                                 </div>
 
@@ -375,7 +374,7 @@ export default function VisionScanPage() {
                                     <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 space-y-4">
                                         <div className="flex items-center gap-3">
                                             <Activity className="h-5 w-5 text-indigo-400" />
-                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Fatigue Index</span>
+                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Tiredness Score</span>
                                         </div>
                                         <div className="flex items-end gap-2">
                                             <span className="text-6xl font-bold font-space text-white tracking-tighter">{results.fatigueIndex}</span>
@@ -393,13 +392,13 @@ export default function VisionScanPage() {
                                     <div className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 space-y-4">
                                         <div className="flex items-center gap-3">
                                             <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Confidence Score</span>
+                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Certainty Score</span>
                                         </div>
                                         <div className="flex items-end gap-2">
                                             <span className="text-6xl font-bold font-space text-white tracking-tighter">94</span>
                                             <span className="text-xl font-bold text-white/20 mb-2 uppercase tracking-tight">%</span>
                                         </div>
-                                        <p className="text-[10px] text-white/20 font-medium">Neural verification complete.</p>
+                                        <p className="text-[10px] text-white/20 font-medium">AI checking complete.</p>
                                     </div>
                                 </div>
 
@@ -415,7 +414,7 @@ export default function VisionScanPage() {
                             <GlassCard className="p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl">
                                 <h4 className="text-sm font-bold text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
                                     <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                    Protocols
+                                    What you should do
                                 </h4>
                                 <ul className="space-y-4">
                                     {results.precautions.map((p, i) => (
@@ -430,7 +429,7 @@ export default function VisionScanPage() {
                             <GlassCard className="p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl">
                                 <h4 className="text-sm font-bold text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
                                     <div className="h-2 w-2 rounded-full bg-indigo-500" />
-                                    Aids
+                                    Items that can help
                                 </h4>
                                 <div className="space-y-3">
                                     {results.otcMedicines.map((med, i) => (
@@ -458,7 +457,7 @@ export default function VisionScanPage() {
                     <div className="flex flex-col items-center gap-6">
                         <div className="flex items-center gap-4 py-4 px-8 rounded-full bg-white/[0.02] border border-white/5 backdrop-blur-xl">
                             <Activity className="h-4 w-4 text-amber-500" />
-                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Clinical Estimation Only • Non-Diagnostic Protocol</p>
+                            <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">AI Guess Only • Show this to a doctor</p>
                         </div>
                         
                         <div className="flex gap-4 w-full max-w-md mx-auto">

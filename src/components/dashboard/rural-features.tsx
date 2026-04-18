@@ -30,19 +30,19 @@ export function RuralHospitalList() {
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-3 text-white">
                         <Activity className="w-6 h-6 text-indigo-400" />
-                        Clinical Nodes
+                        Nearby Hospitals
                     </h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Regional Infrastructure</p>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Local Health Centers</p>
                 </div>
                 <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 text-[9px] border border-emerald-500/20 uppercase tracking-widest px-3 py-1 font-bold">
                     Sync Active
                 </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6 overflow-y-auto custom-scroll pr-2 pb-2">
                 {[
-                    { name: "Mehta Psychiatric Node", dist: "1.2km", sector: "Alpha Pulgaon", rating: 4, cover: "PM-JAY ACTIVE" },
-                    { name: "Sharma Primary Intake", dist: "4.5km", sector: "Kapsi Primary", rating: 3, cover: "STANDARD" }
+                    { name: "Mehta Hospital", dist: "1.2km", sector: "Wardha", rating: 4, cover: "PM-JAY ACTIVE" },
+                    { name: "Sharma Clinic", dist: "4.5km", sector: "Nagpur", rating: 3, cover: "STANDARD" }
                 ].map((hospital, idx) => (
                     <motion.div 
                         key={idx}
@@ -71,14 +71,14 @@ export function RuralHospitalList() {
                                 {[...Array(5)].map((_, i) => (
                                     <Star key={i} className={`w-3 h-3 ${i < hospital.rating ? 'fill-indigo-500 text-indigo-500' : 'fill-white/5 text-white/10'}`} />
                                 ))}
-                                <span className="text-[9px] ml-2 text-white/20 font-bold uppercase tracking-tighter">Clinical Reliability</span>
+                                <span className="text-[9px] ml-2 text-white/20 font-bold uppercase tracking-tighter">Hospital Rating</span>
                             </div>
                         </div>
 
                         <div className="flex gap-4 mt-6">
                             <Button className="flex-1 bg-white text-black hover:bg-emerald-400 hover:text-black rounded-xl h-12 font-bold text-xs font-space transition-all active:scale-95" asChild>
-                                <a href="https://wa.me/919876543210?text=Clinic%20Initialization%20Request." target="_blank" rel="noopener noreferrer">
-                                    <MessageCircle className="w-4 h-4 mr-2" /> Initialize Chat
+                                <a href="https://wa.me/919876543210?text=Hello,%20I%20would%20like%20to%20book%20an%20appointment." target="_blank" rel="noopener noreferrer">
+                                    <MessageCircle className="w-4 h-4 mr-2" /> Chat Now
                                 </a>
                             </Button>
                             <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 border-white/10 rounded-xl bg-white/5 hover:bg-white/10" asChild>
@@ -108,9 +108,9 @@ export function MedicinePriceCard() {
         try {
             const data = await getMedicinePrices(searchQuery.trim());
             setMedicineData(data);
-            toast.success(`Analysis synchronized for ${data.searchedName}`);
+            toast.success(`Found prices for ${data.searchedName}`);
         } catch (error) {
-            toast.error("Telemetry failure in price engine.");
+            toast.error("Could not find medicine prices right now.");
         } finally {
             setSearchQuery("");
             setLoading(false);
@@ -126,15 +126,15 @@ export function MedicinePriceCard() {
                     <Pill className="w-6 h-6 text-indigo-400" />
                 </div>
                 <div className="space-y-0.5">
-                    <h2 className="font-space font-bold text-2xl text-white">Cost Review</h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Pharmaceutical Telemetry</p>
+                    <h2 className="font-space font-bold text-2xl text-white">Medicine Prices</h2>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Check & Compare Costs</p>
                 </div>
             </div>
 
             <div className="space-y-6 flex-1 flex flex-col">
                 <form onSubmit={handleSearch} className="flex gap-3">
                     <Input
-                        placeholder="Search pharmaceutical vector..."
+                        placeholder="Search medicine name..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-14 bg-white/5 border-white/10 rounded-2xl text-sm text-white placeholder:text-white/10 px-6 font-inter focus:ring-indigo-500/20"
@@ -157,7 +157,7 @@ export function MedicinePriceCard() {
                                 <div className="border-b border-white/5 pb-6 mb-8 flex justify-between items-start text-left">
                                     <div className="space-y-1">
                                         <h3 className="font-bold text-2xl text-white font-space tracking-tight">{medicineData.searchedName}</h3>
-                                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[9px] font-bold tracking-widest px-2">VERIFIED VECTOR</Badge>
+                                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[9px] font-bold tracking-widest px-2">VERIFIED</Badge>
                                     </div>
                                     <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center">
                                         <Zap className="w-4 h-4 text-emerald-400" />
@@ -167,18 +167,18 @@ export function MedicinePriceCard() {
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="flex justify-between items-end p-6 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10">
                                         <div className="space-y-1 text-left">
-                                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Clinical Generic</span>
+                                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Generic Medicine</span>
                                             <div className="text-lg font-medium text-white/80 font-space">{medicineData.genericName}</div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-3xl font-bold text-emerald-400 tracking-tighter">₹{medicineData.genericPrice}</div>
-                                            <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold">Standard Node Cost</span>
+                                            <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold">Govt Hospital Price</span>
                                         </div>
                                     </div>
 
                                     <div className="flex justify-between items-end p-6 rounded-2xl bg-white/[0.02] border border-white/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-help">
                                         <div className="space-y-1 text-left">
-                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Market Branded</span>
+                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Branded Medicine</span>
                                             <div className="text-base font-medium text-white/40">{medicineData.brandedName}</div>
                                         </div>
                                         <div className="text-right">
@@ -190,7 +190,7 @@ export function MedicinePriceCard() {
 
                                 <Link href={medicineData.purchaseLink} target="_blank" className="mt-10 block">
                                     <Button className="w-full h-16 bg-white text-black hover:bg-emerald-400 hover:text-black font-bold rounded-2xl shadow-[0_20px_50px_rgba(255,255,255,0.05)] transition-all font-space uppercase tracking-widest text-sm">
-                                        Initialize Procurement Phase
+                                        Buy Online
                                     </Button>
                                 </Link>
                             </div>
@@ -199,7 +199,7 @@ export function MedicinePriceCard() {
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-white/5 rounded-[2.5rem] bg-white/[0.01]">
                             <Server className="w-12 h-12 text-white/5 mb-6 animate-pulse" />
                             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 leading-relaxed max-w-[200px]">
-                                Awaiting clinical vector for cost synchronization
+                                Search for a medicine to compare prices
                             </p>
                         </div>
                     )}
@@ -230,7 +230,7 @@ export function FamilyCardsList() {
                     setFamilyMembers(snap.data().members);
                 }
             } catch (error) {
-                console.warn("Telemetry error in family subsystem.");
+                console.warn("Could not load family members.");
             }
         };
         fetchFamily();
@@ -247,7 +247,7 @@ export function FamilyCardsList() {
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
-                toast.error("Subject not located in registry.");
+                toast.error("Could not find this email address.");
                 setLoading(false);
                 return;
             }
@@ -266,12 +266,12 @@ export function FamilyCardsList() {
 
             await setDoc(familyRef, { members: arrayUnion(newMember) }, { merge: true });
             setFamilyMembers(prev => [...prev, newMember]);
-            toast.success(`Identity Linked: ${newMemberName}`);
+            toast.success(`Family member added: ${newMemberName}`);
             setOpenDialog(false);
             setMemberEmail("");
             setNewRelation("");
         } catch (error: any) {
-            toast.error("Linkage protocol failure.");
+            toast.error("Could not add family member.");
         } finally {
             setLoading(false);
         }
@@ -283,12 +283,12 @@ export function FamilyCardsList() {
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-4 text-white">
                         <Users className="w-7 h-7 text-indigo-400" />
-                        Kinsman Network
+                        Family Members
                     </h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Associated Biometric Nodes</p>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Your connected family accounts</p>
                 </div>
                 <Badge variant="outline" className="border-white/10 text-white/40 font-bold text-[10px] tracking-widest px-3 py-1">
-                    {familyMembers.length + 1} ACTIVE NODES
+                    {familyMembers.length + 1} MEMBERS
                 </Badge>
             </div>
             
@@ -302,22 +302,22 @@ export function FamilyCardsList() {
                             <div className="w-14 h-14 rounded-2xl border border-white/10 flex items-center justify-center text-white/20 group-hover:text-emerald-400 transition-colors">
                                 <Plus className="w-8 h-8" />
                             </div>
-                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white">Expand Node</p>
+                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white">Add Member</p>
                         </motion.div>
                     </DialogTrigger>
                     <DialogContent className="max-w-[450px] bg-[#0a0a0a] border border-white/5 shadow-[0_0_100px_rgba(0,0,0,1)] rounded-[3rem] p-10 font-space overflow-hidden">
                         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/5 blur-[100px] pointer-events-none" />
                         <DialogHeader className="text-left mb-8 relative z-10">
-                            <DialogTitle className="text-3xl font-bold tracking-tighter">Expand Registry</DialogTitle>
+                            <DialogTitle className="text-3xl font-bold tracking-tighter">Add Family Member</DialogTitle>
                             <DialogDescription className="text-white/40 font-inter font-light text-base mt-2">
-                                Integrate a new clinical identity into your kinsman network for shared telemetry.
+                                Link a family member&apos;s account to share health details safely.
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleAddFamily} className="space-y-8 relative z-10">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Network Identifier (Email)</Label>
+                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Email Address</Label>
                                 <Input
-                                    placeholder="patient_id@clinical.host"
+                                    placeholder="name@example.com"
                                     className="h-16 bg-white/[0.03] border-white/10 rounded-2xl text-white font-inter"
                                     value={memberEmail}
                                     onChange={(e) => setMemberEmail(e.target.value)}
@@ -325,7 +325,7 @@ export function FamilyCardsList() {
                                 />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Mapping Protocols</Label>
+                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Relationship to you</Label>
                                 <Input
                                     placeholder="Spouse, Sibling, Ward"
                                     className="h-16 bg-white/[0.03] border-white/10 rounded-2xl text-white font-inter"
@@ -335,7 +335,7 @@ export function FamilyCardsList() {
                                 />
                             </div>
                             <Button type="submit" disabled={loading} className="w-full h-16 bg-white text-black hover:bg-emerald-400 font-bold text-lg rounded-2xl transition-all shadow-2xl">
-                                {loading ? "Authorizing..." : "Initiate Linkage"}
+                                {loading ? "Adding..." : "Add Member"}
                             </Button>
                         </form>
                     </DialogContent>
@@ -372,16 +372,16 @@ export function GovSchemesCard() {
                     <Shield className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div className="space-y-0.5">
-                    <h2 className="font-space font-bold text-2xl text-white">Protocols</h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Sovereign State Infrastructure</p>
+                    <h2 className="font-space font-bold text-2xl text-white">Govt Schemes</h2>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Important Health Benefits</p>
                 </div>
             </div>
 
             <div className="space-y-5">
                 {[
-                    { title: "Ayushman PM-JAY", desc: "₹5 Lakh family coverage ceiling.", icon: ShieldCheck, color: "emerald", link: "https://pmjay.gov.in/" },
-                    { title: "ABHA Health Node", desc: "Universal clinical identification.", icon: Activity, color: "blue", link: "https://abha.abdm.gov.in/" },
-                    { title: "Janani Suraksha", desc: "Maternal assistance protocols.", icon: Activity, color: "fuchsia", link: "https://nhm.gov.in/" }
+                    { title: "Ayushman PM-JAY", desc: "Free healthcare up to ₹5 Lakhs.", icon: ShieldCheck, color: "emerald", link: "https://pmjay.gov.in/" },
+                    { title: "ABHA Health ID", desc: "Your digital health record card.", icon: Activity, color: "blue", link: "https://abha.abdm.gov.in/" },
+                    { title: "Janani Suraksha", desc: "Help for pregnant mothers.", icon: Activity, color: "fuchsia", link: "https://nhm.gov.in/" }
                 ].map((scheme, i) => (
                     <motion.a 
                         key={i} 
@@ -415,8 +415,8 @@ export function GovSchemesCard() {
 export function DailyRemindersCard() {
     const { user } = useFirebaseContext();
     const [reminders, setReminders] = useState([
-        { id: 1, title: "Dermal Integrity Review", subtitle: "Scheduled Telemetry", checked: true },
-        { id: 2, title: "Clinical Archive Sync", subtitle: "Automated Maintenance", checked: false }
+        { id: 1, title: "Check Skin Issue", subtitle: "Scheduled Checkup", checked: true },
+        { id: 2, title: "Take Medicines", subtitle: "Daily Task", checked: false }
     ]);
     const [openDialog, setOpenDialog] = useState(false);
     const [newTitle, setNewTitle] = useState("");
@@ -431,9 +431,9 @@ export function DailyRemindersCard() {
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-4 text-white">
                         <Clock className="w-7 h-7 text-rose-400" />
-                        Temporal Tasks
+                        Daily Reminders
                     </h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Operational Schedule</p>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Your health tasks for today</p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => setOpenDialog(true)} className="h-12 w-12 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 group transition-all shrink-0">
                     <Plus className="w-6 h-6 text-white/20 group-hover:text-white transition-colors" />
@@ -462,13 +462,13 @@ export function DailyRemindersCard() {
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                 <DialogContent className="max-w-[400px] bg-[#0a0a0a] border border-white/5 shadow-3xl rounded-[3rem] p-10 text-white font-space">
                     <DialogHeader className="text-center mb-8">
-                        <DialogTitle className="text-3xl font-bold tracking-tighter">Schedule Vector</DialogTitle>
+                        <DialogTitle className="text-3xl font-bold tracking-tighter">Add Reminder</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6 text-left">
                         <div className="space-y-3">
-                            <Label className="text-[10px] text-white/40 uppercase tracking-widest ml-1">Task Definition</Label>
+                            <Label className="text-[10px] text-white/40 uppercase tracking-widest ml-1">What to remember?</Label>
                             <Input
-                                placeholder="Execution Parameter..."
+                                placeholder="E.g., Take medicine..."
                                 className="h-16 bg-white/5 border-white/10 rounded-2xl font-inter text-white"
                                 value={newTitle}
                                 onChange={(e) => setNewTitle(e.target.value)}
@@ -476,13 +476,13 @@ export function DailyRemindersCard() {
                         </div>
                         <Button onClick={() => {
                             if (newTitle.trim()) {
-                                setReminders([...reminders, { id: Date.now(), title: newTitle, subtitle: "Manual Protocol", checked: false }]);
+                                setReminders([...reminders, { id: Date.now(), title: newTitle, subtitle: "Added by you", checked: false }]);
                                 setNewTitle("");
                                 setOpenDialog(false);
-                                toast.success("Task Synchronized");
+                                toast.success("Reminder Added");
                             }
                         }} className="w-full h-16 bg-white text-black font-bold text-lg rounded-2xl hover:bg-emerald-400 transition-all font-space">
-                            Authorize Task
+                            Add Reminder
                         </Button>
                     </div>
                 </DialogContent>
@@ -506,7 +506,7 @@ export function EmergencyButton() {
                 <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40"></div>
                 <div className="relative inline-flex rounded-full h-3 w-3 bg-white"></div>
             </div>
-            Emergency Protocol (108)
+            Call Ambulance (108)
         </motion.a>
     );
 }
@@ -519,7 +519,7 @@ export function VoiceAssistantButton() {
 
     const toggleListening = () => {
         if (!listening) {
-            toast.success("Voice Engine Active", { description: "Clinical telemetry is monitoring." });
+            toast.success("Voice Helper Ready", { description: "I am listening to you." });
         }
         setListening(!listening);
     };
@@ -551,7 +551,7 @@ export function VoiceAssistantButton() {
                 className={`flex items-center justify-center h-12 w-12 rounded-xl shadow-2xl transition-all backdrop-blur-3xl border relative z-10 ${listening ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                title="Initialize Voice Command"
+                title="Start Voice Search"
             >
                 <Mic className={`h-6 w-6 transition-transform duration-500 ${listening ? 'scale-110' : 'scale-100'}`} />
                 {listening && (
