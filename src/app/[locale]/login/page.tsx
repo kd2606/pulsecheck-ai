@@ -55,15 +55,15 @@ function LoginContent() {
         
         let redirected = false;
         
-        // Fast redirect timeout - if Firestore check takes > 3s, just go to dashboard
+        // Fast redirect timeout - if Firestore check takes > 1s, just go to dashboard
         const timeoutId = setTimeout(() => {
             if (!redirected) {
-                console.warn("Auth check timed out, forcing dashboard redirect");
+                console.warn("Auth check timed out, forcing dashboard redirect for speed");
                 redirected = true;
                 setLoading(false);
                 router.push(`/${locale}/dashboard`);
             }
-        }, 3000);
+        }, 1000); // Reduced to 1000ms for blazing fast UX
 
         try {
             const userDocPath = `users/${authenticatedUser.uid}/profile/data`;
@@ -292,12 +292,14 @@ function LoginContent() {
                                 Create Identity
                             </Link>
                         </div>
-                        <button 
+                        <Button 
+                            variant="secondary"
                             onClick={handleDemoLogin}
-                            className="mt-6 text-[10px] text-white/20 hover:text-emerald-400/60 font-bold uppercase tracking-widest transition-all"
+                            disabled={loading}
+                            className="mt-6 w-full h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 font-bold uppercase tracking-widest transition-all shadow-inner border border-emerald-500/20"
                         >
-                            Or use Guest Diagnostic Access
-                        </button>
+                            Guest Diagnostic Access (Demo)
+                        </Button>
                     </CardFooter>
                 </Card>
             </motion.div>
