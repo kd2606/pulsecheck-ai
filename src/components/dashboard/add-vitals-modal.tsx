@@ -37,8 +37,8 @@ export function AddVitalsModal() {
                 updatedAt: new Date().toISOString()
             });
 
-            toast.success("Clinical Vector Synchronized", {
-                description: "Biometric registry has been updated."
+            toast.success("Health Status Saved", {
+                description: "Your vitals have been successfully updated."
             });
             setOpen(false);
         } catch (error: any) {
@@ -53,7 +53,7 @@ export function AddVitalsModal() {
             <DialogTrigger asChild>
                 <Button variant="outline" className="h-12 px-6 border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-2xl transition-all font-space uppercase tracking-widest text-[10px] font-bold">
                     <Plus className="w-4 h-4 mr-2 text-emerald-400" />
-                    Archive Manual Telemetry
+                    Add Health Vitals
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[450px] bg-[#0a0a0a] border border-white/5 shadow-[0_0_100px_rgba(0,0,0,1)] rounded-[3rem] p-10 font-space overflow-hidden">
@@ -66,11 +66,11 @@ export function AddVitalsModal() {
                         <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
                             <Activity className="w-6 h-6 text-emerald-400" />
                         </div>
-                        <Badge variant="outline" className="border-emerald-500/20 text-emerald-400/60 font-bold text-[8px] tracking-[0.2em] px-3 py-0.5">MANUAL BYPASS ACTIVE</Badge>
+                        <Badge variant="outline" className="border-emerald-500/20 text-emerald-400/60 font-bold text-[8px] tracking-[0.2em] px-3 py-0.5">MANUAL ENTRY</Badge>
                     </div>
-                    <DialogTitle className="text-3xl font-bold tracking-tighter text-white">Biometric Synchronization</DialogTitle>
+                    <DialogTitle className="text-3xl font-bold tracking-tighter text-white">Record Vitals</DialogTitle>
                     <DialogDescription className="text-white/30 font-inter font-light text-sm mt-3 leading-relaxed">
-                        Manually override automated clinical nodes with guest-verified biometric telemetry.
+                        Add your current health measures (like heart rate and stress level) to keep track of your wellbeing.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -78,8 +78,8 @@ export function AddVitalsModal() {
                     <div className="grid grid-cols-1 gap-6">
                         <div className="space-y-3">
                             <div className="flex justify-between items-center px-1">
-                                <Label htmlFor="pulse" className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Pulse Frequency (BPM)</Label>
-                                <span className="text-[10px] font-mono text-emerald-400/40">NOMINAL: 60-100</span>
+                                <Label htmlFor="pulse" className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Heart Rate (BPM)</Label>
+                                <span className="text-[10px] font-mono text-emerald-400/40">NORMAL: 60-100</span>
                             </div>
                             <div className="relative">
                                 <Input
@@ -97,7 +97,7 @@ export function AddVitalsModal() {
                         </div>
 
                         <div className="space-y-3">
-                            <Label htmlFor="autonomic" className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Autonomic Response (%)</Label>
+                            <Label htmlFor="autonomic" className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Stress Level (0-100%)</Label>
                             <Input
                                 id="autonomic"
                                 type="number"
@@ -111,7 +111,7 @@ export function AddVitalsModal() {
                         </div>
 
                         <div className="space-y-3">
-                            <Label htmlFor="biometric" className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Physiological Index (PHI)</Label>
+                            <Label htmlFor="biometric" className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Overall Health Score</Label>
                             <Input
                                 id="biometric"
                                 type="number"
@@ -133,12 +133,12 @@ export function AddVitalsModal() {
                         {loading ? (
                             <span className="flex items-center gap-3">
                                 <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                                Synchronizing...
+                                Saving...
                             </span>
                         ) : (
                             <span className="flex items-center gap-2">
                                 <ShieldCheck className="w-5 h-5" />
-                                Authorize Update
+                                Save Vitals
                             </span>
                         )}
                     </Button>
