@@ -23,6 +23,7 @@ import {
 import { db, auth } from "@/firebase/clientApp";
 import { AddVitalsModal } from "@/components/dashboard/add-vitals-modal";
 import { RuralHospitalList, MedicinePriceCard, FamilyCardsList, GovSchemesCard, VoiceAssistantButton } from "@/components/dashboard/rural-features";
+import { ExpandableCard } from "@/components/dashboard/expandable-card";
 import { UserProfileModal } from "@/components/dashboard/user-profile";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
@@ -256,10 +257,10 @@ export default function DashboardPage() {
 
                         {/* Feature Components */}
                         <div className="col-span-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-                            <div className="xl:col-span-1"><MedicinePriceCard /></div>
-                            <div className="xl:col-span-1"><FamilyCardsList /></div>
-                            <div className="xl:col-span-1"><GovSchemesCard /></div>
-                            <div className="xl:col-span-1"><RuralHospitalList /></div>
+                            <div className="xl:col-span-1"><ExpandableCard><MedicinePriceCard /></ExpandableCard></div>
+                            <div className="xl:col-span-1"><ExpandableCard><FamilyCardsList /></ExpandableCard></div>
+                            <div className="xl:col-span-1"><ExpandableCard><GovSchemesCard /></ExpandableCard></div>
+                            <div className="xl:col-span-1"><ExpandableCard><RuralHospitalList /></ExpandableCard></div>
                         </div>
 
                     </div>

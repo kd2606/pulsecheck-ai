@@ -55,9 +55,17 @@ If user asks "how am I doing?" or "mera health kaisa hai?" — answer using this
             dynamicPrompt += `\n\n${contextBlock}`;
         }
 
-        let validHistory = [...history];
+        let validHistory: PulseChatMessage[] = [];
+        for (const m of history) {
+            if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === m.role) {
+                validHistory[validHistory.length - 1].content += "\n\n" + m.content;
+            } else {
+                validHistory.push({ ...m });
+            }
+        }
+
         // Gemini requires the first message to be from the user
-        while (validHistory.length > 0 && validHistory[0].role !== "user") {
+        if (validHistory.length > 0 && validHistory[0].role !== "user") {
             validHistory.shift();
         }
 
