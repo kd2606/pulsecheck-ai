@@ -1,56 +1,42 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { GlassCard } from "@/components/dashboard/glass-card";
-import { AnimatedCircularProgress } from "@/components/dashboard/animated-circular-progress";
-import { HeartRateChart } from "@/components/dashboard/heart-rate-chart";
-import { StressLevelChart } from "@/components/dashboard/stress-level-chart";
-import { HospitalMap } from "@/components/dashboard/hospital-map";
-import {
-    RuralHospitalList, MedicinePriceCard, FamilyCardsList,
-    GovSchemesCard, DailyRemindersCard, EmergencyButton, VoiceAssistantButton
-} from "@/components/dashboard/rural-features";
-import { UserProfileModal } from "@/components/dashboard/user-profile";
-import { AddVitalsModal } from "@/components/dashboard/add-vitals-modal";
-import { motion, Variants, AnimatePresence } from "framer-motion";
-import { User, Settings, Plus, Activity, Brain, HeartPulse, Hospital, FileText, ChevronRight, LogOut, Smartphone, X } from "lucide-react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useFirebaseContext } from "@/firebase/provider";
-import { useEffect, useState } from "react";
-import { collection, query, where, doc, onSnapshot } from "firebase/firestore";
+import { 
+    User, Settings, Plus, Activity, Brain, HeartPulse, Hospital, 
+    FileText, ChevronRight, LogOut, Smartphone, X, LayoutDashboard, 
+    ShieldCheck, Database, Zap, Bell, Menu
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@/firebase/auth/useUser";
+import { useRouter, useParams } from "next/navigation";
+import { 
+    collection, 
+    query, 
+    where, 
+    orderBy, 
+    limit, 
+    onSnapshot,
+    doc,
+    getDoc
+} from "firebase/firestore";
 import { db, auth } from "@/firebase/clientApp";
+import { AddVitalsModal } from "@/components/dashboard/add-vitals-modal";
+import { RuralHospitalList, MedicinePriceCard, FamilyCardsList, GovSchemesCard, VoiceAssistantButton } from "@/components/dashboard/rural-features";
+import { UserProfileModal } from "@/components/dashboard/user-profile";
+import Link from "next/link";
 import { signOut } from "firebase/auth";
 
-const staggerContainer: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-        },
-    },
-};
-
-const staggerItem: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-};
-
 export default function DashboardPage() {
-    const t = useTranslations("dashboard");
+    const { user, loading } = useUser();
+    const router = useRouter();
     const params = useParams();
     const locale = params.locale as string;
-    const router = useRouter();
-    const { user, loading } = useFirebaseContext();
-    const [vitals, setVitals] = useState({ heartRate: 72, stressLevel: 30, holisticScore: 78 });
-    const [recentScans, setRecentScans] = useState<any[]>([]);
-    const [showAndroidBanner, setShowAndroidBanner] = useState(false);
-
-    const [isDataLoading, setIsDataLoading] = useState(true);
+    const [scrolled, setScrolled] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    
+    const [vitals, setVitals] = useState<any>(null);
+    const [vitalsHistory, setVitalsHistory] = useState<any[]>([]);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -59,51 +45,30 @@ export default function DashboardPage() {
     }, [user, loading, router, locale]);
 
     useEffect(() => {
-        // Enforce a strict 3-second max loading state
-        const timer = setTimeout(() => {
-            setIsDataLoading(false);
-        }, 3000);
-        return () => clearTimeout(timer);
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    useEffect(() => {
-        // Check if banner was dismissed previously
-        const isDismissed = localStorage.getItem("pulse-android-banner-dismissed");
-        if (!isDismissed) {
-            setShowAndroidBanner(true);
-        }
-    }, []);
-
+    // Real-time Vitals Subscription
     useEffect(() => {
         if (!user) return;
 
-        // Listen to active manual vitals updates
-        const vitalsRef = doc(db, "users", user.uid, "vitals", "latest");
-        const unsubscribeVitals = onSnapshot(vitalsRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                setVitals({
-                    heartRate: data.heartRate || 72,
-                    stressLevel: data.stressLevel || 30,
-                    holisticScore: data.holisticScore || 78
-                });
+        const vitalsQuery = query(
+            collection(db, "users", user.uid, "vitals"),
+            orderBy("updatedAt", "desc"),
+            limit(10)
+        );
+
+        const unsubscribe = onSnapshot(vitalsQuery, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (data.length > 0) {
+                setVitals(data[0]);
+                setVitalsHistory(data);
             }
-            // First snapshot resolves loading state early if within 3s
-            setIsDataLoading(false);
         });
 
-        // Listen to active vision reports
-        const reportsQuery = query(collection(db, "reports"), where("userId", "==", user.uid));
-        const unsubscribeReports = onSnapshot(reportsQuery, (snapshot) => {
-            const scans: any[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            scans.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            setRecentScans(scans.slice(0, 3));
-        });
-
-        return () => {
-            unsubscribeVitals();
-            unsubscribeReports();
-        };
+        return () => unsubscribe();
     }, [user]);
 
     const handleLogout = async () => {
@@ -111,304 +76,206 @@ export default function DashboardPage() {
         router.push(`/${locale}/login`);
     };
 
-    if (loading || isDataLoading) {
+    if (loading || !user) {
         return (
-            <div className="min-h-screen bg-transparent pb-24 p-4 md:p-6 w-full">
-                <header className="flex items-center justify-between mb-8">
-                    <div className="space-y-2">
-                        <Skeleton className="h-10 w-48 bg-white/10 dark:bg-white/10" />
-                        <Skeleton className="h-4 w-32 bg-white/10 dark:bg-white/10" />
-                    </div>
-                </header>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <GlassCard className="p-8 h-full min-h-[250px] flex flex-col justify-between">
-                        <Skeleton className="h-6 w-32 mb-8 bg-white/10 dark:bg-white/10" />
-                        <div className="flex justify-center flex-1 items-center">
-                            <Skeleton className="h-32 w-32 rounded-full bg-white/10 dark:bg-white/10" />
-                        </div>
-                    </GlassCard>
-                    <GlassCard className="p-8 h-full min-h-[250px] flex flex-col justify-between">
-                        <Skeleton className="h-6 w-32 mb-8 bg-white/10 dark:bg-white/10" />
-                        <div className="flex-1 mt-auto">
-                            <Skeleton className="w-full h-24 bg-white/10 dark:bg-white/10" />
-                        </div>
-                    </GlassCard>
-                    <GlassCard className="p-8 h-full min-h-[250px] flex flex-col justify-between">
-                        <Skeleton className="h-6 w-32 mb-8 bg-white/10 dark:bg-white/10" />
-                        <div className="flex-1 mt-auto">
-                            <Skeleton className="w-full h-24 bg-white/10 dark:bg-white/10" />
-                        </div>
-                    </GlassCard>
+            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+                <div className="relative">
+                    <div className="h-24 w-24 rounded-full border-t-2 border-emerald-500 animate-spin" />
+                    <HeartPulse className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-emerald-500 animate-pulse" />
                 </div>
             </div>
         );
     }
 
-    if (!user) return null; // Prevent flash before redirect
+    const navItems = [
+        { icon: LayoutDashboard, label: "Archive", active: true },
+        { icon: Activity, label: "Diagnostics", path: `/${locale}/vision-scan` },
+        { icon: ShieldCheck, label: "Protocols" },
+        { icon: Database, label: "Nodes" },
+        { icon: Zap, label: "Live Feed" },
+    ];
+
     return (
-        <div className="min-h-screen bg-transparent pb-24">
-            {/* Header with New Voice & Emergency Features */}
-            <header className="flex items-center justify-between mb-8">
-                <div>
-                    <motion.h1
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-3xl font-bold tracking-tight bg-gradient-to-br from-emerald-600 to-indigo-600 dark:from-emerald-400 dark:to-indigo-400 bg-clip-text text-transparent"
-                    >
-                        PulseCheck AI
-                    </motion.h1>
-                    <motion.p
+        <div className="min-h-screen bg-[#0a0a0a] text-white font-inter flex overflow-hidden">
+            {/* Global Grid Pattern */}
+            <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+            
+            {/* Sidebar Navigation */}
+            <aside className={`
+                fixed inset-y-0 left-0 z-50 w-24 bg-[#0a0a0a]/80 backdrop-blur-3xl border-r border-white/5 
+                flex flex-col items-center py-10 transition-transform duration-500 ease-in-out
+                md:relative md:translate-x-0
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                <div className="mb-12">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center emerald-glow group cursor-pointer transition-transform duration-500 hover:rotate-12">
+                        <HeartPulse className="w-6 h-6 text-white" />
+                    </div>
+                </div>
+                
+                <nav className="flex flex-col gap-8 flex-1">
+                    {navItems.map((item, index) => (
+                        <Link key={index} href={item.path || "#"} className="group relative" onClick={() => setIsSidebarOpen(false)}>
+                            <item.icon className={`w-6 h-6 transition-all duration-300 ${item.active ? 'text-emerald-400' : 'text-white/20 group-hover:text-white/60'}`} />
+                            {item.active && <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-1 h-6 bg-emerald-500 rounded-r-full shadow-[0_0_15px_rgba(0,252,64,0.5)]" />}
+                            <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter z-50 shadow-xl border border-black/10">
+                                {item.label}
+                            </span>
+                        </Link>
+                    ))}
+                </nav>
+
+                <div className="flex flex-col gap-6 pt-8 border-t border-white/5 w-full items-center">
+                    <Settings className="w-6 h-6 text-white/20 hover:text-white/60 cursor-pointer transition-colors" />
+                    <UserProfileModal>
+                        <button className="h-10 w-10 rounded-full border border-white/10 overflow-hidden hover:border-emerald-500/50 transition-all">
+                            {user.photoURL ? (
+                                <img src={user.photoURL} alt="P" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-white/5 flex items-center justify-center text-[10px] font-bold">U</div>
+                            )}
+                        </button>
+                    </UserProfileModal>
+                    <button onClick={handleLogout} className="p-2 text-white/20 hover:text-red-400 transition-colors">
+                        <LogOut className="w-5 h-5" />
+                    </button>
+                </div>
+            </aside>
+
+            {/* Mobile Overlay */}
+            <AnimatePresence>
+                {isSidebarOpen && (
+                    <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-muted-foreground text-sm flex items-center gap-1 mt-1"
-                    >
-                        Health Action Center
-                    </motion.p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <AddVitalsModal />
-                    <VoiceAssistantButton />
-                    <EmergencyButton />
-
-                    <Button variant="outline" size="icon" onClick={handleLogout} className="rounded-full shadow-sm hover:shadow-md transition-shadow dark:border-white/10 dark:bg-black/40 backdrop-blur-md hidden sm:flex text-red-400 hover:text-red-500 hover:bg-red-500/10">
-                        <LogOut className="h-4 w-4" />
-                    </Button>
-                    <UserProfileModal>
-                        <Button variant="outline" size="icon" className="rounded-full shadow-sm hover:shadow-md transition-shadow dark:border-white/10 dark:bg-black/40 backdrop-blur-md overflow-hidden p-0 relative group">
-                            <div className="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center transition-all z-10">
-                                <span className="text-[10px] text-white font-bold">EDIT</span>
-                            </div>
-                            {user.photoURL ? (
-                                <img src={user.photoURL} alt="User" loading="lazy" className="w-full h-full object-cover relative z-0" />
-                            ) : (
-                                <div className="w-full h-full relative z-0 bg-gradient-to-tr from-emerald-400 to-indigo-400 flex items-center justify-center text-white font-bold capitalize">
-                                    {user.displayName ? user.displayName[0] : user.email ? user.email[0] : "U"}
-                                </div>
-                            )}
-                        </Button>
-                    </UserProfileModal>
-                </div>
-            </header>
-
-            {/* Android App Banner */}
-            <AnimatePresence>
-                {showAndroidBanner && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10, height: 0 }}
-                        animate={{ opacity: 1, y: 0, height: "auto" }}
-                        exit={{ opacity: 0, y: -10, height: 0 }}
-                        className="mb-8 overflow-hidden"
-                    >
-                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-5 rounded-xl bg-black/40 border-l-4 border-l-teal-500 border-y border-r border-white/5 backdrop-blur-md shadow-lg gap-4 relative">
-                            <div className="flex items-center gap-4 w-full sm:w-auto">
-                                <div className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-full bg-teal-500/20 flex flex-col items-center justify-center text-teal-400">
-                                    <Smartphone className="w-5 h-5 sm:w-6 sm:h-6" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-white tracking-tight leading-tight sm:text-lg">
-                                        Get <span className="text-teal-400">PulseCheck AI</span> on Mobile
-                                    </h3>
-                                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 max-w-sm">
-                                        For a faster and better experience, install our Android app. Free, no Play Store needed.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-end mt-2 sm:mt-0">
-                                <a 
-                                    href="https://expo.dev/artifacts/eas/a4cyVYKBAo1t1yKs552SYf4.apk"
-                                    onClick={() => console.log('APK Download clicked')}
-                                    className="bg-teal-500 hover:bg-teal-400 text-black font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-colors whitespace-nowrap shadow-[0_0_15px_rgba(0,191,165,0.3)]"
-                                >
-                                    Download APK →
-                                </a>
-                                <button 
-                                    onClick={() => {
-                                        setShowAndroidBanner(false);
-                                        localStorage.setItem("pulse-android-banner-dismissed", "true");
-                                    }}
-                                    className="text-muted-foreground hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 sm:p-2.5 rounded-lg"
-                                    aria-label="Dismiss banner"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    </motion.div>
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                    />
                 )}
             </AnimatePresence>
 
-            {/* Main Grid */}
-            <motion.div
-                variants={staggerContainer}
-                initial="hidden"
-                animate="show"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-                {/* -- Core Metrics: Row 1 -- */}
-                <motion.div variants={staggerItem}>
-                    <GlassCard className="h-full flex flex-col items-center justify-center p-4 sm:p-8">
-                        <div className="w-full flex justify-between items-center mb-4">
-                            <h2 className="font-semibold flex items-center gap-2 text-sm sm:text-base"><Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" /> Holistic Score</h2>
+            {/* Main Content Area */}
+            <main className="flex-1 h-screen overflow-y-auto relative scrollbar-hide">
+                <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-12">
+                    
+                    {/* Top Command Bar */}
+                    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+                        <div className="flex items-center gap-6">
+                            <button 
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-3 bg-white/5 border border-white/10 rounded-xl md:hidden hover:bg-white/10 transition-all"
+                            >
+                                <Menu className="w-5 h-5" />
+                            </button>
+                            <div className="space-y-1">
+                                <p className="text-[10px] text-emerald-400/60 font-space font-bold tracking-[0.3em] uppercase">
+                                    Registry: Clin-Alpha-9
+                                </p>
+                                <h1 className="text-4xl font-space font-bold tracking-tighter text-white">
+                                    Diagnostic <span className="text-white/40">Center</span>
+                                </h1>
+                            </div>
                         </div>
-                        <AnimatedCircularProgress value={vitals.holisticScore} />
-                    </GlassCard>
-                </motion.div>
-
-                <motion.div variants={staggerItem}>
-                    <GlassCard className="h-full flex flex-col justify-between">
-                        <div className="w-full flex justify-between items-center">
-                            <h2 className="font-semibold flex items-center gap-2"><HeartPulse className="w-5 h-5 text-rose-500" /> Heart Rate</h2>
-                            <span className="text-2xl font-bold">{vitals.heartRate} <span className="text-sm font-normal text-muted-foreground">bpm</span></span>
+                        <div className="flex items-center gap-3 self-end sm:self-auto">
+                            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
+                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] font-space font-bold uppercase tracking-widest text-white/60">System Online</span>
+                            </div>
+                            <AddVitalsModal />
+                            <VoiceAssistantButton />
                         </div>
-                        <HeartRateChart currentBpm={vitals.heartRate} />
-                    </GlassCard>
-                </motion.div>
+                    </header>
 
-                <motion.div variants={staggerItem}>
-                    <GlassCard className="h-full flex flex-col justify-between">
-                        <div className="w-full flex justify-between items-center">
-                            <h2 className="font-semibold flex items-center gap-2"><Brain className="w-5 h-5 text-amber-500" /> Stress Level</h2>
-                        </div>
-                        <StressLevelChart stressLevel={vitals.stressLevel} />
-                    </GlassCard>
-                </motion.div>
+                    {/* Layout Grid */}
+                    <div className="grid grid-cols-12 gap-8">
+                        
+                        {/* Hero Section: AI Diagnostic Vector */}
+                        <section className="col-span-12 group relative rounded-[3rem] border border-white/5 bg-gradient-to-br from-[#0e0e0e]/80 to-transparent p-12 overflow-hidden backdrop-blur-3xl">
+                            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-500/[0.03] blur-[150px] -mr-96 -mt-96 transition-all duration-1000 group-hover:bg-emerald-500/[0.05]" />
+                            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/[0.02] blur-[150px] -ml-48 -mb-48" />
+                            
+                            <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+                                <div className="space-y-10">
+                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">Neural Engine Protocol Active</span>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <h2 className="text-6xl md:text-7xl font-space font-bold tracking-tighter leading-[0.9]">
+                                            Initialize <br/> 
+                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-white/40">Diagnostic Scan</span>
+                                        </h2>
+                                        <p className="text-xl text-white/40 font-medium leading-relaxed max-w-lg">
+                                            Deploy precision clinical intelligence to analyze physiological telemetry with 99.8% grade accuracy.
+                                        </p>
+                                    </div>
 
-                {/* -- Expanded Rural Features: Row 2 -- */}
-                <motion.div variants={staggerItem} className="md:col-span-2">
-                    <RuralHospitalList />
-                </motion.div>
-
-                <motion.div variants={staggerItem}>
-                    <MedicinePriceCard />
-                </motion.div>
-
-                {/* -- Rural Tracking: Row 3 -- */}
-                <motion.div variants={staggerItem} className="md:col-span-2 lg:col-span-1">
-                    <DailyRemindersCard />
-                </motion.div>
-
-                <motion.div variants={staggerItem}>
-                    <GovSchemesCard />
-                </motion.div>
-
-                <motion.div variants={staggerItem}>
-                    <FamilyCardsList />
-                </motion.div>
-
-                {/* -- Original Dashboard Items: Row 4 -- */}
-                <motion.div variants={staggerItem} className="md:col-span-2 lg:col-span-1">
-                    <GlassCard className="h-full">
-                        <h2 className="font-semibold flex items-center gap-2 mb-4"><FileText className="w-5 h-5 text-indigo-500" /> Latest Scans</h2>
-                        <div className="space-y-4">
-                            {recentScans.length > 0 ? (
-                                recentScans.map((scan, i) => (
-                                    <div key={scan.id || i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 dark:bg-black/20 hover:bg-white/10 transition-colors group gap-3">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-medium">{scan.type || "Vision Scan"}</span>
-                                            <span className="text-xs text-muted-foreground">{scan.createdAt ? new Date(scan.createdAt).toLocaleDateString() : 'Today'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                                            <Badge variant="outline" className={scan.result?.overallRisk === "High" ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"}>
-                                                {scan.disease_detected || "Healthy"}
-                                            </Badge>
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                className="h-7 text-xs px-2 shadow-sm rounded-md"
-                                                onClick={async (e) => {
-                                                    e.stopPropagation();
-                                                    try {
-                                                        const { jsPDF } = await import("jspdf");
-                                                        const doc = new jsPDF();
-
-                                                        doc.setFontSize(22);
-                                                        doc.setTextColor(34, 197, 94); // Emerald color
-                                                        doc.text("PulseCheck AI - Health Report", 20, 20);
-
-                                                        doc.setFontSize(14);
-                                                        doc.setTextColor(0, 0, 0);
-                                                        doc.text(`Scan Date: ${scan.createdAt ? new Date(scan.createdAt).toLocaleDateString() : 'Unknown'}`, 20, 35);
-                                                        doc.text(`Result: ${scan.disease_detected || "Healthy"}`, 20, 45);
-
-                                                        // Fallback for different data structures (mental vs vision etc)
-                                                        doc.setFontSize(12);
-                                                        const details = scan.result?.overallAssessment || scan.aiAnalysis || scan.notes || "No detailed notes provided.";
-
-                                                        const splitDetails = doc.splitTextToSize(`Details: ${details}`, 170);
-                                                        doc.text(splitDetails, 20, 60);
-
-                                                        doc.text("Generated by PulseCheck AI", 20, 280);
-
-                                                        doc.save(`PulseCheck_Report_${scan.createdAt ? new Date(scan.createdAt).getTime() : 'Latest'}.pdf`);
-                                                    } catch (err) {
-                                                        console.error("Failed to generate PDF", err);
-                                                        alert("Failed to download PDF. Please try again.");
-                                                    }
-                                                }}
-                                            >
-                                                Download PDF
-                                            </Button>
+                                    <div className="flex flex-wrap items-center gap-6 pt-4">
+                                        <Link href={`/${locale}/skin-scan`}>
+                                            <button className="h-16 px-10 rounded-2xl bg-white text-black font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-emerald-500/10 group">
+                                                Execute Vector
+                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        </Link>
+                                        <div className="flex items-center gap-4 px-6 h-16 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl">
+                                            <div className="flex -space-x-3">
+                                                {[1, 2, 3].map(i => (
+                                                    <div key={i} className="h-8 w-8 rounded-full border-2 border-[#0a0a0a] bg-white/10 flex items-center justify-center text-[8px] font-bold">U{i}</div>
+                                                ))}
+                                            </div>
+                                            <span className="text-xs font-bold text-white/30 uppercase tracking-widest">3,204 Active Nodes</span>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="text-center p-4 text-muted-foreground bg-white/5 dark:bg-black/20 rounded-xl border border-white/10 border-dashed">
-                                    <p className="text-sm mb-2">No scans recorded yet.</p>
-                                    <Link href={`/${locale}/vision-scan`}>
-                                        <Button variant="outline" size="sm" className="w-full text-xs h-8 border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-500">
-                                            Take First Scan
-                                        </Button>
-                                    </Link>
                                 </div>
-                            )}
-                        </div>
-                    </GlassCard>
-                </motion.div>
-
-                <motion.div variants={staggerItem}>
-                    <GlassCard className="h-full flex flex-col">
-                        <div className="w-full flex justify-between items-center mb-2">
-                            <h2 className="font-semibold flex items-center gap-2"><Hospital className="w-5 h-5 text-blue-500" /> Map View</h2>
-                        </div>
-                        <HospitalMap />
-                    </GlassCard>
-                </motion.div>
-
-                <motion.div variants={staggerItem} className="flex flex-col gap-4">
-                    <Link href={`/${locale}/cardio-check`} className="w-full h-full min-h-[96px] flex items-center justify-center">
-                        <motion.div
-                            className="relative flex flex-col items-center justify-center gap-2 w-full h-full rounded-[24px] bg-gradient-to-br from-rose-500 to-orange-600 p-1 shadow-xl cursor-pointer group overflow-hidden"
-                            whileHover={{ scale: 1.05, rotateZ: 1 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-rose-400 via-pink-500 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity duration-500 blur-xl group-hover:blur-2xl" />
-                            <div className="relative z-10 flex flex-row items-center justify-center gap-3 h-full w-full bg-black/20 backdrop-blur-md rounded-[22px] border border-white/20 p-4 text-white text-center">
-                                <div className="h-10 w-10 shrink-0 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                                    <HeartPulse className="w-5 h-5" />
+                                
+                                <div className="relative hidden lg:block">
+                                    <div className="aspect-square rounded-full border border-white/5 flex items-center justify-center relative bg-white/[0.01]">
+                                        <div className="absolute inset-0 border-t-2 border-emerald-500/20 rounded-full animate-[spin_20s_linear_infinite]" />
+                                        <div className="absolute inset-8 border-b-2 border-indigo-500/20 rounded-full animate-[spin_15s_linear_reverse_infinite]" />
+                                        <div className="absolute inset-16 border-l-2 border-emerald-500/10 rounded-full animate-[spin_30s_linear_infinite]" />
+                                        
+                                        <motion.div 
+                                            animate={{ 
+                                                scale: [1, 1.1, 1],
+                                                rotate: [0, 90, 0]
+                                            }}
+                                            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                                            className="h-48 w-48 rounded-[3rem] bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center shadow-[0_0_80px_rgba(0,252,64,0.2)] relative z-20 overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+                                            <Zap className="w-20 h-20 text-white relative z-10" />
+                                        </motion.div>
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold">Cardio Check</h3>
                             </div>
-                        </motion.div>
-                    </Link>
+                        </section>
 
-                    <Link href={`/${locale}/vision-scan`} className="w-full h-full min-h-[96px] flex items-center justify-center">
-                        <motion.div
-                            className="relative flex flex-col items-center justify-center gap-2 w-full h-full rounded-[24px] bg-gradient-to-br from-emerald-500 to-indigo-600 p-1 shadow-xl cursor-pointer group overflow-hidden"
-                            whileHover={{ scale: 1.05, rotateZ: -1 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-teal-500 to-indigo-500 opacity-80 group-hover:opacity-100 transition-opacity duration-500 blur-xl group-hover:blur-2xl" />
-                            <div className="relative z-10 flex flex-row items-center justify-center gap-3 h-full w-full bg-black/20 backdrop-blur-md rounded-[22px] border border-white/20 p-4 text-white text-center">
-                                <div className="h-10 w-10 shrink-0 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                                    <Plus className="w-5 h-5" />
-                                </div>
-                                <h3 className="text-lg font-bold">New Vision Scan</h3>
-                            </div>
-                        </motion.div>
-                    </Link>
-                </motion.div>
-            </motion.div>
+
+
+                        {/* Feature Components */}
+                        <div className="col-span-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+                            <div className="xl:col-span-1"><MedicinePriceCard /></div>
+                            <div className="xl:col-span-1"><FamilyCardsList /></div>
+                            <div className="xl:col-span-1"><GovSchemesCard /></div>
+                            <div className="xl:col-span-1"><RuralHospitalList /></div>
+                        </div>
+
+                    </div>
+                    
+                    {/* Footer System Status */}
+                    <footer className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 opacity-30">
+                        <div className="flex items-center gap-6">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Protocol X-01</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Lat: 28.61 n</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Lon: 77.20 e</span>
+                        </div>
+                        <p className="text-[10px] font-bold">© 2026 CLINICAL LUMINARY SYSTEM. ALL RIGHTS RESERVED.</p>
+                    </footer>
+
+                </div>
+            </main>
         </div>
     );
 }

@@ -34,23 +34,24 @@ export function useUser() {
 
     const signInWithGoogle = async () => {
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        
         try {
-            // Try popup first (works on localhost and when domains are properly configured)
-            return await signInWithPopup(auth, provider);
+            // Check if we are in a context that supports popups
+            const result = await signInWithPopup(auth, provider);
+            return result;
         } catch (error: any) {
-            // If popup fails due to cross-origin/iframe issues, fall back to redirect
-            if (
-                error.code === "auth/popup-blocked" ||
-                error.code === "auth/popup-closed-by-user" ||
-                error.code === "auth/unauthorized-domain" ||
-                error.message?.includes("Illegal url") ||
-                error.message?.includes("cross-origin")
-            ) {
-                console.warn("Popup sign-in failed, falling back to redirect:", error.message);
-                return await signInWithRedirect(auth, provider);
-            } else {
-                throw error;
+            // Handle cross-origin or blocked popups
+            const isPopupBlocked = error.code === "auth/popup-blocked" || error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request";
+            const isCrossOrigin = error.code === "auth/unauthorized-domain" || error.message?.includes("cross-origin");
+            
+            if (isPopupBlocked || isCrossOrigin) {
+                console.warn("Switching to redirect auth interface due to:", error.code);
+                // Return null to signify that a redirect has been initiated
+                await signInWithRedirect(auth, provider);
+                return null; 
             }
+            throw error;
         }
     };
 

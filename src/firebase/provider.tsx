@@ -21,32 +21,43 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         // Handle redirect result (from signInWithRedirect)
-        getRedirectResult(auth).catch((error) => {
-            console.error("Redirect sign-in error:", error);
-        });
+        const handleRedirect = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    console.log("Redirect sign-in successful for:", result.user.email);
+                }
+            } catch (error: any) {
+                console.error("Critical Redirect sign-in error:", error);
+                // The error will be handled by the specialized login page if we're on it,
+                // but we catch it here to prevent silent failures in the background.
+            }
+        };
+
+        handleRedirect();
 
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            setUser(firebaseUser);
-            setLoading(false);
-
             if (firebaseUser) {
                 // Sync minimal profile logic
                 try {
-                    const userRef = doc(db, "users", firebaseUser.uid);
+                    const userProfileRef = doc(db, "users", firebaseUser.uid, "profile", "data");
                     await setDoc(
-                        userRef,
-                        {
-                            email: firebaseUser.email,
-                            displayName: firebaseUser.displayName,
-                            photoURL: firebaseUser.photoURL,
-                            lastLogin: new Date().toISOString(),
-                        },
-                        { merge: true }
-                    );
+                                userProfileRef,
+                                {
+                                    email: firebaseUser.email,
+                                    displayName: firebaseUser.displayName,
+                                    photoURL: firebaseUser.photoURL,
+                                    lastLogin: new Date().toISOString(),
+                                },
+                                { merge: true }
+                            );
                 } catch (e) {
                     console.warn("Could not sync profile (offline or blocked)", e);
                 }
             }
+            
+            setUser(firebaseUser);
+            setLoading(false);
         });
 
         return () => unsubscribe();

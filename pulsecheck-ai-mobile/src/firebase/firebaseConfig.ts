@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCc69e7skm1lsZz1WdJePDbxDWKwdhushw",
+    apiKey: "AIzaSyCGPulX7bwZy7_FpjW8pOf9cWnwUbiDc7M",
     authDomain: "healthsense-ai-prod-478.firebaseapp.com",
     projectId: "healthsense-ai-prod-478",
     storageBucket: "healthsense-ai-prod-478.firebasestorage.app",

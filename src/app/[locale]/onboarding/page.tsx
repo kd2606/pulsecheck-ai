@@ -125,136 +125,167 @@ export default function OnboardingPage() {
     };
 
     return (
-        <div className="min-h-[100dvh] bg-[#0A0F1A] text-white flex flex-col relative overflow-hidden font-sans">
-            {/* Ambient Background Gradient */}
-            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col relative overflow-hidden font-space">
+            {/* Premium Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                <div className="absolute top-[-15%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 blur-[130px] rounded-full" />
+                <div className="absolute bottom-[-15%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[130px] rounded-full" />
+            </div>
 
             {/* Top Bar / Progress */}
             {step < 4 && (
-                <div className="h-16 flex items-center px-4 md:px-8 z-10">
-                    {step > 1 && (
-                        <button onClick={handleBack} className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
-                            <ArrowLeft className="w-6 h-6" />
-                        </button>
-                    )}
-                    <div className="flex-1 flex justify-center gap-2">
+                <div className="h-20 flex items-center px-6 md:px-12 z-10">
+                    <div className="flex-1 flex justify-center items-center gap-3">
                         {[1, 2, 3].map((s) => (
                             <div 
                                 key={s} 
-                                className={`h-2 rounded-full transition-all duration-300 ${s <= step ? 'bg-emerald-500 shadow-[0_0_10px_rgba(0,191,165,0.4)]' : 'bg-white/10'} w-12 sm:w-16`}
+                                className={`h-1.5 rounded-full transition-all duration-500 ${s <= step ? 'bg-indigo-500 w-16 md:w-24 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : 'bg-white/5 w-8 md:w-12'}`}
                             />
                         ))}
                     </div>
-                    {step > 1 && <div className="w-10"></div>} {/* spacer for centering */}
                 </div>
             )}
 
             {/* Main Content Area */}
-            <div className="flex-1 flex items-center justify-center p-4 z-10">
+            <div className="flex-1 flex items-center justify-center p-6 z-10">
                 <AnimatePresence mode="wait" custom={1}>
                     {step === 1 && (
-                        <motion.div key="step1" custom={1} variants={variants} initial="initial" animate="animate" exit="exit" className="w-full max-w-md space-y-8 text-center">
-                            <div className="text-6xl mb-6">👋</div>
-                            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Welcome to PulseCheck AI!</h1>
-                            <p className="text-lg text-white/60">Your personal AI health companion, designed for Bharat.</p>
+                        <motion.div 
+                            key="step1" 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="w-full max-w-xl space-y-10 text-center"
+                        >
+                            <div className="relative inline-block">
+                                <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full" />
+                                <div className="text-7xl md:text-8xl relative z-10">🛡️</div>
+                            </div>
                             
-                            <div className="space-y-4 text-left bg-white/5 border border-white/10 p-6 rounded-2xl mx-auto shadow-xl">
+                            <div className="space-y-4">
+                                <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white font-space">
+                                    Initialize <span className="text-indigo-400">Clinical Identity</span>
+                                </h1>
+                                <p className="text-xl text-white/40 max-w-md mx-auto leading-relaxed">
+                                    Set up your advanced medical dashboard with AI-driven diagnostics.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
                                 {[
-                                    "Free forever — no hidden charges",
-                                    "Your data is private & secure",
-                                    "Works in Hindi & English"
+                                    { text: "Encrypted Protocol", sub: "AES-256 Security" },
+                                    { text: "AI Diagnostic Engine", sub: "98% Accuracy" },
+                                    { text: "Multi-Lingual", sub: "Hindi & English" }
                                 ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5" />
-                                        <span className="text-[15px] font-medium text-white/90">{item}</span>
+                                    <div key={i} className="bg-white/[0.03] border border-white/10 p-5 rounded-3xl backdrop-blur-md">
+                                        <CheckCircle2 className="w-5 h-5 text-emerald-400 mb-3" />
+                                        <div className="text-sm font-bold text-white">{item.text}</div>
+                                        <div className="text-[10px] text-white/30 uppercase tracking-widest mt-1 font-bold">{item.sub}</div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="pt-4 space-y-4">
-                                <Button onClick={handleNext} className="w-full h-14 text-lg bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/40">
-                                    Get Started <ArrowRight className="ml-2 w-5 h-5" />
+                            <div className="pt-6 space-y-6">
+                                <Button onClick={handleNext} className="w-full max-w-sm h-16 text-lg bg-white text-black hover:bg-indigo-50 rounded-2xl font-bold shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                    Begin Onboarding <ArrowRight className="ml-2 w-5 h-5" />
                                 </Button>
-                                <p className="text-xs text-white/40 font-medium tracking-wide uppercase">Takes only 1 minute</p>
+                                <p className="text-xs text-white/20 font-bold tracking-[0.2em] uppercase">Security Clearance Level 1</p>
                             </div>
                         </motion.div>
                     )}
 
                     {step === 2 && (
-                        <motion.div key="step2" custom={1} variants={variants} initial="initial" animate="animate" exit="exit" className="w-full max-w-md space-y-8">
-                            <div className="text-center space-y-2 mb-8">
-                                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Tell us a little about you</h2>
-                                <p className="text-white/60">This helps Pulse give better, personalized advice.</p>
+                        <motion.div 
+                            key="step2" 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="w-full max-w-md space-y-8"
+                        >
+                            <div className="space-y-2 text-center md:text-left">
+                                <h2 className="text-3xl font-bold tracking-tight text-white">Identity Particulars</h2>
+                                <p className="text-white/40">Provide essential data for clinical personalization.</p>
                             </div>
 
-                            <div className="space-y-5 bg-white/5 border border-white/10 p-6 rounded-2xl shadow-xl">
+                            <div className="space-y-6 bg-white/[0.03] border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full -mr-16 -mt-16" />
+                                
                                 <div className="space-y-2">
-                                    <Label className="text-white/80">What should Pulse call you?</Label>
+                                    <Label className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Assigned Name</Label>
                                     <Input 
-                                        placeholder="Your Name (Optional)" 
+                                        placeholder="Dr. Ramesh Kumar" 
                                         value={name} 
                                         onChange={(e) => setName(e.target.value)} 
-                                        className="h-12 bg-black/40 border-white/10 focus-visible:ring-emerald-500/50" 
+                                        className="h-14 bg-white/5 border-white/10 rounded-2xl text-white focus:border-indigo-500/50 transition-all" 
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-white/80">Age</Label>
-                                    <Input 
-                                        type="number" 
-                                        placeholder="e.g. 25" 
-                                        value={age} 
-                                        onChange={(e) => setAge(e.target.value)} 
-                                        className="h-12 bg-black/40 border-white/10 focus-visible:ring-emerald-500/50" 
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-white/80 mb-2 block">Gender</Label>
-                                    <div className="flex gap-2">
-                                        {["Male", "Female", "Other"].map(g => (
-                                            <button 
-                                                key={g}
-                                                onClick={() => setGender(g)}
-                                                className={`flex-1 py-3 rounded-xl border font-medium text-sm transition-all ${gender === g ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-black/40 border-white/10 text-white/60 hover:bg-white/10'}`}
-                                            >
-                                                {g}
-                                            </button>
-                                        ))}
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Age</Label>
+                                        <Input 
+                                            type="number" 
+                                            placeholder="25" 
+                                            value={age} 
+                                            onChange={(e) => setAge(e.target.value)} 
+                                            className="h-14 bg-white/5 border-white/10 rounded-2xl text-white focus:border-indigo-500/50 transition-all" 
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Gender</Label>
+                                        <Select value={gender} onValueChange={setGender}>
+                                            <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl text-white">
+                                                <SelectValue placeholder="Gender" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-[#161616] border-white/10 text-white rounded-2xl">
+                                                {["Male", "Female", "Other"].map(g => (
+                                                    <SelectItem key={g} value={g} className="focus:bg-white/10">{g}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
+
                                 <div className="space-y-2">
-                                    <Label className="text-white/80 block">State</Label>
+                                    <Label className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Operating Region</Label>
                                     <Select value={state} onValueChange={setState}>
-                                        <SelectTrigger className="h-12 bg-black/40 border-white/10">
-                                            <SelectValue placeholder="Select your state" />
+                                        <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl text-white">
+                                            <SelectValue placeholder="Select State" />
                                         </SelectTrigger>
-                                        <SelectContent className="max-h-[300px]">
-                                            {STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                        <SelectContent className="max-h-[300px] bg-[#161616] border-white/10 text-white rounded-2xl">
+                                            {STATES.map(s => <SelectItem key={s} value={s} className="focus:bg-white/10">{s}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <Button onClick={handleNext} className="w-full h-12 text-[15px] bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold">
-                                    Continue <ArrowRight className="ml-2 w-4 h-4" />
+                                <Button onClick={handleNext} className="w-full h-14 bg-white text-black rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl">
+                                    Validate & Continue <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>
-                                <button onClick={handleNext} className="text-sm font-medium text-white/40 hover:text-white/70 transition-colors">
-                                    Skip for now
+                                <button onClick={handleNext} className="text-[10px] font-bold text-white/20 hover:text-white/50 transition-colors uppercase tracking-[0.2em] py-2">
+                                    Bypass Validation
                                 </button>
                             </div>
                         </motion.div>
                     )}
 
                     {step === 3 && (
-                        <motion.div key="step3" custom={1} variants={variants} initial="initial" animate="animate" exit="exit" className="w-full max-w-md space-y-8">
-                             <div className="text-center space-y-2 mb-8">
-                                <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Any health conditions?</h2>
-                                <p className="text-white/60">Optional — helps us personalize warnings.</p>
+                        <motion.div 
+                            key="step3" 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="w-full max-w-md space-y-8"
+                        >
+                             <div className="space-y-2 text-center md:text-left">
+                                <h2 className="text-3xl font-bold tracking-tight text-white">Clinical History</h2>
+                                <p className="text-white/40">Map existing conditions for precise AI monitoring.</p>
                             </div>
 
-                            <div className="space-y-8 bg-white/5 border border-white/10 p-6 md:p-8 rounded-2xl shadow-xl">
-                                {/* Chips */}
+                            <div className="space-y-8 bg-white/[0.03] border border-white/10 p-8 rounded-[2.5rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -ml-16 -mb-16" />
+                                
                                 <div className="flex flex-wrap gap-2">
                                     {CONDITIONS.map(cond => {
                                         const isSelected = conditions.includes(cond);
@@ -262,7 +293,7 @@ export default function OnboardingPage() {
                                             <button
                                                 key={cond}
                                                 onClick={() => toggleCondition(cond)}
-                                                className={`px-4 py-2.5 rounded-full text-sm font-medium border transition-all ${isSelected ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-black/40 border-white/10 text-white/70 hover:bg-white/10'}`}
+                                                className={`px-5 py-2.5 rounded-2xl text-xs font-bold border transition-all ${isSelected ? 'bg-indigo-500/20 border-indigo-500 text-indigo-400' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'}`}
                                             >
                                                 {cond}
                                             </button>
@@ -270,62 +301,82 @@ export default function OnboardingPage() {
                                     })}
                                 </div>
 
-                                {/* Toggles */}
-                                <div className="space-y-5 pt-4 border-t border-white/10">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-[15px] text-white/90">Do you smoke?</Label>
-                                        <Switch checked={smokes} onCheckedChange={setSmokes} />
+                                <div className="space-y-6 pt-6 border-t border-white/5">
+                                    <div className="flex items-center justify-between group">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-bold text-white/90">Tobacco Usage</Label>
+                                            <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Clinical Parameter</p>
+                                        </div>
+                                        <Switch checked={smokes} onCheckedChange={setSmokes} className="data-[state=checked]:bg-indigo-500" />
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-[15px] text-white/90">Do you exercise regularly?</Label>
-                                        <Switch checked={exercises} onCheckedChange={setExercises} />
+                                    <div className="flex items-center justify-between group">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-bold text-white/90">Regular Physical Activity</Label>
+                                            <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Clinical Parameter</p>
+                                        </div>
+                                        <Switch checked={exercises} onCheckedChange={setExercises} className="data-[state=checked]:bg-emerald-500" />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <Button onClick={handleFinish} disabled={isSaving} className="w-full h-12 text-[15px] bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold">
-                                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Finish Setup <ArrowRight className="ml-2 w-4 h-4" /></>}
+                                <Button onClick={handleFinish} disabled={isSaving} className="w-full h-14 bg-white text-black rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl">
+                                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Finalize Configuration <ArrowRight className="ml-2 w-4 h-4" /></>}
                                 </Button>
-                                <button onClick={handleFinish} disabled={isSaving} className="text-sm font-medium text-white/40 hover:text-white/70 transition-colors">
-                                    Skip for now
+                                <button onClick={handleFinish} disabled={isSaving} className="text-[10px] font-bold text-white/20 hover:text-white/50 transition-colors uppercase tracking-[0.2em] py-2">
+                                    Complete Later
                                 </button>
                             </div>
                         </motion.div>
                     )}
 
                     {step === 4 && (
-                        <motion.div key="step4" custom={1} variants={variants} initial="initial" animate="animate" exit="exit" className="w-full max-w-md space-y-8 text-center pt-10">
-                            <div className="text-7xl mb-4 animate-bounce">🎉</div>
-                            <h2 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">
-                                You're all set{name ? `, ${name}` : ''}!
-                            </h2>
-                            <p className="text-white/60 mb-8">Pulse is ready to help you. Try out these features first:</p>
+                        <motion.div 
+                            key="step4" 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="w-full max-w-xl space-y-10 text-center"
+                        >
+                            <div className="relative inline-block">
+                                <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150" />
+                                <div className="text-8xl relative z-10 animate-pulse">🧤</div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter text-white font-space">
+                                    System <span className="text-emerald-400">Activated</span>
+                                </h2>
+                                <p className="text-xl text-white/40 max-w-md mx-auto leading-relaxed">
+                                    Welcome, {name || 'Professional'}. Your clinical workspace is now fully functional.
+                                </p>
+                            </div>
                             
-                            <div className="space-y-3 pb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <FeatureButton 
                                     icon={Activity} 
-                                    title="Check Symptoms" 
-                                    desc="Got a fever or pain? Ask our AI." 
+                                    title="Neuro-Scan" 
+                                    desc="Symptom analysis." 
                                     onClick={() => router.push(`/${locale}/symptom-checker`)} 
                                 />
                                 <FeatureButton 
                                     icon={Scan} 
-                                    title="Try Skin Scan" 
-                                    desc="Take a photo for a quick review." 
+                                    title="Dermal-View" 
+                                    desc="Skin diagnostics." 
                                     onClick={() => router.push(`/${locale}/skin-scan`)} 
                                 />
                                 <FeatureButton 
                                     icon={MessageSquare} 
-                                    title="Chat with Pulse" 
-                                    desc="Talk directly to your Health Agent." 
+                                    title="Pulse-Mind" 
+                                    desc="AI Consultation." 
                                     onClick={() => router.push(`/${locale}/dashboard`)} 
                                 />
                             </div>
 
-                            <Button onClick={() => router.push(`/${locale}/dashboard`)} variant="outline" className="w-full h-12 font-bold border-white/20 hover:bg-white/10 bg-transparent text-white">
-                                Skip to Dashboard <ChevronRight className="w-4 h-4 ml-1" />
-                            </Button>
+                            <div className="pt-6">
+                                <Button onClick={() => router.push(`/${locale}/dashboard`)} className="w-full max-w-sm h-16 bg-white/5 border border-white/10 rounded-2xl text-white font-bold hover:bg-white/10 backdrop-blur-md transition-all">
+                                    Enter Dashboard <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -338,16 +389,15 @@ function FeatureButton({ icon: Icon, title, desc, onClick }: { icon: any, title:
     return (
         <button 
             onClick={onClick}
-            className="w-full flex items-center p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-emerald-500/30 transition-all group text-left shadow-lg"
+            className="group flex flex-col p-6 bg-white/[0.03] border border-white/10 rounded-[2rem] hover:bg-white/[0.06] hover:border-indigo-500/50 transition-all text-left backdrop-blur-md shadow-xl"
         >
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center mr-4 group-hover:from-emerald-500/30 group-hover:to-teal-500/20 transition-colors border border-emerald-500/20">
-                <Icon className="w-6 h-6 text-emerald-400" />
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:bg-indigo-500/20 transition-colors border border-indigo-500/20">
+                <Icon className="w-6 h-6 text-indigo-400" />
             </div>
-            <div className="flex-1">
-                <h3 className="font-semibold text-[15px] text-white">{title}</h3>
-                <p className="text-xs text-white/50 mt-0.5">{desc}</p>
+            <div className="space-y-1">
+                <h3 className="font-bold text-sm text-white group-hover:text-indigo-300 transition-colors">{title}</h3>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">{desc}</p>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-emerald-400 transition-colors" />
         </button>
     );
 }

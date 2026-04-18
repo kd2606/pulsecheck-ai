@@ -30,7 +30,7 @@ export default function LoginPage() {
 
 function LoginContent() {
     const t = useTranslations("auth");
-    const { signInWithGoogle } = useUser();
+    const { user, loading: globalLoading, signInWithGoogle } = useUser();
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -40,7 +40,56 @@ function LoginContent() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [authChecking, setAuthChecking] = useState(true);
     const hasTriggeredDemo = useRef(false);
+
+    useEffect(() => {
+        // Redirection logic when user is authenticated
+        if (user && !globalLoading && !loading) {
+            handleAuthSuccess(user);
+        }
+    }, [user, globalLoading, loading]);
+
+    const handleAuthSuccess = async (authenticatedUser: any) => {
+        if (!authenticatedUser) return;
+        
+        let redirected = false;
+        
+        // Fast redirect timeout - if Firestore check takes > 3s, just go to dashboard
+        const timeoutId = setTimeout(() => {
+            if (!redirected) {
+                console.warn("Auth check timed out, forcing dashboard redirect");
+                redirected = true;
+                setLoading(false);
+                router.push(`/${locale}/dashboard`);
+            }
+        }, 3000);
+
+        try {
+            const userDocPath = `users/${authenticatedUser.uid}/profile/data`;
+            const userDoc = await getDoc(doc(db, userDocPath));
+            
+            if (!redirected) {
+                clearTimeout(timeoutId);
+                redirected = true;
+                setLoading(false);
+                
+                if (userDoc.exists() && userDoc.data().onboardingDone) {
+                    router.push(`/${locale}/dashboard`);
+                } else {
+                    router.push(`/${locale}/onboarding`);
+                }
+            }
+        } catch (firestoreError) {
+            console.warn("Firestore check failed during auth success:", firestoreError);
+            if (!redirected) {
+                clearTimeout(timeoutId);
+                redirected = true;
+                setLoading(false);
+                router.push(`/${locale}/dashboard`);
+            }
+        }
+    };
 
     useEffect(() => {
         if (isAutoDemo && !hasTriggeredDemo.current) {
@@ -57,18 +106,7 @@ function LoginContent() {
         try {
             const userCred = await signInWithEmailAndPassword(auth, email, password);
             toast.success("Login successful!");
-            // Try to check onboarding status, but don't block login if Firestore is offline
-            try {
-                const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
-                if (userDoc.exists() && userDoc.data().onboardingDone) {
-                    router.push(`/${locale}/dashboard`);
-                } else {
-                    router.push(`/${locale}/onboarding`);
-                }
-            } catch (firestoreError) {
-                console.warn("Firestore check failed, redirecting to dashboard:", firestoreError);
-                router.push(`/${locale}/dashboard`);
-            }
+            handleAuthSuccess(userCred.user);
         } catch (error: any) {
             toast.error(error.message || "Failed to login");
         } finally {
@@ -113,138 +151,153 @@ function LoginContent() {
             const userCred = await signInWithGoogle();
             if (userCred && userCred.user) {
                 toast.success("Google sign in successful!");
-                // Try to check onboarding status, but don't block login if Firestore is offline
-                try {
-                    const userDoc = await getDoc(doc(db, "users", userCred.user.uid, "profile", "data"));
-                    if (userDoc.exists() && userDoc.data().onboardingDone) {
-                        router.push(`/${locale}/dashboard`);
-                    } else {
-                        router.push(`/${locale}/onboarding`);
-                    }
-                } catch (firestoreError) {
-                    console.warn("Firestore check failed, redirecting to dashboard:", firestoreError);
-                    router.push(`/${locale}/dashboard`);
-                }
+                await handleAuthSuccess(userCred.user);
             }
+            // If userCred is null, it means a redirect was initiated, 
+            // so we keep the loading state until the page reloads.
         } catch (error: any) {
+            setLoading(false);
             if (error.code === 'auth/configuration-not-found' || error.message?.includes('configuration-not-found')) {
                 toast.error("Configuration Error", {
-                    description: "Google Sign-In is not enabled. Please enable it in your Firebase Console (Authentication > Sign-in method).",
+                    description: "Google Sign-In is not enabled. Please enable it in your Firebase Console.",
                     duration: 10000,
                 });
-            } else {
+            } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                 toast.error("Google sign in failed: " + error.message);
             }
-        } finally {
-            setLoading(false);
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 blur-[120px] rounded-full animate-pulse" />
+                <div className="relative z-10 flex flex-col items-center gap-6">
+                    <div className="h-1 plan-loading-bar w-48 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div 
+                            className="h-full bg-emerald-500"
+                            animate={{ x: [-200, 200] }}
+                            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                        />
+                    </div>
+                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] animate-pulse">Syncing Clinical Link...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex min-h-[90vh] items-center justify-center p-4 relative overflow-hidden bg-transparent">
-            {/* Ambient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-indigo-500/5 pointer-events-none" />
+        <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0a0a0a]">
+            <style jsx global>{`
+                .font-space { font-family: var(--font-space-grotesk), sans-serif; }
+            `}</style>
+
+            {/* Premium Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full" />
+            </div>
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="w-full max-w-md z-10"
             >
-                <Card className="rounded-[24px] border border-white/20 bg-white/60 dark:bg-black/40 backdrop-blur-xl shadow-2xl">
-                    <CardHeader className="text-center pb-2">
-                        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-lg shadow-emerald-500/20">
-                            <HeartPulse className="h-7 w-7 text-white" />
+                <Card className="rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] blur-3xl rounded-full -mr-16 -mt-16" />
+                    
+                    <CardHeader className="text-center pb-2 pt-10">
+                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-2xl shadow-emerald-500/20 group animate-in zoom-in duration-500">
+                            <HeartPulse className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-2xl font-bold tracking-tight">Welcome Back</CardTitle>
-                        <CardDescription>Sign in to your PulseCheck AI account</CardDescription>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Clinical <span className="text-emerald-400">Luminary</span></CardTitle>
+                        <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">Precision Rural Healthcare AI</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-4">
+
+                    <CardContent className="space-y-6 pt-6 px-8">
                         <form onSubmit={handleEmailLogin} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Email Access</Label>
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="patient@example.com"
+                                    placeholder="doctor@pulsecheck.ai"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="bg-white/50 dark:bg-black/50"
+                                    className="bg-white/5 border-white/10 text-white rounded-2xl h-12 focus:border-emerald-500/50 transition-all"
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password" title="Access Key" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Access Key</Label>
                                 <Input
                                     id="password"
                                     type="password"
+                                    placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="bg-white/50 dark:bg-black/50"
+                                    className="bg-white/5 border-white/10 text-white rounded-2xl h-12 focus:border-emerald-500/50 transition-all"
                                     required
                                 />
                             </div>
-                            <Button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white" disabled={loading}>
-                                <Mail className="w-4 h-4 mr-2" />
-                                {loading ? "Signing in..." : "Continue with Email"}
+                            <Button type="submit" className="w-full h-12 rounded-2xl bg-white text-black font-bold hover:bg-emerald-50 transition-all shadow-xl active:scale-[0.98]" disabled={loading}>
+                                {loading ? <Loader2 className="animate-spin" /> : <><Mail className="w-4 h-4 mr-2" /> Authenticate Account</>}
                             </Button>
                         </form>
 
-                        <div className="relative my-6">
+                        <div className="relative my-8">
                             <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/10" />
+                                <span className="w-full border-t border-white/5" />
                             </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-transparent px-2 text-muted-foreground">or sign in with</span>
+                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
+                                <span className="bg-transparent px-4 text-white/30">Secure Gateway</span>
                             </div>
                         </div>
 
-                        <Button
-                            onClick={handleGoogleSignIn}
-                            variant="outline"
-                            className="w-full bg-white/50 dark:bg-black/50 border-white/20"
-                            size="lg"
-                            disabled={loading}
-                        >
-                            <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
-                                <path
-                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                                    fill="#4285F4"
-                                />
-                                <path
-                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                    fill="#34A853"
-                                />
-                                <path
-                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                                    fill="#FBBC05"
-                                />
-                                <path
-                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                                    fill="#EA4335"
-                                />
-                            </svg>
-                            Google Connect
-                        </Button>
-
-                        <div className="pt-2">
+                        <div className="grid grid-cols-1 gap-4">
                             <Button
-                                onClick={handleDemoLogin}
-                                variant="secondary"
-                                className="w-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+                                onClick={handleGoogleSignIn}
+                                variant="outline"
+                                className="w-full h-12 rounded-2xl bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all"
                                 disabled={loading}
                             >
-                                Try Demo Account Fast
+                                <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
+                                    <path
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                                        fill="#4285F4"
+                                    />
+                                    <path
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                        fill="#34A853"
+                                    />
+                                    <path
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                        fill="#FBBC05"
+                                    />
+                                    <path
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                        fill="#EA4335"
+                                    />
+                                </svg>
+                                Continue with Google
                             </Button>
                         </div>
                     </CardContent>
-                    <CardFooter className="flex flex-col items-center justify-center border-t border-white/10 pt-6 pb-6">
+
+                    <CardFooter className="flex flex-col items-center justify-center border-t border-white/5 pt-8 pb-10 mt-4">
                         <div className="text-center text-sm">
-                            <span className="text-muted-foreground pr-1">Don't have an account?</span>
-                            <Link href={`/${locale}/signup`} className="text-emerald-500 hover:text-emerald-600 font-medium transition-colors">
-                                Create new account
+                            <span className="text-white/40 mr-2">New Medical Professional?</span>
+                            <Link href={`/${locale}/signup`} className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
+                                Create Identity
                             </Link>
                         </div>
+                        <button 
+                            onClick={handleDemoLogin}
+                            className="mt-6 text-[10px] text-white/20 hover:text-emerald-400/60 font-bold uppercase tracking-widest transition-all"
+                        >
+                            Or use Guest Diagnostic Access
+                        </button>
                     </CardFooter>
                 </Card>
             </motion.div>

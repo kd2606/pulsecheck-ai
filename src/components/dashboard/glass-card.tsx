@@ -13,16 +13,19 @@ export function GlassCard({ className, children, hoverEffect = true, ...props }:
     return (
         <motion.div
             className={cn(
-                "relative overflow-hidden rounded-[24px] border border-white/20 bg-background/60 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-black/40",
-                hoverEffect && "transition-all hover:shadow-2xl hover:border-primary/30",
+                "relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#0e0e0e]/40 p-8 shadow-2xl backdrop-blur-3xl transition-all duration-500",
+                hoverEffect && "hover:border-emerald-500/10 hover:bg-[#121212]/60",
                 className
             )}
-            whileHover={hoverEffect ? { scale: 1.02, rotateX: 2, rotateY: -2 } : undefined}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            whileHover={hoverEffect ? { y: -5, scale: 1.005 } : undefined}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
             {...props}
         >
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent dark:from-white/5 pointer-events-none" />
+            {/* Specular Ghost Highlight (15% opacity fallback border) */}
+            <div className="absolute inset-0 border border-white/[0.03] rounded-[2.5rem] pointer-events-none" />
+            
+            {/* Atmospheric Depth Layer */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/[0.03] blur-[100px] pointer-events-none" />
 
             <div className="relative z-10 h-full">{children}</div>
         </motion.div>

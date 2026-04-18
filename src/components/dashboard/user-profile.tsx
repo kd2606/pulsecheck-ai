@@ -37,10 +37,10 @@ export function UserProfileModal({ children }: { children: React.ReactNode }) {
         const fetchProfile = async () => {
             setFetching(true);
             try {
-                const userRef = doc(db, "users", user.uid);
+                const userRef = doc(db, "users", user.uid, "profile", "data");
                 const snap = await getDoc(userRef);
-                if (snap.exists() && snap.data().profileDetails) {
-                    setProfile({ ...profile, ...snap.data().profileDetails });
+                if (snap.exists()) {
+                    setProfile(prev => ({ ...prev, ...snap.data() }));
                 } else if (user.displayName) {
                     setProfile(prev => ({ ...prev, name: user.displayName || "" }));
                 }
@@ -65,12 +65,12 @@ export function UserProfileModal({ children }: { children: React.ReactNode }) {
                 });
             }
 
-            const userRef = doc(db, "users", user.uid);
-            // Optimistic UI: Don't await setDoc since Firebase handles offline persistence
-            // and websocket lag can cause it to unnecessarily hang the UI
-            setDoc(userRef, {
-                profileDetails: profile
-            }, { merge: true }).catch(err => console.error("Background sync error:", err));
+            const userRef = doc(db, "users", user.uid, "profile", "data");
+            // Sync with merge to preserve other fields like onboardingDone
+            await setDoc(userRef, {
+                ...profile,
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
 
             toast.success("Profile updated successfully!");
             setOpen(false);
