@@ -34,11 +34,11 @@ export default function NearbyHospitalsScreen() {
             const location = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = location.coords;
 
-            const res = await fetch(`${VERCEL_API}/api/nearby-facilities?lat=${latitude}&lon=${longitude}`);
+            const res = await fetch(`${VERCEL_API}/api/nearby-facilities?lat=${latitude}&lng=${longitude}`);
             if (!res.ok) throw new Error("Failed to fetch facilities");
             
             const data = await res.json();
-            setHospitals(data.results || []);
+            setHospitals(data.places || []);
         } catch (error: any) {
             console.error("Fetch hospitals error:", error);
             setErrorMsg("Could not load hospitals. Please check your connection and try again.");

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatWithPulse } from "@/ai/flows/pulse-chat";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
     try {
         const { messages, userContext } = await req.json();

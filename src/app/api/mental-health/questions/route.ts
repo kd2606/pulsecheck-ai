@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateMentalHealthQuestions } from "@/ai/flows/mental-health";
 
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 export async function GET() {
