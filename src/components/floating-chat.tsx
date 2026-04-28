@@ -296,7 +296,7 @@ export function FloatingChat() {
                     {
                         id: Date.now().toString(),
                         role: "model" as const,
-                        content: "Pulse abhi rest kar raha hai 😴 Thodi der baad try karo.",
+                        content: "Pulse is resting right now 😴 Please try again later.",
                         timestamp: new Date(),
                         type: "text" as const
                     }

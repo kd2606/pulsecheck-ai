@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     } catch (error: any) {
         console.error("[Pulse Route] Unexpected error:", error);
         
-        const fallbackMsg = "Pulse abhi rest kar raha hai 😴 Thodi der baad try karo.";
+        const fallbackMsg = "Pulse is resting right now 😴 Please try again later.";
         
         try {
             const url = new URL(req.url);
