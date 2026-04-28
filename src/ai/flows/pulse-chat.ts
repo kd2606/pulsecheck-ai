@@ -83,7 +83,7 @@ If user asks "how am I doing?" or "mera health kaisa hai?" — answer using this
             config: { temperature: 0.7 }
         });
 
-        return { role: "model", content: "Pulse is resting right now 😴 Please try again later." };
+        return { role: "model", content: text };
     } catch (error: any) {
         console.error("[Pulse Flow] Error:", error);
         if (error?.status === 429 || error?.message?.includes("429")) {

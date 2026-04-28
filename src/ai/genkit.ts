@@ -1,7 +1,29 @@
 import { genkit } from "genkit";
-import { googleAI, gemini20Flash } from "@genkit-ai/googleai";
+import { openAI } from "genkitx-openai";
 
 export const ai = genkit({
-    plugins: [googleAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY || process.env.GEMINI_API_KEY })],
-    model: gemini20Flash,
+    plugins: [
+        openAI({
+            apiKey: process.env.OPENROUTER_API_KEY,
+            baseURL: "https://openrouter.ai/api/v1",
+            compatibility: "strict",
+            models: [
+                {
+                    name: "google/gemini-2.5-flash:free",
+                    info: {
+                        label: "OpenRouter Gemini Flash Free",
+                        versions: ["google/gemini-2.5-flash:free"],
+                        supports: {
+                            multiturn: true,
+                            media: true,
+                            tools: true,
+                            systemRole: true
+                        }
+                    },
+                    configSchema: { parse: (val: any) => val }
+                }
+            ]
+        })
+    ],
+    model: "openai/google/gemini-2.5-flash:free",
 });
