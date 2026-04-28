@@ -210,7 +210,7 @@ export default function GovtSchemesPage() {
                         </Card>
                     ) : (
                         <div className="grid gap-6">
-                            {results.schemes.map((scheme, i) => (
+                            {results.schemes.map((scheme: { name: string; description: string; eligibilityStatus: "eligible" | "maybe" | "check"; eligibility: string; benefits: string; howToApply: string; officialLink: string }, i: number) => (
                                 <Card key={i} className="overflow-hidden border-2 transition-all hover:border-primary/50">
                                     <CardHeader className="bg-muted/10 border-b pb-5">
                                         <CardTitle className="text-xl sm:text-2xl text-primary leading-tight">{scheme.name}</CardTitle>

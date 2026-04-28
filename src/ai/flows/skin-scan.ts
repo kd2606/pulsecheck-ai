@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const SkinScanOutputSchema = z.object({
@@ -34,7 +34,7 @@ export interface SkinScanInput {
 }
 
 export async function analyzeSkinScan({ imageBase64, itchingLevel, spreadRate, recentChanges }: SkinScanInput) {
-    const { output } = await ai.generate({
+    const { output } = await generateWithModelFallback({
         prompt: [
             {
                 media: { url: `data:image/jpeg;base64,${imageBase64}` },

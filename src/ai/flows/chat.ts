@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 
 export type ChatMessage = {
     role: "user" | "model" | "system";
@@ -32,7 +32,7 @@ Keep your responses strictly under 2 short paragraphs, prioritizing quick answer
 
 export async function chatWithAI(history: ChatMessage[], newMessage: string): Promise<ChatMessage> {
     try {
-        // Gemini requires the first message in the conversation to be from the 'user'
+        // Ensure first history item is from the user for provider compatibility.
         let validHistory = [...history];
         while (validHistory.length > 0 && validHistory[0].role !== "user") {
             validHistory.shift();
@@ -43,7 +43,7 @@ export async function chatWithAI(history: ChatMessage[], newMessage: string): Pr
             content: [{ text: m.content }],
         }));
 
-        const { text } = await ai.generate({
+        const { text } = await generateWithModelFallback({
             system: SYSTEM_PROMPT,
             messages: [
                 ...formattedHistory,

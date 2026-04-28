@@ -74,7 +74,7 @@ export default function SymptomCheckerPage() {
                 summary: result.simpleExplanation,
                 details: {
                     condition: result.symptomCluster,
-                    medicines: result.otcMedicines.map(m => m.name),
+                    medicines: result.otcMedicines.map((m: { name: string }) => m.name),
                     homecare: result.precautions
                 }
             });
@@ -294,7 +294,7 @@ export default function SymptomCheckerPage() {
                                     Care Recommendations
                                 </h4>
                                 <ul className="space-y-2">
-                                    {results.precautions.map((p, i) => (
+                                    {results.precautions.map((p: string, i: number) => (
                                         <li key={i} className="flex items-start gap-2 text-sm rounded-lg bg-muted/50 p-2.5">
                                             <span className="mt-0.5 h-5 w-5 shrink-0 flex items-center justify-center rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold">
                                                 {i + 1}
@@ -310,7 +310,7 @@ export default function SymptomCheckerPage() {
                                 <div className="space-y-3">
                                     <h4 className="font-semibold p-1">Wellness Supplements</h4>
                                     <div className="space-y-2">
-                                        {results.otcMedicines.map((med, i) => (
+                                        {results.otcMedicines.map((med: { name: string; purpose: string; searchQuery: string }, i: number) => (
                                             <div key={i} className="flex items-center justify-between rounded-lg border p-3 gap-3">
                                                 <div>
                                                     <p className="font-medium text-sm">{med.name}</p>

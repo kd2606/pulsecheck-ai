@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 
 export type PulseChatMessage = {
     role: "user" | "model";
@@ -64,7 +64,7 @@ If user asks "how am I doing?" or "mera health kaisa hai?" — answer using this
             }
         }
 
-        // Gemini requires the first message to be from the user
+        // Ensure first history item is from the user for provider compatibility.
         if (validHistory.length > 0 && validHistory[0].role !== "user") {
             validHistory.shift();
         }
@@ -74,7 +74,7 @@ If user asks "how am I doing?" or "mera health kaisa hai?" — answer using this
             content: [{ text: m.content }],
         }));
 
-        const { text } = await ai.generate({
+        const { text } = await generateWithModelFallback({
             system: dynamicPrompt,
             messages: [
                 ...formattedHistory,

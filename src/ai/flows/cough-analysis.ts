@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const CoughAnalysisOutputSchema = z.object({
@@ -28,7 +28,7 @@ export interface CoughAnalysisInput {
 }
 
 export async function analyzeCough({ audioBase64, duration, fever, breathingDifficulty }: CoughAnalysisInput) {
-    const { output } = await ai.generate({
+    const { output } = await generateWithModelFallback({
         prompt: [
             {
                 media: { url: `data:audio/webm;base64,${audioBase64}` },

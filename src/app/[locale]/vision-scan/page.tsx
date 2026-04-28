@@ -417,7 +417,7 @@ export default function VisionScanPage() {
                                     What you should do
                                 </h4>
                                 <ul className="space-y-4">
-                                    {results.precautions.map((p, i) => (
+                                    {results.precautions.map((p: string, i: number) => (
                                         <li key={i} className="flex gap-4 group">
                                             <span className="text-white/10 font-bold font-space text-xl group-hover:text-emerald-400 transition-colors">0{i + 1}</span>
                                             <p className="text-xs text-white/60 font-medium leading-relaxed pt-1 uppercase tracking-tight">{p}</p>
@@ -432,7 +432,7 @@ export default function VisionScanPage() {
                                     Items that can help
                                 </h4>
                                 <div className="space-y-3">
-                                    {results.otcMedicines.map((med, i) => (
+                                    {results.otcMedicines.map((med: { name: string; purpose: string; searchQuery: string }, i: number) => (
                                         <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group">
                                             <div className="text-left">
                                                 <p className="text-[10px] font-bold text-white uppercase tracking-widest">{med.name}</p>

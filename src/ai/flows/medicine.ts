@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 
 export type MedicinePriceInfo = {
     searchedName: string;
@@ -27,7 +27,7 @@ CRITICAL: Return ONLY valid JSON. No markdown code blocks, no intro, no outro te
 
 export async function getMedicinePrices(query: string): Promise<MedicinePriceInfo> {
     try {
-        const { text } = await ai.generate({
+        const { text } = await generateWithModelFallback({
             system: SYSTEM_PROMPT,
             prompt: `Find realistic price comparison for medicine: ${query}`,
             config: {

@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const CardioCheckOutputSchema = z.object({
@@ -26,7 +26,7 @@ export interface CardioCheckInput {
 
 export async function analyzeCardioCheck(input: CardioCheckInput) {
     try {
-        const { output } = await ai.generate({
+        const { output } = await generateWithModelFallback({
             prompt: `Act as an analytical wellness synthesizer. Analyze the user's provided biometrics and lifestyle metadata to determine cardio wellness triage. DO NOT use medical diagnostic terms (e.g., heart attack, myocardial infarction, diagnosing).
 
 ### User Provided Data:

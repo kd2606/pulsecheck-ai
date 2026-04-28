@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const GovtSchemesOutputSchema = z.object({
@@ -22,7 +22,7 @@ export async function suggestGovtSchemes(profile: {
     state?: string;
     category?: string;
 }) {
-    const { output } = await ai.generate({
+    const { output } = await generateWithModelFallback({
         prompt: `
 You are a knowledgeable assistant specializing in Indian Government Health and Social Welfare Schemes (both Central and State level).
 Based on the following minimal user profile, suggest the most relevant government schemes they might be eligible for.

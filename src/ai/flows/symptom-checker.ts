@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const SymptomCheckerInputSchema = z.object({
@@ -45,7 +45,7 @@ Pain Scale (1-10): ${input.painScale}
 Fever Presence: ${input.fever}
 `;
 
-    const { output } = await ai.generate({
+    const { output } = await generateWithModelFallback({
         prompt: `You are an analytical health synthesizer acting as a triage assessment tool for communities in rural India. You must analyze the reported symptoms and structured clinical metadata to output a dataset-backed triage priority.
 
 ${patientProfile ? `Patient Profile: ${patientProfile}` : ""}

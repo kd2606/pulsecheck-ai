@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { DEEP_PSYCH_QUESTIONS } from "./constants";
 import { 
     MentalHealthInputSchema, 
@@ -17,7 +17,7 @@ export async function analyzeMentalHealth(input: z.infer<typeof MentalHealthInpu
     const totalScore = input.answers.reduce((sum, a) => sum + a.answer, 0);
 
     try {
-        const { output } = await ai.generate({
+        const { output } = await generateWithModelFallback({
             prompt: `You are an empathetic analytical synthesizer evaluating a user's Wellness and Stress Assessment along with Voice Biomarkers.
         
 *** SELF-REPORTED LIFESTYLE & STRESS DATA ***
@@ -66,7 +66,7 @@ Important: Maintain an immensely empathetic, supportive, and human tone. Read be
 
 export async function generateMentalHealthQuestions(count: number = 5) {
     try {
-        const { output } = await ai.generate({
+        const { output } = await generateWithModelFallback({
             prompt: `You are an analytical wellness synthesizer. Generate exactly ${count} unique questions to assess a user's stress, fatigue, and lifestyle balance. The questions should be written directly to the user (e.g., "How often do you feel..."). They should be answerable on a scale of Never/Rarely/Sometimes/Often/Constantly. Avoid medical or diagnostic terminology; focus on emotional regulation, sleep, diet, isolation, and workload.`,
             output: { schema: WellnessQuestionsSchema },
         });

@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const HealthOverviewInputSchema = z.object({
@@ -28,7 +28,7 @@ const HealthOverviewOutputSchema = z.object({
 });
 
 export async function analyzeHealthOverview(input: z.infer<typeof HealthOverviewInputSchema>) {
-    const { output } = await ai.generate({
+    const { output } = await generateWithModelFallback({
         prompt: `You are a health advisory AI assistant. Analyze the following person's profile and provide health insights.
 
 Age: ${input.age}

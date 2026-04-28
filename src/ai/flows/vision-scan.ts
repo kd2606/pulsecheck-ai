@@ -1,6 +1,6 @@
 "use server";
 
-import { ai } from "@/ai/genkit";
+import { generateWithModelFallback } from "@/ai/generate-with-fallback";
 import { z } from "genkit";
 
 const VisionScanOutputSchema = z.object({
@@ -35,7 +35,7 @@ export interface VisionScanInput {
 }
 
 export async function analyzeVisionScan({ imageBase64, screenTime, sleepHours, stressLevel }: VisionScanInput) {
-    const { output } = await ai.generate({
+    const { output } = await generateWithModelFallback({
         prompt: [
             {
                 media: { url: `data:image/jpeg;base64,${imageBase64}` },
