@@ -83,8 +83,8 @@ export async function generateWithGeminiOnly(
 ) {
     // Gemini 1.5 Flash supports images and is on free tier
     const geminiModels = [
+        "googleai/gemini-2.0-flash",
         "googleai/gemini-1.5-flash",
-        "googleai/gemini-1.5-pro",
     ];
 
     let lastError: unknown;

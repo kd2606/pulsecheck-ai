@@ -3,7 +3,7 @@ import { googleAI } from "@genkit-ai/googleai";
 import { openAI } from "genkitx-openai";
 
 // ── PRIMARY: Google Gemini 1.5 Flash (stable, widely available on free tier) ──
-export const PRIMARY_MODEL = "googleai/gemini-1.5-flash";
+export const PRIMARY_MODEL = "googleai/gemini-2.0-flash";
 
 // ── FALLBACK: Free OpenRouter models (validated & currently available) ──
 // These are the EXACT model IDs used by OpenRouter API
