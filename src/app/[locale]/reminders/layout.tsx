@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Medication & Appointment Reminders | PulseCheck AI",
+    title: "Medication & Appointment Reminders | Diagnoverse AI",
     description: "Keep track of your localized health reminders and pill schedules.",
 };
 

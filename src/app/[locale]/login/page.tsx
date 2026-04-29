@@ -116,7 +116,7 @@ function LoginContent() {
 
     const handleDemoLogin = async () => {
         setLoading(true);
-        const DEMO_EMAIL = "demo@pulsecheckai.in";
+        const DEMO_EMAIL = "demo@diagnoverseai.in";
         const DEMO_PASSWORD = "demo123456";
         try {
             await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
@@ -211,7 +211,7 @@ function LoginContent() {
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-2xl shadow-emerald-500/20 group animate-in zoom-in duration-500">
                             <HeartPulse className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">PulseCheck <span className="text-emerald-400">AI</span></CardTitle>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Diagnoverse <span className="text-emerald-400">AI</span></CardTitle>
                         <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">Simple Health Check</CardDescription>
                     </CardHeader>
 
@@ -222,7 +222,7 @@ function LoginContent() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="doctor@pulsecheck.ai"
+                                    placeholder="doctor@diagnoverse.ai"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="bg-white/5 border-white/10 text-white rounded-2xl h-12 focus:border-emerald-500/50 transition-all"

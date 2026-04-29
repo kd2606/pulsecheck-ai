@@ -9,7 +9,7 @@ export default function AboutPage() {
                 <blockquote className="text-3xl md:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-400 max-w-4xl mx-auto leading-tight">
                     "Every life in rural India deserves the same quality of healthcare as urban India."
                 </blockquote>
-                <p className="text-xl text-muted-foreground">That's why we built PulseCheck AI</p>
+                <p className="text-xl text-muted-foreground">That's why we built Diagnoverse AI</p>
             </div>
 
             {/* Section 2 - The Story & Stats */}
@@ -17,7 +17,7 @@ export default function AboutPage() {
                 <div className="md:col-span-3 space-y-6 text-lg text-muted-foreground leading-relaxed">
                     <h2 className="text-3xl font-semibold text-white mb-4">Our Story</h2>
                     <p>
-                        PulseCheck AI was born from a simple observation — millions of people in rural India, 
+                        Diagnoverse AI was born from a simple observation — millions of people in rural India, 
                         especially in states like Chhattisgarh, have no easy access to immediate healthcare advice.
                     </p>
                     <p>
@@ -25,7 +25,7 @@ export default function AboutPage() {
                         our own backyard and decided to do something about it.
                     </p>
                     <p className="text-emerald-400 font-medium">
-                        Built with AI, designed for Bharat — PulseCheck AI is our answer.
+                        Built with AI, designed for Bharat — Diagnoverse AI is our answer.
                     </p>
                 </div>
                 <div className="md:col-span-2">
@@ -114,7 +114,7 @@ export default function AboutPage() {
                     Made with <span className="text-rose-500">❤️</span> for Bharat 🇮🇳
                 </p>
                 <div className="flex items-center justify-center gap-6 text-muted-foreground">
-                    <a href="https://pulsecheckai-orcin.vercel.app" target="_blank" rel="noreferrer" className="flex items-center hover:text-emerald-400 transition-colors">
+                    <a href="https://diagnoverseai-orcin.vercel.app" target="_blank" rel="noreferrer" className="flex items-center hover:text-emerald-400 transition-colors">
                         <Globe className="w-4 h-4 mr-2" /> Website
                     </a>
                     <a href="mailto:dewangankrrish50@gmail.com" className="flex items-center hover:text-emerald-400 transition-colors">

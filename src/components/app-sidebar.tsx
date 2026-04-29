@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { PulseCheckLogo } from "@/components/pulse-check-logo";
+import { DiagnoverseLogo } from "@/components/diagnoverse-logo";
 import {
     LayoutDashboard,
     Eye,
@@ -76,7 +76,7 @@ export function AppSidebar({ locale }: { locale: string }) {
             <Sidebar>
                 <SidebarHeader className="border-b p-4">
                     <Link href={`/${locale}/dashboard`}>
-                        <PulseCheckLogo size={40} />
+                        <DiagnoverseLogo size={40} />
                     </Link>
                 </SidebarHeader>
                 <SidebarContent>

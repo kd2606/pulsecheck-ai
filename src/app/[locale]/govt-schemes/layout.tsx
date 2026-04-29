@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Government Health Schemes | PulseCheck AI",
+    title: "Government Health Schemes | Diagnoverse AI",
     description: "Discover government health schemes tailored to your profile.",
 };
 

@@ -171,7 +171,7 @@ export default function DashboardPage() {
                             </button>
                             <div className="space-y-1">
                                 <p className="text-[10px] text-emerald-400/60 font-space font-bold tracking-[0.3em] uppercase">
-                                    Welcome to PulseCheck
+                                    Welcome to Diagnoverse
                                 </p>
                                 <h1 className="text-4xl font-space font-bold tracking-tighter text-white">
                                     Health <span className="text-white/40">Dashboard</span>

@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
                         <CardTitle className="text-lg">No Ads. Ever.</CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground">
-                        PulseCheck AI is completely ad-free. Your health data is never used for advertising.
+                        Diagnoverse AI is completely ad-free. Your health data is never used for advertising.
                     </CardContent>
                 </Card>
 

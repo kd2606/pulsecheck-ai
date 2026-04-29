@@ -157,7 +157,7 @@ function DashboardMockup() {
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginLeft: 8 }}>PulseCheck AI — Dashboard</span>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginLeft: 8 }}>Diagnoverse AI — Dashboard</span>
             </div>
             {/* Holistic Score */}
             <div style={{ background: "rgba(0,191,165,0.08)", border: "1px solid rgba(0,191,165,0.2)", borderRadius: 10, padding: "12px 16px", marginBottom: 10 }}>
@@ -289,7 +289,7 @@ export default function LandingPage() {
                 <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ width: 34, height: 34, background: TEAL, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16, color: "#fff" }}>P</div>
-                        <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: -0.5 }}>PulseCheck <span style={{ color: TEAL }}>AI</span></span>
+                        <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: -0.5 }}>Diagnoverse <span style={{ color: TEAL }}>AI</span></span>
                     </div>
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                         <Link href="/en/login" style={{ color: "rgba(255,255,255,0.75)", fontSize: 14, fontWeight: 500, textDecoration: "none", padding: "8px 16px" }}>
@@ -429,7 +429,7 @@ export default function LandingPage() {
                         ))}
                     </div>
                     <p style={{ fontSize: "1.15rem", fontWeight: 700 }}>
-                        PulseCheck AI changes this. <span style={{ color: TEAL }}>Free. For everyone.</span>
+                        Diagnoverse AI changes this. <span style={{ color: TEAL }}>Free. For everyone.</span>
                     </p>
                 </FadeSection>
             </section>
@@ -537,7 +537,7 @@ export default function LandingPage() {
                     <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                             <div style={{ width: 30, height: 30, background: TEAL, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff" }}>P</div>
-                            <span style={{ fontWeight: 800, fontSize: 16 }}>PulseCheck <span style={{ color: TEAL }}>AI</span></span>
+                            <span style={{ fontWeight: 800, fontSize: 16 }}>Diagnoverse <span style={{ color: TEAL }}>AI</span></span>
                         </div>
                         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", maxWidth: 220, lineHeight: 1.6 }}>
                             AI-powered healthcare for every Indian. Free forever.

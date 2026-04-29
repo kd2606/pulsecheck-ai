@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PulseCheck AI — Rural Health Accessibility Platform",
+  title: "Diagnoverse AI — Rural Health Accessibility Platform",
   description:
     "AI-powered health diagnostic and tracking platform designed for rural health accessibility. Features vision scan, cough analysis, skin scan, and mental health screening.",
   icons: {

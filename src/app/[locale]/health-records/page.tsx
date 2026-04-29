@@ -180,7 +180,7 @@ export default function HealthRecordsPage() {
         const verdictText =
             (r.verdict === "doctor_today" || r.verdict === "urgent_support") ? "Urgent Support / Medical Attention Recommended" :
                 r.verdict === "monitor" ? "Monitor for 24-48 hours" : "Rest at home";
-        const text = `*Health Record – PulseCheck AI*\n\nCondition: ${r.title}\nSeverity: ${r.severity.toUpperCase()}\nVerdict: ${verdictText}\n\nSummary:\n${r.summary}`;
+        const text = `*Health Record – Diagnoverse AI*\n\nCondition: ${r.title}\nSeverity: ${r.severity.toUpperCase()}\nVerdict: ${verdictText}\n\nSummary:\n${r.summary}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     };
 

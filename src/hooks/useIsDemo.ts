@@ -2,7 +2,7 @@
 
 import { useUser } from "@/firebase/auth/useUser";
 
-const DEMO_EMAIL = "demo@pulsecheckai.in";
+const DEMO_EMAIL = "demo@diagnoverseai.in";
 
 /**
  * Returns true if the current logged-in user is the demo account.

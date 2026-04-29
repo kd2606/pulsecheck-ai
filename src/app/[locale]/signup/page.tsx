@@ -71,7 +71,7 @@ export default function SignupPage() {
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-emerald-500 shadow-2xl shadow-indigo-500/20">
                             <Activity className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Join <span className="text-emerald-400">PulseCheck AI</span></CardTitle>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Join <span className="text-emerald-400">Diagnoverse AI</span></CardTitle>
                         <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">New Professional Registration</CardDescription>
                     </CardHeader>
 
@@ -93,7 +93,7 @@ export default function SignupPage() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="doctor@pulsecheck.ai"
+                                    placeholder="doctor@diagnoverse.ai"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="bg-white/5 border-white/10 text-white rounded-2xl h-12 focus:border-indigo-500/50 transition-all"

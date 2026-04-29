@@ -6,7 +6,7 @@ import { useUser } from "@/firebase/auth/useUser";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-const DEMO_EMAIL = "demo@pulsecheckai.in";
+const DEMO_EMAIL = "demo@diagnoverseai.in";
 
 export function DemoBanner() {
     const { user } = useUser();
