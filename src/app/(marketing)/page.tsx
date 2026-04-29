@@ -288,7 +288,7 @@ export default function LandingPage() {
             <nav style={{ position: "sticky", top: 0, zIndex: 50, background: "rgba(10,15,26,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "0 5vw" }}>
                 <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 34, height: 34, background: TEAL, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16, color: "#fff" }}>P</div>
+                        <div style={{ width: 34, height: 34, background: TEAL, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16, color: "#fff" }}>D</div>
                         <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: -0.5 }}>Diagnoverse <span style={{ color: TEAL }}>AI</span></span>
                     </div>
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -536,7 +536,7 @@ export default function LandingPage() {
                 <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                            <div style={{ width: 30, height: 30, background: TEAL, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff" }}>P</div>
+                            <div style={{ width: 30, height: 30, background: TEAL, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff" }}>D</div>
                             <span style={{ fontWeight: 800, fontSize: 16 }}>Diagnoverse <span style={{ color: TEAL }}>AI</span></span>
                         </div>
                         <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", maxWidth: 220, lineHeight: 1.6 }}>
