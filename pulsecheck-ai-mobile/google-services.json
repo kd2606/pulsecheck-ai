@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:218534686639:android:49d1734e2fe8d73c0f095a",
         "android_client_info": {
-          "package_name": "com.pulsecheck.ai"
+          "package_name": "com.diagnoverse.ai"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "218534686639-o7knltaop02vncgt6ev8o83a8t6ncm1i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.pulsecheck.ai",
+            "package_name": "com.diagnoverse.ai",
             "certificate_hash": "54fa808a8b06decf525b9072149981fd97b47c59"
           }
         },
