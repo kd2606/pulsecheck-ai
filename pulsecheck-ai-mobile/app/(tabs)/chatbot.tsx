@@ -8,7 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
+const VERCEL_API = "https://diagnoverseai-peach.vercel.app";
 
 type ChatMessage = {
     role: "user" | "model" | "system";
@@ -17,7 +17,7 @@ type ChatMessage = {
 
 export default function ChatbotScreen() {
     const [messages, setMessages] = useState<ChatMessage[]>([
-        { role: "model", content: "Hi! I'm Medu, your PulseCheck AI assistant. How can I help you today?" }
+        { role: "model", content: "Hi! I'm Medu, your Diagnoverse AI assistant. How can I help you today?" }
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);

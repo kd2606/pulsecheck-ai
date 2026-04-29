@@ -14,7 +14,7 @@ import { auth } from "../../src/firebase/firebaseConfig";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { PulseCheckLogoMobile } from "../../src/components/PulseCheckLogoMobile";
+import { DiagnoverseLogoMobile } from "../../src/components/DiagnoverseLogoMobile";
 
 const GOOGLE_CLIENT_ID_WEB = "218534686639-lv8pg2l9cv5922agntcqm9r9nisia620.apps.googleusercontent.com";
 
@@ -79,7 +79,7 @@ export default function LoginScreen() {
 
                     {/* ── LOGO + BRAND ── */}
                     <View style={s.hero}>
-                        <PulseCheckLogoMobile size={90} />
+                        <DiagnoverseLogoMobile size={90} />
                         <Text style={s.tagline}>Your AI-Powered Health Companion</Text>
                     </View>
 

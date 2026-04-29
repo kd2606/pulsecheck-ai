@@ -7,7 +7,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system";
 
-const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
+const VERCEL_API = "https://diagnoverseai-peach.vercel.app";
 
 type Medicine = { name: string; purpose: string; searchQuery: string };
 type Condition = { name: string; confidence: "High" | "Medium" | "Low"; description: string };

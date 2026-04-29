@@ -10,7 +10,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../src/firebase/firebaseConfig";
 import { useAuthContext } from "../../src/context/AuthProvider";
 
-const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
+const VERCEL_API = "https://diagnoverseai-peach.vercel.app";
 
 type Medicine = { name: string; purpose: string; searchQuery: string };
 type Indicator = { sign: string; detected: boolean; details: string };

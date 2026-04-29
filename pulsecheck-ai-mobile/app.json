@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PulseCheck AI",
-    "slug": "pulsecheck-ai-mobile",
+    "name": "Diagnoverse AI",
+    "slug": "diagnoverse-ai-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#060E1E"
       },
-      "package": "com.pulsecheck.ai",
+      "package": "com.diagnoverse.ai",
       "versionCode": 4,
       "permissions": [
         "CAMERA",
@@ -39,13 +39,13 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow PulseCheck AI to access your photos for health analysis."
+          "photosPermission": "Allow Diagnoverse AI to access your photos for health analysis."
         }
       ],
       "expo-font",
       "@react-native-google-signin/google-signin"
     ],
-    "scheme": "pulsecheck",
+    "scheme": "diagnoverse",
     "experiments": {
       "typedRoutes": true
     },

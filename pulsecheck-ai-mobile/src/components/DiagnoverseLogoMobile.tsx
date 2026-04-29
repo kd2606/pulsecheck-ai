@@ -18,14 +18,14 @@ import Svg, {
 } from "react-native-svg";
 import { View, StyleSheet } from "react-native";
 
-interface PulseCheckLogoMobileProps {
+interface DiagnoverseLogoMobileProps {
     /** Size in dp. Default: 80 */
     size?: number;
-    /** Show "PulseCheck AI" and tagline below icon. Default: false */
+    /** Show "Diagnoverse AI" and tagline below icon. Default: false */
     showWordmark?: boolean;
 }
 
-export function PulseCheckLogoMobile({ size = 80, showWordmark = false }: PulseCheckLogoMobileProps) {
+export function DiagnoverseLogoMobile({ size = 80, showWordmark = false }: DiagnoverseLogoMobileProps) {
     // SVG is 500×500 viewBox. Scale accordingly.
     return (
         <View style={[styles.wrap, showWordmark && { alignItems: "center" }]}>
@@ -187,7 +187,7 @@ export function PulseCheckLogoMobile({ size = 80, showWordmark = false }: PulseC
                     fill="white"
                     opacity="0.97"
                 >
-                    PulseCheck
+                    Diagnoverse
                 </SvgText>
 
                 {/* Thin divider */}

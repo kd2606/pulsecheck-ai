@@ -13,11 +13,11 @@ import { Ionicons } from "@expo/vector-icons";
 // ─── ABOUT CONTENT ───────────────────────────────────────────────────────────
 const ABOUT_SECTIONS = [
     {
-        title: "About PulseCheck AI",
+        title: "About Diagnoverse AI",
         subtitle: "Version 1.0.0",
         icon: "pulse-outline",
         color: "#34D399",
-        content: `PulseCheck AI was built with a simple conviction: Every life in rural India deserves access to precise, timely, and affordable healthcare. Designed for Bharat, our AI-powered health monitoring platform empowers individuals to take control of their health through early detection and real-time health insights.`,
+        content: `Diagnoverse AI was built with a simple conviction: Every life in rural India deserves access to precise, timely, and affordable healthcare. Designed for Bharat, our AI-powered health monitoring platform empowers individuals to take control of their health through early detection and real-time health insights.`,
     },
     {
         title: "Our Platform Offers",
@@ -35,7 +35,7 @@ const ABOUT_SECTIONS = [
         title: "Medical Disclaimer",
         icon: "warning-outline",
         color: "#FBBF24",
-        content: `PulseCheck AI is intended for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Users are strongly advised to consult a licensed healthcare professional for any medical concerns.`,
+        content: `Diagnoverse AI is intended for informational purposes only and does not constitute medical advice, diagnosis, or treatment. Users are strongly advised to consult a licensed healthcare professional for any medical concerns.`,
     },
 ];
 
@@ -50,15 +50,15 @@ const FAQ = [
     },
     {
         q: "How is my personal data protected?",
-        a: "PulseCheck AI employs industry-standard encryption protocols to ensure your data remains private and confidential at all times.",
+        a: "Diagnoverse AI employs industry-standard encryption protocols to ensure your data remains private and confidential at all times.",
     },
     {
         q: "How reliable are the AI-generated results?",
         a: "Our AI models are trained on extensive medical datasets to deliver accurate and meaningful health insights. However, all results are intended to supplement — not replace — the advice of a qualified medical professional.",
     },
     {
-        q: "Is PulseCheck AI suitable for medical emergencies?",
-        a: "No. PulseCheck AI is not an emergency service. In the event of a medical emergency, please contact your local emergency services immediately.",
+        q: "Is Diagnoverse AI suitable for medical emergencies?",
+        a: "No. Diagnoverse AI is not an emergency service. In the event of a medical emergency, please contact your local emergency services immediately.",
     },
 ];
 
@@ -131,7 +131,7 @@ export default function ProfileScreen() {
         { key: "privacy", icon: "shield-checkmark-outline", label: "Privacy & Security", color: "#34D399", bg: "rgba(52,211,153,0.12)" },
         { key: "notifications", icon: "notifications-outline", label: "Notifications", color: "#FBBF24", bg: "rgba(251,191,36,0.12)" },
         { key: "help", icon: "help-circle-outline", label: "Help & Support", color: "#A78BFA", bg: "rgba(167,139,250,0.12)" },
-        { key: "about", icon: "information-circle-outline", label: "About PulseCheck AI", color: "#64748B", bg: "rgba(100,116,139,0.12)" },
+        { key: "about", icon: "information-circle-outline", label: "About Diagnoverse AI", color: "#64748B", bg: "rgba(100,116,139,0.12)" },
     ] as const;
 
     const initials = (user?.displayName ?? "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
@@ -201,7 +201,7 @@ export default function ProfileScreen() {
                     <Text style={s.signOutTxt}>Sign Out</Text>
                 </TouchableOpacity>
 
-                <Text style={s.footer}>© 2025 PulseCheck AI. All rights reserved.</Text>
+                <Text style={s.footer}>© 2025 Diagnoverse AI. All rights reserved.</Text>
             </ScrollView>
 
             {/* ══════════════════════════════════════════════════════════════
@@ -349,7 +349,7 @@ export default function ProfileScreen() {
                         <Text style={m.issueText}>
                             If you encounter a bug, write to us with a brief description of the problem, your device model, and your current app version. Our team will investigate and resolve it promptly.
                         </Text>
-                        <TouchableOpacity style={[m.saveBtn, { marginTop: 14 }]} onPress={() => Linking.openURL("mailto:dewangankrrish50@gmail.com?subject=Bug Report - PulseCheck AI v1.0.0")} activeOpacity={0.8}>
+                        <TouchableOpacity style={[m.saveBtn, { marginTop: 14 }]} onPress={() => Linking.openURL("mailto:dewangankrrish50@gmail.com?subject=Bug Report - Diagnoverse AI v1.0.0")} activeOpacity={0.8}>
                             <Ionicons name="bug-outline" size={16} color="#FFF" style={{ marginRight: 6 }} />
                             <Text style={m.saveBtnTxt}>Report a Bug</Text>
                         </TouchableOpacity>
@@ -361,7 +361,7 @@ export default function ProfileScreen() {
             {/* ══════════════════════════════════════════════════════════════
                   MODAL — ABOUT PULSECHECK AI
              ══════════════════════════════════════════════════════════════ */}
-            <BottomModal visible={activeModal === "about"} onClose={close} title="About PulseCheck AI">
+            <BottomModal visible={activeModal === "about"} onClose={close} title="About Diagnoverse AI">
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 520 }}>
                     {/* Version badge */}
                     <View style={m.versionBadge}>
@@ -369,7 +369,7 @@ export default function ProfileScreen() {
                             <Ionicons name="pulse" size={28} color="#34D399" />
                         </View>
                         <View>
-                            <Text style={m.versionTitle}>PulseCheck AI</Text>
+                            <Text style={m.versionTitle}>Diagnoverse AI</Text>
                             <Text style={m.versionNum}>Version 1.0.0</Text>
                         </View>
                     </View>
@@ -388,7 +388,7 @@ export default function ProfileScreen() {
                     ))}
 
                     <View style={m.footerCard}>
-                        <Text style={m.footerCardTxt}>© 2025 PulseCheck AI. All rights reserved.</Text>
+                        <Text style={m.footerCardTxt}>© 2025 Diagnoverse AI. All rights reserved.</Text>
                         <Text style={[m.footerCardTxt, { marginTop: 4, color: "#334155" }]}>Built with ❤️ for accessible healthcare</Text>
                     </View>
                     <View style={{ height: 20 }} />

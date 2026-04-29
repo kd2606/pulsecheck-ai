@@ -10,7 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
+const VERCEL_API = "https://diagnoverseai-peach.vercel.app";
 
 const FALLBACK_QUESTIONS = [
     "When facing an unexpected setback, how quickly can you identify and process the specific emotions you are feeling, rather than just feeling overwhelmed?",

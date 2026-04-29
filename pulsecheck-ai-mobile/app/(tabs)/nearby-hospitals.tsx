@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 
-const VERCEL_API = "https://pulsecheckai-peach.vercel.app";
+const VERCEL_API = "https://diagnoverseai-peach.vercel.app";
 
 export default function NearbyHospitalsScreen() {
     const router = useRouter();

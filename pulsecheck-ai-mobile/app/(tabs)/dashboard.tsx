@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthContext } from "../../src/context/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { PulseCheckLogoMobile } from "../../src/components/PulseCheckLogoMobile";
+import { DiagnoverseLogoMobile } from "../../src/components/DiagnoverseLogoMobile";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 
@@ -58,7 +58,7 @@ export default function DashboardScreen() {
 
                     {/* ── TOP BAR ── */}
                     <View style={s.topBar}>
-                        <PulseCheckLogoMobile size={52} />
+                        <DiagnoverseLogoMobile size={52} />
                         <TouchableOpacity
                             onPress={() => router.push("/profile")}
                             activeOpacity={0.7}
