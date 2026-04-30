@@ -1,8 +1,6 @@
 import { ai, FALLBACK_MODELS, PRIMARY_MODEL } from "@/ai/genkit";
 import type { GenerateOptions } from "genkit";
 
-const RETRYABLE_STATUS_CODES = [404, 429, 402, 503, 500];
-
 const RETRYABLE_MARKERS = [
     "404",
     "not found",
@@ -24,30 +22,47 @@ const RETRYABLE_MARKERS = [
 ];
 
 const isRetryableError = (error: unknown): boolean => {
-    if (!error || typeof error !== "object") {
-        return false;
-    }
+    if (!error || typeof error !== "object") return false;
 
     const e = error as { status?: number; message?: string; code?: number };
+    const retryableCodes = [404, 429, 402, 503, 500];
 
-    // Retry on any of these HTTP status codes (including 404 for bad model names)
-    if (RETRYABLE_STATUS_CODES.includes(e.status ?? 0)) return true;
-    if (RETRYABLE_STATUS_CODES.includes(e.code ?? 0)) return true;
+    if (retryableCodes.includes(e.status ?? 0)) return true;
+    if (retryableCodes.includes(e.code ?? 0)) return true;
 
     const message = (e.message || String(error) || "").toLowerCase();
     return RETRYABLE_MARKERS.some((marker) => message.includes(marker));
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * Race a promise against a hard timeout.
+ * Resolves or rejects based on whichever finishes first.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(
+            () => reject(new Error(`[Timeout] ${label} exceeded ${ms}ms`)),
+            ms
+        );
+        promise
+            .then((v) => { clearTimeout(timer); resolve(v); })
+            .catch((e) => { clearTimeout(timer); reject(e); });
+    });
+}
+
+// ── Per-model timeout: 15 seconds max per attempt ──
+const MODEL_TIMEOUT_MS = 15_000;
 
 // ── Full fallback chain (text-only features) ──
 export async function generateWithModelFallback(
     request: GenerateOptions
 ) {
     const firstModel = request.model || PRIMARY_MODEL;
-    const modelsToTry = [firstModel, ...FALLBACK_MODELS].filter(
-        (model, index, list) => list.indexOf(model) === index
-    );
+
+    // Only try primary + first 2 fallbacks to stay within Vercel's 60s limit
+    const modelsToTry = [firstModel, ...FALLBACK_MODELS]
+        .filter((model, index, list) => list.indexOf(model) === index)
+        .slice(0, 4);
 
     let lastError: unknown;
 
@@ -55,21 +70,23 @@ export async function generateWithModelFallback(
         const model = modelsToTry[i];
         try {
             console.log(`[AI] Trying model ${i + 1}/${modelsToTry.length}: ${model}`);
-            const result = await ai.generate({
-                ...request,
-                model,
-            });
+
+            const result = await withTimeout(
+                ai.generate({ ...request, model }),
+                MODEL_TIMEOUT_MS,
+                model
+            );
+
             console.log(`[AI] ✅ Success with: ${model}`);
             return result;
         } catch (error) {
             const msg = (error as any)?.message || String(error);
-            console.warn(`[AI] ❌ ${model}: ${msg.substring(0, 120)}`);
+            console.warn(`[AI] ❌ ${model}: ${msg.substring(0, 150)}`);
             lastError = error;
 
-            // Always try next model regardless of error type
-            if (i < modelsToTry.length - 1) {
-                const delay = isRetryableError(error) ? 1000 : 200;
-                await sleep(delay);
+            // Small delay before trying next model
+            if (i < modelsToTry.length - 1 && isRetryableError(error)) {
+                await new Promise((r) => setTimeout(r, 500));
             }
         }
     }
@@ -81,7 +98,6 @@ export async function generateWithModelFallback(
 export async function generateWithGeminiOnly(
     request: GenerateOptions
 ) {
-    // Gemini 2.5 Flash supports images and is on free tier
     const geminiModels = [
         "googleai/gemini-2.5-flash",
     ];
@@ -92,19 +108,22 @@ export async function generateWithGeminiOnly(
         const model = geminiModels[i];
         try {
             console.log(`[AI:Vision] Trying ${model}`);
-            const result = await ai.generate({
-                ...request,
-                model,
-            });
+
+            const result = await withTimeout(
+                ai.generate({ ...request, model }),
+                25_000, // Vision gets more time since image processing is slower
+                model
+            );
+
             console.log(`[AI:Vision] ✅ Success with: ${model}`);
             return result;
         } catch (error) {
             const msg = (error as any)?.message || String(error);
-            console.warn(`[AI:Vision] ❌ ${model}: ${msg.substring(0, 120)}`);
+            console.warn(`[AI:Vision] ❌ ${model}: ${msg.substring(0, 150)}`);
             lastError = error;
 
             if (i < geminiModels.length - 1) {
-                await sleep(1500);
+                await new Promise((r) => setTimeout(r, 1000));
             }
         }
     }
