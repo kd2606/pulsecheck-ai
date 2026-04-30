@@ -12,12 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import { FadeIn } from "@/components/ui/fade-in";
 import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck, Info, Heart, Activity } from "lucide-react";
-import { checkSymptoms } from "@/ai/flows/symptom-checker";
 import { toast } from "sonner";
 import { useUser } from "@/firebase/auth/useUser";
 import { saveHealthRecord } from "@/firebase/healthRecords";
 
-type Results = Awaited<ReturnType<typeof checkSymptoms>>;
+type Results = any;
 
 export default function SymptomCheckerPage() {
     const t = useTranslations("symptomChecker");
@@ -50,14 +49,25 @@ export default function SymptomCheckerPage() {
         setLoading(true);
         setResults(null);
         try {
-            const result = await checkSymptoms({
-                symptoms: symptoms.trim(),
-                duration,
-                painScale,
-                fever,
-                age: age ? parseInt(age, 10) : undefined,
-                gender: gender || undefined,
+            const response = await fetch('/api/symptom-checker', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    symptoms: symptoms.trim(),
+                    duration,
+                    painScale,
+                    fever,
+                    age: age ? parseInt(age, 10) : undefined,
+                    gender: gender || undefined,
+                })
             });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || "Failed to analyze symptoms");
+            }
+
+            const result = await response.json();
             setResults(result);
             if (!result) return;
 
