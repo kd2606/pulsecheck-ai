@@ -38,7 +38,7 @@ const isRetryableError = (error: unknown): boolean => {
  * Race a promise against a hard timeout.
  * Resolves or rejects based on whichever finishes first.
  */
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, label: unknown): Promise<T> {
     return new Promise((resolve, reject) => {
         const timer = setTimeout(
             () => reject(new Error(`[Timeout] ${label} exceeded ${ms}ms`)),
