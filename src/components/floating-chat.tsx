@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Send, User, Mic, HeartPulse, Activity, Loader2, ArrowRight } from "lucide-react";
+import { X, Send, User, Mic, HeartPulse, Activity, Loader2, ArrowRight, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AnimatePresence, motion } from "framer-motion";
@@ -55,7 +55,11 @@ export function FloatingChat() {
     const [isLoading, setIsLoading] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [agentContext, setAgentContext] = useState<any>(null);
+    const [isSpeaking, setIsSpeaking] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
     // Fetch user context when chat opens
     useEffect(() => {
@@ -138,39 +142,106 @@ export function FloatingChat() {
         };
     }, [isOpen, user, agentContext]);
 
-    const startListening = () => {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            toast.error("Speech recognition not supported in this browser.");
+    const startListening = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                setIsListening(false);
+                setIsLoading(true);
+
+                try {
+                    const formData = new FormData();
+                    formData.append("file", audioBlob);
+
+                    const response = await fetch("/api/stt", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!response.ok) throw new Error("STT failed");
+
+                    const data = await response.json();
+                    if (data.transcript) {
+                        setInput(data.transcript);
+                        handleSend(data.transcript);
+                    } else {
+                        toast.error("Could not understand audio");
+                    }
+                } catch (err) {
+                    console.error("STT Error:", err);
+                    toast.error("Voice processing failed");
+                } finally {
+                    setIsLoading(false);
+                }
+
+                // Stop all tracks to release microphone
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsListening(true);
+            toast.info("Listening...");
+        } catch (err) {
+            console.error("Microphone access denied:", err);
+            toast.error("Microphone access denied");
+        }
+    };
+
+    const stopListening = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+            mediaRecorderRef.current.stop();
+        }
+    };
+
+    const playTTS = async (text: string, msgId: string) => {
+        if (isSpeaking === msgId) {
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.pause();
+                setIsSpeaking(null);
+            }
             return;
         }
 
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+        setIsSpeaking(msgId);
+        try {
+            const response = await fetch("/api/tts", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text, languageCode: "hi-IN" }), // Default to Hindi as it's better for Indian context
+            });
 
-        recognition.continuous = false;
-        recognition.interimResults = false;
+            if (!response.ok) throw new Error("TTS failed");
 
-        recognition.onstart = () => {
-            setIsListening(true);
-            setInput("");
-            toast.info("Listening...");
-        };
-
-        recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript;
-            setInput(transcript);
-        };
-
-        recognition.onerror = (event: any) => {
-            console.error("Speech recognition error:", event.error);
-            setIsListening(false);
-        };
-
-        recognition.onend = () => {
-            setIsListening(false);
-        };
-
-        recognition.start();
+            const data = await response.json();
+            if (data.audios && data.audios[0]) {
+                const audioSrc = `data:audio/wav;base64,${data.audios[0]}`;
+                if (audioPlayerRef.current) {
+                    audioPlayerRef.current.src = audioSrc;
+                    audioPlayerRef.current.play();
+                    audioPlayerRef.current.onended = () => setIsSpeaking(null);
+                } else {
+                    const audio = new Audio(audioSrc);
+                    audioPlayerRef.current = audio;
+                    audio.play();
+                    audio.onended = () => setIsSpeaking(null);
+                }
+            }
+        } catch (err) {
+            console.error("TTS Error:", err);
+            toast.error("Speech playback failed");
+            setIsSpeaking(null);
+        }
     };
 
     // Auto-scroll
@@ -398,6 +469,18 @@ export function FloatingChat() {
                                         <div className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                                             <div className={`p-3 rounded-2xl text-sm whitespace-pre-wrap ${msg.role === "user" ? "bg-teal-600 text-white rounded-tr-sm" : "bg-card border shadow-sm rounded-tl-sm text-foreground"}`}>
                                                 {msg.content}
+                                                {msg.role === "model" && msg.content && (
+                                                    <button 
+                                                        onClick={() => playTTS(msg.content, idx.toString())}
+                                                        className="mt-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 hover:opacity-80 transition-opacity"
+                                                    >
+                                                        {isSpeaking === idx.toString() ? (
+                                                            <><VolumeX className="h-3 w-3" /> Stop</>
+                                                        ) : (
+                                                            <><Volume2 className="h-3 w-3" /> Listen</>
+                                                        )}
+                                                    </button>
+                                                )}
                                             </div>
                                             <span className="text-[10px] text-muted-foreground mt-1 px-1">
                                                 {formatTime(msg.timestamp)}
@@ -447,7 +530,7 @@ export function FloatingChat() {
                             <form onSubmit={onSubmit} className="flex items-center gap-2">
                                 <Button
                                     type="button"
-                                    onClick={startListening}
+                                    onClick={isListening ? stopListening : startListening}
                                     variant="ghost"
                                     size="icon"
                                     className={`shrink-0 rounded-full h-10 w-10 transition-colors ${isListening ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'text-muted-foreground hover:bg-muted'}`}

@@ -1,9 +1,13 @@
 import { genkit } from "genkit";
 import { googleAI } from "@genkit-ai/googleai";
 import { openAI } from "genkitx-openai";
+import { sarvamChat } from "./sarvam";
 
-// ── PRIMARY: Google Gemini 1.5 Flash (stable, widely available on free tier) ──
-export const PRIMARY_MODEL = "googleai/gemini-2.0-flash";
+// ── PRIMARY: Google Gemini 2.5 Flash (stable, widely available on free tier) ──
+export const PRIMARY_MODEL = "googleai/gemini-2.5-flash";
+
+// ── SARVAM: Specialized for Indian Languages ──
+export const SARVAM_MODEL_ID = "sarvam/sarvam-30b";
 
 // ── FALLBACK: Free OpenRouter models (validated & currently available) ──
 // These are the EXACT model IDs used by OpenRouter API
@@ -20,7 +24,10 @@ const OPENROUTER_FREE_MODELS = [
 
 // These get registered in the openAI plugin under the "openai" namespace
 // So they are referenced as "openai/<model-id>"
-export const FALLBACK_MODELS = OPENROUTER_FREE_MODELS.map((m) => `openai/${m}`);
+export const FALLBACK_MODELS = [
+    SARVAM_MODEL_ID,
+    ...OPENROUTER_FREE_MODELS.map((m) => `openai/${m}`)
+];
 
 const modelInfo = {
     supports: {
@@ -57,3 +64,37 @@ export const ai = genkit({
     ],
     model: PRIMARY_MODEL,
 });
+
+// ── Define Sarvam AI as a custom Genkit model via ai.defineModel() ──
+ai.defineModel(
+    {
+        name: SARVAM_MODEL_ID,
+        label: "Sarvam AI 30B",
+        supports: {
+            multiturn: true,
+            media: false,
+            tools: false,
+            systemRole: true,
+            output: ["text"],
+        },
+    },
+    async (request) => {
+        const messages = request.messages.map((m) => ({
+            role: m.role === "model" ? "assistant" : m.role,
+            content: m.content
+                .map((c) => ("text" in c ? c.text : ""))
+                .filter(Boolean)
+                .join("\n"),
+        }));
+
+        const response = await sarvamChat(messages, "sarvam-30b");
+        const text = response.choices?.[0]?.message?.content ?? "";
+
+        return {
+            message: {
+                role: "model" as const,
+                content: [{ text }],
+            },
+        };
+    }
+);

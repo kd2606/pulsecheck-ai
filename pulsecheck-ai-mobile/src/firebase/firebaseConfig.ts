@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
+// @ts-expect-error - Firebase 11 has missing types for react native persistence but it is exported
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
