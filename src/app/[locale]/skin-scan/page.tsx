@@ -117,9 +117,15 @@ export default function SkinScanPage() {
                 }
 
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Analysis error:", error);
-            toast.error("Could not fetch the report. Please try again later.");
+            const msg = error.message || "Could not fetch the report. Please try again later.";
+            // If it's a 503 or 429, make it user friendly
+            if (msg.includes("503") || msg.includes("experiencing high demand") || msg.includes("429")) {
+                toast.error("Our AI servers are currently experiencing extremely high demand. Please try again in 1-2 minutes.");
+            } else {
+                toast.error(msg);
+            }
             setStep(2); // bring back to step 2 on error
         } finally {
             setLoading(false);
