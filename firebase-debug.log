@@ -1,0 +1,242 @@
+[debug] [2026-05-02T14:16:08.867Z] ----------------------------------------------------------------------
+[debug] [2026-05-02T14:16:08.873Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Krrish\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-05-02T14:16:08.874Z] CLI Version:   15.16.0
+[debug] [2026-05-02T14:16:08.874Z] Platform:      win32
+[debug] [2026-05-02T14:16:08.874Z] Node Version:  v24.13.1
+[debug] [2026-05-02T14:16:08.875Z] Time:          Sat May 02 2026 19:46:08 GMT+0530 (India Standard Time)
+[debug] [2026-05-02T14:16:08.875Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-02T14:16:12.179Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-02T14:16:12.179Z] > authorizing via signed-in user (dewangankrrish50@gmail.com)
+[debug] [2026-05-02T14:16:12.180Z] [iam] checking project healthsense-ai-prod-478 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-05-02T14:16:12.182Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:12.182Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:12.184Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions [none]
+[debug] [2026-05-02T14:16:12.184Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions  x-goog-user-project=healthsense-ai-prod-478
+[debug] [2026-05-02T14:16:12.184Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-05-02T14:16:13.812Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions 200
+[debug] [2026-05-02T14:16:13.812Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-05-02T14:16:13.813Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:13.813Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:13.813Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/healthsense-ai-prod-478/serviceAccounts/healthsense-ai-prod-478@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-05-02T14:16:13.813Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/healthsense-ai-prod-478/serviceAccounts/healthsense-ai-prod-478@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-05-02T14:16:15.579Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/healthsense-ai-prod-478/serviceAccounts/healthsense-ai-prod-478@appspot.gserviceaccount.com:testIamPermissions 404
+[debug] [2026-05-02T14:16:15.579Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/healthsense-ai-prod-478/serviceAccounts/healthsense-ai-prod-478@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}}
+[debug] [2026-05-02T14:16:15.580Z] [functions] service account IAM check errored, deploy may fail: Request to https://iam.googleapis.com/v1/projects/healthsense-ai-prod-478/serviceAccounts/healthsense-ai-prod-478@appspot.gserviceaccount.com:testIamPermissions had HTTP Error: 404, Unknown service account {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}},"response":{"statusCode":404}},"exit":1,"message":"Request to https://iam.googleapis.com/v1/projects/healthsense-ai-prod-478/serviceAccounts/healthsense-ai-prod-478@appspot.gserviceaccount.com:testIamPermissions had HTTP Error: 404, Unknown service account","status":404}
+[debug] [2026-05-02T14:16:15.581Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:15.581Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:15.582Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478 [none]
+[debug] [2026-05-02T14:16:16.041Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478 200
+[debug] [2026-05-02T14:16:16.041Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478 {"projectId":"healthsense-ai-prod-478","projectNumber":"218534686639","displayName":"HealthSense AI Production","name":"projects/healthsense-ai-prod-478","resources":{"hostingSite":"healthsense-ai-prod-478"},"state":"ACTIVE","etag":"1_c72b0a24-c6b8-4afd-a1d7-0593a0ab4d87"}
+[debug] [2026-05-02T14:16:32.746Z] defaultcredentials: writing to file C:\Users\Krrish\AppData\Roaming\firebase\dewangankrrish50_gmail_com_application_default_credentials.json
+[debug] [2026-05-02T14:16:32.751Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:32.751Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:32.751Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites pageToken=&pageSize=10
+[debug] [2026-05-02T14:16:29.449Z] ----------------------------------------------------------------------
+[debug] [2026-05-02T14:16:29.455Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Krrish\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-05-02T14:16:29.455Z] CLI Version:   15.16.0
+[debug] [2026-05-02T14:16:29.455Z] Platform:      win32
+[debug] [2026-05-02T14:16:29.456Z] Node Version:  v24.13.1
+[debug] [2026-05-02T14:16:29.456Z] Time:          Sat May 02 2026 19:46:29 GMT+0530 (India Standard Time)
+[debug] [2026-05-02T14:16:29.456Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-05-02T14:16:32.787Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-05-02T14:16:32.788Z] > authorizing via signed-in user (dewangankrrish50@gmail.com)
+[debug] [2026-05-02T14:16:32.788Z] [iam] checking project healthsense-ai-prod-478 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-05-02T14:16:32.791Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:32.792Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:32.795Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions [none]
+[debug] [2026-05-02T14:16:32.796Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions  x-goog-user-project=healthsense-ai-prod-478
+[debug] [2026-05-02T14:16:32.796Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-05-02T14:16:34.018Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites 200
+[debug] [2026-05-02T14:16:34.018Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites {"sites":[{"name":"projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478","defaultUrl":"https://healthsense-ai-prod-478.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-05-02T14:16:34.019Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:34.020Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:34.020Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites 
+[debug] [2026-05-02T14:16:34.424Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions 200
+[debug] [2026-05-02T14:16:34.424Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/healthsense-ai-prod-478:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-05-02T14:16:34.425Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:34.425Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:34.426Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478 [none]
+[debug] [2026-05-02T14:16:34.725Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites 200
+[debug] [2026-05-02T14:16:34.725Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites {"sites":[{"name":"projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478","defaultUrl":"https://healthsense-ai-prod-478.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-05-02T14:16:34.726Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:34.726Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:34.726Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/webApps/-/config [none]
+[debug] [2026-05-02T14:16:34.914Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478 200
+[debug] [2026-05-02T14:16:35.581Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/webApps/-/config 200
+[debug] [2026-05-02T14:16:35.582Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/webApps/-/config {"projectId":"healthsense-ai-prod-478","appId":"1:218534686639:web:ea566353997d51f20f095a","storageBucket":"healthsense-ai-prod-478.firebasestorage.app","apiKey":"AIzaSyCGPulX7bwZy7_FpjW8pOf9cWnwUbiDc7M","authDomain":"healthsense-ai-prod-478.firebaseapp.com","messagingSenderId":"218534686639","projectNumber":"218534686639","version":"2"}
+[debug] [2026-05-02T14:16:34.914Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478 {"projectId":"healthsense-ai-prod-478","projectNumber":"218534686639","displayName":"HealthSense AI Production","name":"projects/healthsense-ai-prod-478","resources":{"hostingSite":"healthsense-ai-prod-478"},"state":"ACTIVE","etag":"1_c72b0a24-c6b8-4afd-a1d7-0593a0ab4d87"}
+[debug] [2026-05-02T14:16:51.237Z] defaultcredentials: writing to file C:\Users\Krrish\AppData\Roaming\firebase\dewangankrrish50_gmail_com_application_default_credentials.json
+[debug] [2026-05-02T14:16:51.241Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:51.242Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:51.242Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites pageToken=&pageSize=10
+[debug] [2026-05-02T14:16:52.564Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites 200
+[debug] [2026-05-02T14:16:52.565Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites {"sites":[{"name":"projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478","defaultUrl":"https://healthsense-ai-prod-478.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-05-02T14:16:52.566Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:52.566Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:52.566Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites 
+[debug] [2026-05-02T14:16:53.347Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites 200
+[debug] [2026-05-02T14:16:53.348Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites {"sites":[{"name":"projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478","defaultUrl":"https://healthsense-ai-prod-478.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-05-02T14:16:53.348Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:53.348Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:16:53.348Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/webApps/-/config [none]
+[debug] [2026-05-02T14:16:54.070Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/webApps/-/config 200
+[debug] [2026-05-02T14:16:54.070Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/webApps/-/config {"projectId":"healthsense-ai-prod-478","appId":"1:218534686639:web:ea566353997d51f20f095a","storageBucket":"healthsense-ai-prod-478.firebasestorage.app","apiKey":"AIzaSyCGPulX7bwZy7_FpjW8pOf9cWnwUbiDc7M","authDomain":"healthsense-ai-prod-478.firebaseapp.com","messagingSenderId":"218534686639","projectNumber":"218534686639","version":"2"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 15.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2026-05-02T14:17:09.632Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:17:09.632Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:17:09.632Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478 [none]
+[debug] [2026-05-02T14:17:10.856Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478 200
+[debug] [2026-05-02T14:17:10.856Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478 {"name":"projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478","defaultUrl":"https://healthsense-ai-prod-478.web.app","type":"DEFAULT_SITE"}
+[info] ▲ Next.js 16.1.6 (Turbopack)
+
+[info] - Environments: .env.local
+
+
+[info]   Creating an optimized production build ...
+
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 15.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[info] ✓ Compiled successfully in 13.6s
+
+[info]   Running TypeScript ...
+
+[debug] [2026-05-02T14:17:30.751Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:17:30.751Z] Checked if tokens are valid: true, expires at: 1777734897614
+[debug] [2026-05-02T14:17:30.752Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478 [none]
+[debug] [2026-05-02T14:17:32.133Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478 200
+[debug] [2026-05-02T14:17:32.134Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478 {"name":"projects/healthsense-ai-prod-478/sites/healthsense-ai-prod-478","defaultUrl":"https://healthsense-ai-prod-478.web.app","type":"DEFAULT_SITE"}
+[info] ⨯ Unable to acquire lock at C:\Users\Krrish\Desktop\pulsecheck.ai\.next\lock, is another instance of next build running?
+
+[info]   Suggestion: If you intended to restart next build, terminate the other process, and then try again.
+
+[debug] [2026-05-02T14:17:44.291Z] Error: ENOENT: no such file or directory, open 'C:\Users\Krrish\Desktop\pulsecheck.ai\.next\export-marker.json'
+[error] 
+[error] Error: An unexpected error has occurred.
+[info]   Collecting page data using 15 workers ...
+
+[info]   Generating static pages using 15 workers (0/5) ...
+
+[info]   Generating static pages using 15 workers (1/5) 
+
+[info]   Generating static pages using 15 workers (2/5) 
+
+[info]   Generating static pages using 15 workers (3/5) 
+
+[info] ✓ Generating static pages using 15 workers (5/5) in 561.6ms
+
+[info]   Finalizing page optimization ...
+
+[info] 
+
+[info] Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/about
+├ ƒ /[locale]/cardio-check
+├ ƒ /[locale]/cough-analysis
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/govt-schemes
+├ ƒ /[locale]/health-records
+├ ƒ /[locale]/health-trends
+├ ƒ /[locale]/login
+├ ƒ /[locale]/mental-health-screen
+├ ƒ /[locale]/nearby-hospitals
+├ ƒ /[locale]/onboarding
+├ ƒ /[locale]/people
+├ ƒ /[locale]/privacy-policy
+├ ƒ /[locale]/reminders
+├ ƒ /[locale]/signup
+├ ƒ /[locale]/skin-scan
+├ ƒ /[locale]/symptom-checker
+├ ƒ /[locale]/vision-scan
+├ ƒ /api/cardio-check
+├ ƒ /api/chat
+├ ƒ /api/cough-analysis
+├ ƒ /api/govt-schemes
+├ ƒ /api/mental-health
+├ ƒ /api/mental-health/questions
+├ ƒ /api/nearby-facilities
+├ ƒ /api/pulse
+├ ƒ /api/skin-scan
+├ ƒ /api/stt
+├ ƒ /api/symptom-checker
+├ ƒ /api/tts
+├ ƒ /api/vision-scan
+└ ○ /icon.svg
+
+
+ƒ Proxy (Middleware)
+
+[info] 
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+[info] Building a Cloud Function to run this application. This is needed due to:
+[info]  • middleware
+[info]  • non-static component /[locale]/about/page
+[info]  • non-static component /[locale]/cardio-check/page
+[info]  • non-static component /[locale]/cough-analysis/page
+[info]  • non-static component /[locale]/dashboard/page
+[debug] [2026-05-02T14:18:32.884Z]  • non-static component /[locale]/govt-schemes/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/health-records/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/health-trends/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/login/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/mental-health-screen/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/nearby-hospitals/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/onboarding/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/people/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/privacy-policy/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/reminders/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/signup/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/skin-scan/page
+[debug] [2026-05-02T14:18:32.885Z]  • non-static component /[locale]/symptom-checker/page
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /[locale]/vision-scan/page
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /api/cardio-check/route
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /api/chat/route
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /api/cough-analysis/route
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /api/govt-schemes/route
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /api/mental-health/questions/route
+[debug] [2026-05-02T14:18:32.886Z]  • non-static component /api/mental-health/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/nearby-facilities/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/pulse/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/skin-scan/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/stt/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/symptom-checker/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/tts/route
+[debug] [2026-05-02T14:18:32.887Z]  • non-static component /api/vision-scan/route
+[debug] [2026-05-02T14:18:32.887Z]  • route with server action /[locale]/cough-analysis
+[debug] [2026-05-02T14:18:32.887Z]  • route with server action /[locale]/dashboard
+[debug] [2026-05-02T14:18:32.888Z]  • route with server action /[locale]/mental-health-screen
+[info]  • and 31 other reasons, use --debug to see more
+[info] 
+[debug] [2026-05-02T14:18:40.190Z] Error: Unable to find the next dep, try NPM installing?
+    at getConfig (C:\Users\Krrish\AppData\Roaming\npm\node_modules\firebase-tools\lib\frameworks\next\index.js:497:19)
+    at async ɵcodegenPublicDirectory (C:\Users\Krrish\AppData\Roaming\npm\node_modules\firebase-tools\lib\frameworks\next\index.js:245:41)
+    at async prepareFrameworks (C:\Users\Krrish\AppData\Roaming\npm\node_modules\firebase-tools\lib\frameworks\index.js:243:13)
+    at async deploy (C:\Users\Krrish\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\index.js:80:9)
+[error] 
+[error] Error: An unexpected error has occurred.

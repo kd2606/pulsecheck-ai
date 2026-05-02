@@ -1,0 +1,39 @@
+[build]
+  publish = "out"
+  command = "npm run build:export"
+
+[[redirects]]
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/nearby-facilities"
+  to = "/.netlify/functions/nearby-facilities"
+  status = 200
+
+[[redirects]]
+  from = "/api/people"
+  to = "/.netlify/functions/people"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[functions]
+  directory = "netlify/functions"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Cross-Origin-Opener-Policy = "same-origin-allow-popups"
