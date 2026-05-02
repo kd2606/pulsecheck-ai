@@ -2,7 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -14,13 +14,13 @@ import { DemoBanner } from "@/components/demo-banner";
 import "../globals.css";
 
 
-const inter = Inter({
-    variable: "--font-inter",
+const geistSans = Geist({
+    variable: "--font-geist-sans",
     subsets: ["latin"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-    variable: "--font-jetbrains-mono",
+const geistMono = Geist_Mono({
+    variable: "--font-geist-mono",
     subsets: ["latin"],
 });
 
@@ -48,7 +48,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     return (
         <html lang={locale} suppressHydrationWarning>
             <body
-                className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} font-sans antialiased`}
             >
                 <ThemeProvider
                     attribute="class"
