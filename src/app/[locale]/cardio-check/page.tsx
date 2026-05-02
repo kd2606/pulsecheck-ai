@@ -58,7 +58,7 @@ export default function CardioCheckPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/cardio-check", {
+            const response = await fetch("/.netlify/functions/cardio-check", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
