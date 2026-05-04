@@ -11,6 +11,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "imageBase64 field is required" }, { status: 400 });
         }
 
+        // Add small delay to simulate processing
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         // Mock Skin Scan Results
         const mockResult = {
             triagePriority: itchingLevel === "Severe" ? "High Priority" : "Moderate Priority",
@@ -37,6 +40,12 @@ export async function POST(req: NextRequest) {
                 "Contact Dermatitis",
                 "Eczema",
                 "Allergic Reaction"
+            ],
+            visualFeatures: [
+                { feature: "Mild erythema (redness)", confidence: 0.75 },
+                { feature: "Slight swelling", confidence: 0.60 },
+                { feature: "Dry patches", confidence: 0.80 },
+                { feature: "No ulceration", confidence: 0.95 }
             ]
         };
 
