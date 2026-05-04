@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const OVERPASS_URL = "https://maps.mail.ru/osm/tools/overpass/api/interpreter";
+const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -31,6 +31,9 @@ export async function GET(request: Request) {
 
         const response = await fetch(OVERPASS_URL, {
             method: "POST",
+            headers: {
+                "Content-Type": "text/plain",
+            },
             body: query,
         });
 
@@ -52,7 +55,8 @@ export async function GET(request: Request) {
                 lng: lon,
                 address: [
                     el.tags?.['addr:street'],
-                    el.tags?.['addr:city']
+                    el.tags?.['addr:city'],
+                    el.tags?.['addr:housenumber']
                 ].filter(Boolean).join(", ") || "Address not available",
                 phone: el.tags?.phone || el.tags?.['contact:phone'] || null,
                 website: el.tags?.website || el.tags?.['contact:website'] || null
