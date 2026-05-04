@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { analyzeCardioCheck, CardioCheckInput } from "@/ai/flows/cardio-check";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -41,20 +40,49 @@ export async function POST(req: Request) {
             });
         }
 
-        const input: CardioCheckInput = {
-            age: Number(age),
-            gender,
-            bmi: bmi ? Number(bmi) : undefined,
-            restingHR: restingHR ? Number(restingHR) : undefined,
-            chestPainType,
-            exerciseAngina,
-            bloodSugar,
-            smokerTarget
+        // Mock Cardio Check Results
+        const ageNum = Number(age);
+        const bmiNum = bmi ? Number(bmi) : 25;
+        const restingHRNum = restingHR ? Number(restingHR) : 72;
+        
+        // Calculate mock wellness score based on inputs
+        let wellnessScore = 75;
+        if (ageNum > 50) wellnessScore -= 10;
+        if (bmiNum > 25) wellnessScore -= 15;
+        if (restingHRNum > 80) wellnessScore -= 10;
+        if (smokerTarget === "Yes") wellnessScore -= 20;
+        if (bloodSugar === "Yes") wellnessScore -= 15;
+        if (exerciseAngina === "Yes") wellnessScore -= 25;
+
+        const mockResult = {
+            triagePriority: wellnessScore < 50 ? "High Priority" : wellnessScore < 70 ? "Elevated Priority" : "Low Priority",
+            wellnessScore: Math.max(wellnessScore, 20),
+            overallAssessment: `Based on your cardiovascular assessment, your wellness score is ${Math.max(wellnessScore, 20)}/100. ${ageNum > 40 ? 'At your age, ' : ''}your heart health indicators suggest ${wellnessScore < 60 ? 'some areas that need attention' : wellnessScore < 80 ? 'moderate cardiovascular health' : 'good heart health'}. Regular monitoring and lifestyle adjustments can help improve your cardiovascular wellness.`,
+            precautions: [
+                "Monitor blood pressure regularly",
+                "Maintain a heart-healthy diet low in saturated fats",
+                "Engage in regular moderate exercise (30 minutes daily)",
+                "Avoid smoking and limit alcohol consumption",
+                "Manage stress through relaxation techniques"
+            ],
+            recommendations: [
+                "Schedule regular check-ups with your healthcare provider",
+                "Consider cardiac screening if you have risk factors",
+                "Maintain a healthy weight through diet and exercise",
+                "Stay hydrated and limit processed foods",
+                "Get adequate sleep (7-8 hours nightly)"
+            ],
+            riskFactors: [
+                ...(smokerTarget === "Yes" ? ["Smoking"] : []),
+                ...(bloodSugar === "Yes" ? ["High Blood Sugar"] : []),
+                ...(bmiNum > 25 ? ["Elevated BMI"] : []),
+                ...(ageNum > 45 ? ["Age over 45"] : []),
+                ...(restingHRNum > 80 ? ["Elevated Resting Heart Rate"] : [])
+            ],
+            seekEmergency: false
         };
 
-        const result = await analyzeCardioCheck(input);
-
-        return NextResponse.json(result);
+        return NextResponse.json(mockResult);
     } catch (error: any) {
         console.error("CardioCheck Route Error:", error);
         return NextResponse.json(
