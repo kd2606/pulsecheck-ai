@@ -303,22 +303,14 @@ export default function CardioCheckPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={saving || !user}
-                                onClick={async () => {
-                                    if (!user) return toast.error("Please login to save");
-                                    setSaving(true);
-                                    try {
-                                        await saveScan(user.uid, "self", "cardioScreens", results);
-                                        toast.success("Scan saved successfully");
-                                    } catch (e) {
-                                        toast.error("Failed to save scan");
-                                    } finally {
-                                        setSaving(false);
-                                    }
+                                onClick={() => {
+                                    import("@/lib/downloadReport").then(m => {
+                                        m.downloadReportAsText("Cardio Screen", results);
+                                        toast.success("Report downloaded successfully");
+                                    });
                                 }}
                             >
-                                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Save Report
+                                <Save className="mr-2 h-4 w-4" /> Download Report
                             </Button>
                         </CardHeader>
                         <CardContent className="space-y-6">

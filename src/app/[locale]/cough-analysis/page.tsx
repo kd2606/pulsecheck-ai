@@ -411,6 +411,17 @@ export default function CoughAnalysisPage() {
                                 </div>
                             )}
 
+                            <Button 
+                                onClick={() => {
+                                    import("@/lib/downloadReport").then(m => {
+                                        m.downloadReportAsText("Respiratory Assessment", results);
+                                        toast.success("Report downloaded successfully");
+                                    });
+                                }} 
+                                className="w-full mb-3"
+                            >
+                                <Save className="mr-2 h-4 w-4" /> Download Report
+                            </Button>
                             <Button onClick={resetWizard} variant="outline" className="w-full">
                                 Retake Assessment
                             </Button>

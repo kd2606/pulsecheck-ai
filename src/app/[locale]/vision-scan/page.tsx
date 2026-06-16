@@ -467,6 +467,17 @@ export default function VisionScanPage() {
                         </div>
                         
                         <div className="flex gap-4 w-full max-w-md mx-auto">
+                            <Button 
+                                onClick={() => {
+                                    import("@/lib/downloadReport").then(m => {
+                                        m.downloadReportAsText("Ocular & Facial Strain Analysis", results);
+                                        toast.success("Report downloaded successfully");
+                                    });
+                                }} 
+                                className="w-full h-14 rounded-2xl border border-white/10 text-white font-bold"
+                            >
+                                <Save className="mr-2 h-4 w-4" /> Download Report
+                            </Button>
                             <Button onClick={resetWizard} variant="outline" className="flex-1 h-14 border-white/10 text-white/40 hover:bg-white/5 rounded-2xl font-bold font-space uppercase tracking-widest">
                                 Re-Scan
                             </Button>
