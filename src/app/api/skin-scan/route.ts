@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { analyzeSkinScan } from '@/ai/flows/skin-scan';
+import { callWithResilience, isCapacityExhausted } from '@/ai/resilience';
 import { logger } from '@/lib/logger';
 
 // --- Constants ---
@@ -31,6 +32,7 @@ export interface ApiErrorResponse {
     | 'INVALID_PAYLOAD'
     | 'AI_FLOW_FAILED'
     | 'AI_OUTPUT_INVALID'
+    | 'AI_CAPACITY_EXHAUSTED'
     | 'INTERNAL_ERROR';
   message: string;
   retryable: boolean;
@@ -83,16 +85,34 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 4. Invoke the real Genkit flow. Any throw here is an AI-layer failure.
+    // 4. Invoke the real Genkit flow with resilience wrapper (retry + backoff).
     let flowOutput;
     try {
-      flowOutput = await analyzeSkinScan({
-        imageBase64,
-        itchingLevel,
-        spreadRate,
-        recentChanges,
-      });
+      flowOutput = await callWithResilience(
+        () => analyzeSkinScan({
+          imageBase64,
+          itchingLevel,
+          spreadRate,
+          recentChanges,
+        }),
+        { maxAttempts: 3, label: 'skin-scan-flow' }
+      );
     } catch (err) {
+      // Quota / rate-limit exhaustion → 503 with Retry-After.
+      if (isCapacityExhausted(err)) {
+        logger.warn('skin-scan: capacity exhausted', { err: (err as Error).message });
+        return NextResponse.json(
+          {
+            error: 'AI_CAPACITY_EXHAUSTED',
+            retryable: true,
+            retryAfterSeconds: 30,
+            userMessage: 'High demand right now. For urgent symptoms please contact emergency services.',
+          },
+          { status: 503, headers: { 'Retry-After': '30' } }
+        );
+      }
+
+      // Other AI failures.
       logger.error('skin-scan: genkit flow threw', { err: (err as Error).message });
       return NextResponse.json<ApiErrorResponse>(
         {
