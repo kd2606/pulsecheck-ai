@@ -115,7 +115,7 @@ export default function VisionScanPage() {
             const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Strain Profile" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
-            await saveHealthRecord(user?.uid, {
+            saveHealthRecord(user?.uid, {
                 type: "vision",
                 title: "Ocular & Facial Strain Analysis",
                 severity: severityLevel,
@@ -126,10 +126,10 @@ export default function VisionScanPage() {
                     medicines: result.otcMedicines.map((m: any) => m.name),
                     homecare: result.precautions
                 }
-            });
+            }).catch(console.error);
 
             if (user) {
-                await saveScan(user.uid, "self", "visionScans", result);
+                saveScan(user.uid, "self", "visionScans", result).catch(console.error);
             }
 
             setStep("results");

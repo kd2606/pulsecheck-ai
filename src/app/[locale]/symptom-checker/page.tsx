@@ -76,7 +76,7 @@ export default function SymptomCheckerPage() {
             const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Triage Priority" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
-            await saveHealthRecord(user?.uid, {
+            saveHealthRecord(user?.uid, {
                 type: "symptom",
                 title: "Symptom Assessment",
                 severity: severityLevel,
@@ -87,7 +87,7 @@ export default function SymptomCheckerPage() {
                     medicines: result.otcMedicines.map((m: { name: string }) => m.name),
                     homecare: result.precautions
                 }
-            });
+            }).catch(console.error);
 
             setStep("results");
         } catch (error) {

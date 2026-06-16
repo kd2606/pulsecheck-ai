@@ -129,7 +129,7 @@ export default function SkinScanPage() {
             const severityLevel = topPriority === "High Triage Priority" ? "high" : topPriority === "Elevated Triage Priority" ? "moderate" : "low";
             const verdictStr = topPriority === "High Triage Priority" ? "doctor_today" : topPriority === "Elevated Triage Priority" ? "monitor" : "rest";
 
-            await saveHealthRecord(user?.uid, {
+            saveHealthRecord(user?.uid, {
                 type: "skin",
                 title: "Skin Analysis",
                 severity: severityLevel,
@@ -141,7 +141,7 @@ export default function SkinScanPage() {
                     precautions: result.precautions || []
                 }
 
-            });
+            }).catch(console.error);
         } catch (error: any) {
             console.error("Analysis error:", error);
             const msg = error.message || "Could not fetch the report. Please try again later.";

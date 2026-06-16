@@ -76,7 +76,7 @@ export default function CardioCheckPage() {
             const severityLevel = isHighPriority ? "high" : data.triagePriority === "Elevated Priority" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "urgent_support" : data.triagePriority === "Elevated Priority" ? "monitor" : "rest";
 
-            await saveHealthRecord(user?.uid, {
+            saveHealthRecord(user?.uid, {
                 type: "heart",
                 title: "Cardio Screen",
                 severity: severityLevel,
@@ -87,7 +87,7 @@ export default function CardioCheckPage() {
                     medicines: [],
                     homecare: data.precautions
                 }
-            });
+            }).catch(console.error);
 
             setStep("results");
         } catch (error) {

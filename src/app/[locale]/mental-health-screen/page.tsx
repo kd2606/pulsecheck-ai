@@ -137,7 +137,7 @@ export default function MentalHealthPage() {
             const severityLevel = isHighPriority ? "high" : result.wellnessScore < 60 ? "moderate" : "low";
             const verdictStr = isHighPriority ? "urgent_support" : result.wellnessScore < 60 ? "monitor" : "rest";
 
-            await saveHealthRecord(user?.uid, {
+            saveHealthRecord(user?.uid, {
                 type: "stress",
                 title: "Wellness Screen",
                 severity: severityLevel,
@@ -148,7 +148,7 @@ export default function MentalHealthPage() {
                     medicines: [],
                     homecare: result.recommendations
                 }
-            });
+            }).catch(console.error);
 
             setStep("results");
         } catch (error) {

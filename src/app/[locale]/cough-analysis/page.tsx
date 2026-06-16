@@ -124,7 +124,7 @@ export default function CoughAnalysisPage() {
             const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Triage Priority" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
-            await saveHealthRecord(user?.uid, {
+            saveHealthRecord(user?.uid, {
                 type: "cough",
                 title: "Respiratory Assessment",
                 severity: severityLevel,
@@ -135,11 +135,11 @@ export default function CoughAnalysisPage() {
                     medicines: result.otcMedicines.map((m: { name: string }) => m.name),
                     homecare: result.precautions
                 }
-            });
+            }).catch(console.error);
             
             // Also save specifically to scan store
             if (user) {
-                await saveScan(user.uid, "self", "coughAnalyses", result);
+                saveScan(user.uid, "self", "coughAnalyses", result).catch(console.error);
             }
 
             setStep("results");
