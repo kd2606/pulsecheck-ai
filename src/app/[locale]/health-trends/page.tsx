@@ -101,6 +101,7 @@ export default function TrendsPage() {
 
         setFetchState("loading");
 
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => setFetchState("timeout"), LOAD_TIMEOUT_MS);
 
         try {
@@ -155,14 +156,13 @@ export default function TrendsPage() {
         if (authLoading) return;
         if (!user) { setFetchState("done"); return; }
         loadPeople(user.uid);
-        loadMemberData(user.uid, selectedMember);
-        return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
     }, [user, authLoading]);
 
     useEffect(() => {
         if (!user) return;
         loadMemberData(user.uid, selectedMember);
-    }, [selectedMember]);
+        return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+    }, [user, selectedMember]);
 
     const handleRetry = () => user && loadMemberData(user.uid, selectedMember, true);
 
