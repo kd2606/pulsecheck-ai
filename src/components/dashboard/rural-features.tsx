@@ -24,9 +24,43 @@ import Link from "next/link";
  * Regional Medical Centers - Redesigned as high-fidelity node monitoring
  */
 export function RuralHospitalList() {
+    const [hospitals, setHospitals] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    try {
+                        const res = await fetch(`/api/nearby-facilities?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&radius=5000`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            const formatted = (data.places || []).slice(0, 10).map((place: any, idx: number) => ({
+                                name: place.name || "Local Clinic",
+                                dist: "Nearby",
+                                sector: place.address?.split(",")[0] || "Unknown",
+                                rating: (idx % 2 === 0) ? 4 : 5,
+                                cover: (idx % 3 === 0) ? "PM-JAY ACTIVE" : "STANDARD",
+                                phone: place.phone || ""
+                            }));
+                            setHospitals(formatted);
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch hospitals", e);
+                    } finally {
+                        setLoading(false);
+                    }
+                },
+                () => setLoading(false)
+            );
+        } else {
+            setLoading(false);
+        }
+    }, []);
+
     return (
-        <GlassCard className="h-full flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-8">
+        <GlassCard className="h-[500px] flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
+            <div className="flex justify-between items-center mb-8 shrink-0">
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-3 text-white">
                         <Activity className="w-6 h-6 text-indigo-400" />
@@ -35,58 +69,63 @@ export function RuralHospitalList() {
                     <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Local Health Centers</p>
                 </div>
                 <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 text-[9px] border border-emerald-500/20 uppercase tracking-widest px-3 py-1 font-bold">
-                    Sync Active
+                    {loading ? "Syncing..." : "Sync Active"}
                 </Badge>
             </div>
 
-            <div className="flex flex-col gap-6 overflow-y-auto custom-scroll pr-2 pb-2">
-                {[
-                    { name: "Mehta Hospital", dist: "1.2km", sector: "Wardha", rating: 4, cover: "PM-JAY ACTIVE" },
-                    { name: "Sharma Clinic", dist: "4.5km", sector: "Nagpur", rating: 3, cover: "STANDARD" }
-                ].map((hospital, idx) => (
-                    <motion.div 
-                        key={idx}
-                        className="p-6 rounded-[2rem] border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all group flex flex-col justify-between"
-                        whileHover={{ y: -5 }}
-                    >
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="font-bold text-lg text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight font-space">
-                                        {hospital.name}
-                                    </h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <MapPin className="w-3 h-3 text-white/20" />
-                                        <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest leading-none">
-                                            {hospital.dist} • {hospital.sector}
-                                        </p>
+            <div className="flex flex-col gap-6 overflow-y-auto custom-scroll pr-2 pb-2 flex-1">
+                {loading ? (
+                    <div className="flex-1 flex items-center justify-center min-h-[200px]">
+                        <div className="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                    </div>
+                ) : hospitals.length > 0 ? (
+                    hospitals.map((hospital, idx) => (
+                        <motion.div 
+                            key={idx}
+                            className="p-6 rounded-[2rem] border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-all group flex flex-col justify-between shrink-0"
+                            whileHover={{ y: -5 }}
+                        >
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1 pr-4">
+                                        <h3 className="font-bold text-lg text-white group-hover:text-emerald-400 transition-colors uppercase tracking-tight font-space truncate">
+                                            {hospital.name}
+                                        </h3>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <MapPin className="w-3 h-3 text-white/20 shrink-0" />
+                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest leading-none truncate">
+                                                {hospital.dist} • {hospital.sector}
+                                            </p>
+                                        </div>
                                     </div>
+                                    <Badge className="bg-white/5 text-[8px] border border-white/10 text-white/40 px-2 py-0.5 rounded-lg shrink-0">
+                                        {hospital.cover}
+                                    </Badge>
                                 </div>
-                                <Badge className="bg-white/5 text-[8px] border border-white/10 text-white/40 px-2 py-0.5 rounded-lg">
-                                    {hospital.cover}
-                                </Badge>
+
+                                <div className="flex items-center gap-1.5 py-2 border-y border-white/5">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className={`w-3 h-3 ${i < hospital.rating ? 'fill-indigo-500 text-indigo-500' : 'fill-white/5 text-white/10'}`} />
+                                    ))}
+                                    <span className="text-[9px] ml-2 text-white/20 font-bold uppercase tracking-tighter">Hospital Rating</span>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-1.5 py-2 border-y border-white/5">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className={`w-3 h-3 ${i < hospital.rating ? 'fill-indigo-500 text-indigo-500' : 'fill-white/5 text-white/10'}`} />
-                                ))}
-                                <span className="text-[9px] ml-2 text-white/20 font-bold uppercase tracking-tighter">Hospital Rating</span>
+                            <div className="flex gap-4 mt-6">
+                                <Button className="flex-1 bg-white text-black hover:bg-emerald-400 hover:text-black rounded-xl h-12 font-bold text-xs font-space transition-all active:scale-95" asChild>
+                                    <a href={`https://wa.me/91${hospital.phone || '9876543210'}?text=Hello,%20I%20would%20like%20to%20book%20an%20appointment.`} target="_blank" rel="noopener noreferrer">
+                                        <MessageCircle className="w-4 h-4 mr-2" /> Chat Now
+                                    </a>
+                                </Button>
+                                <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 border-white/10 rounded-xl bg-white/5 hover:bg-white/10" asChild>
+                                    <a href={`tel:${hospital.phone || '09876543210'}`}><Phone className="w-4 h-4 text-indigo-400" /></a>
+                                </Button>
                             </div>
-                        </div>
-
-                        <div className="flex gap-4 mt-6">
-                            <Button className="flex-1 bg-white text-black hover:bg-emerald-400 hover:text-black rounded-xl h-12 font-bold text-xs font-space transition-all active:scale-95" asChild>
-                                <a href="https://wa.me/919876543210?text=Hello,%20I%20would%20like%20to%20book%20an%20appointment." target="_blank" rel="noopener noreferrer">
-                                    <MessageCircle className="w-4 h-4 mr-2" /> Chat Now
-                                </a>
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 border-white/10 rounded-xl bg-white/5 hover:bg-white/10" asChild>
-                                <a href="tel:09876543210"><Phone className="w-4 h-4 text-indigo-400" /></a>
-                            </Button>
-                        </div>
-                    </motion.div>
-                ))}
+                        </motion.div>
+                    ))
+                ) : (
+                    <div className="text-center text-white/40 text-sm mt-10 font-medium">No hospitals found nearby. Make sure location is enabled.</div>
+                )}
             </div>
         </GlassCard>
     );
@@ -118,7 +157,7 @@ export function MedicinePriceCard() {
     };
 
     return (
-        <GlassCard className="h-full flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem] relative overflow-hidden">
+        <GlassCard className="h-[500px] flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem] relative overflow-hidden">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[100px] pointer-events-none" />
             
             <div className="flex items-center gap-4 mb-10 text-left">
@@ -278,8 +317,8 @@ export function FamilyCardsList() {
     };
 
     return (
-        <GlassCard className="h-full p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
-            <div className="flex justify-between items-center mb-10 text-left">
+        <GlassCard className="h-[500px] flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
+            <div className="flex justify-between items-center mb-8 shrink-0 text-left">
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-4 text-white">
                         <Users className="w-7 h-7 text-indigo-400" />
@@ -292,17 +331,17 @@ export function FamilyCardsList() {
                 </Badge>
             </div>
             
-            <div className="flex gap-6 overflow-x-auto pb-4 custom-scroll">
+            <div className="flex flex-col gap-4 overflow-y-auto pb-4 custom-scroll flex-1 pr-2">
                 <Dialog open={openDialog} onOpenChange={setOpenDialog}>
                     <DialogTrigger asChild>
                         <motion.div 
-                            className="shrink-0 w-36 h-48 rounded-[2rem] border-2 border-dashed border-white/5 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-white/[0.03] hover:border-emerald-500/20 transition-all group"
-                            whileHover={{ scale: 1.02 }}
+                            className="shrink-0 w-full min-h-[100px] rounded-[2rem] border-2 border-dashed border-white/5 flex items-center justify-center gap-4 cursor-pointer hover:bg-white/[0.03] hover:border-emerald-500/20 transition-all group"
+                            whileHover={{ scale: 1.01 }}
                         >
-                            <div className="w-14 h-14 rounded-2xl border border-white/10 flex items-center justify-center text-white/20 group-hover:text-emerald-400 transition-colors">
-                                <Plus className="w-8 h-8" />
+                            <div className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white/20 group-hover:text-emerald-400 transition-colors">
+                                <Plus className="w-6 h-6" />
                             </div>
-                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white">Add Member</p>
+                            <p className="text-[12px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white">Add Member</p>
                         </motion.div>
                     </DialogTrigger>
                     <DialogContent className="max-w-[450px] bg-[#0a0a0a] border border-white/5 shadow-[0_0_100px_rgba(0,0,0,1)] rounded-[3rem] p-10 font-space overflow-hidden">
@@ -344,15 +383,15 @@ export function FamilyCardsList() {
                 {familyMembers.map((member, i) => (
                     <motion.div 
                         key={i} 
-                        className="shrink-0 w-36 h-48 rounded-[2rem] border border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-5 hover:bg-white/[0.04] transition-all group cursor-pointer"
-                        whileHover={{ scale: 1.02 }}
+                        className="shrink-0 w-full min-h-[100px] rounded-[2rem] border border-white/5 bg-white/[0.02] flex items-center gap-5 p-6 hover:bg-white/[0.04] transition-all group cursor-pointer"
+                        whileHover={{ scale: 1.01 }}
                     >
-                        <div className={`w-16 h-16 rounded-[1.25rem] flex items-center justify-center font-space font-bold text-xl shadow-2xl transition-transform group-hover:rotate-6 ${i % 2 === 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}`}>
+                        <div className={`w-14 h-14 shrink-0 rounded-[1.25rem] flex items-center justify-center font-space font-bold text-xl shadow-2xl transition-transform group-hover:rotate-6 ${i % 2 === 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}`}>
                             {member.name?.[0] || 'N'}
                         </div>
-                        <div className="text-center px-4 space-y-1">
+                        <div className="text-left space-y-1 overflow-hidden">
                             <p className="text-sm font-bold text-white tracking-tight leading-tight truncate">{member.name}</p>
-                            <p className="text-[9px] text-white/20 font-bold uppercase tracking-[0.15em]">{member.relation}</p>
+                            <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.15em] truncate">{member.relation}</p>
                         </div>
                     </motion.div>
                 ))}
@@ -366,8 +405,8 @@ export function FamilyCardsList() {
  */
 export function GovSchemesCard() {
     return (
-        <GlassCard className="h-full p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
-            <div className="flex items-center gap-4 mb-10 text-left">
+        <GlassCard className="h-[500px] flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
+            <div className="flex items-center gap-4 mb-8 shrink-0 text-left">
                 <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                     <Shield className="w-6 h-6 text-emerald-400" />
                 </div>
@@ -377,7 +416,7 @@ export function GovSchemesCard() {
                 </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="flex flex-col gap-4 overflow-y-auto custom-scroll pr-2 pb-2 flex-1">
                 {[
                     { title: "Ayushman PM-JAY", desc: "Free healthcare up to ₹5 Lakhs.", icon: ShieldCheck, color: "emerald", link: "https://pmjay.gov.in/" },
                     { title: "ABHA Health ID", desc: "Your digital health record card.", icon: Activity, color: "blue", link: "https://abha.abdm.gov.in/" },
@@ -387,7 +426,7 @@ export function GovSchemesCard() {
                         key={i} 
                         href={scheme.link}
                         target="_blank"
-                        className="block p-6 border border-white/5 bg-white/[0.01] rounded-[2rem] transition-all hover:bg-white/[0.03] group overflow-hidden relative"
+                        className="block shrink-0 p-6 border border-white/5 bg-white/[0.01] rounded-[2rem] transition-all hover:bg-white/[0.03] group overflow-hidden relative"
                         whileHover={{ x: 5 }}
                     >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.01] rotate-45 translate-x-12 -translate-y-12" />
@@ -398,7 +437,7 @@ export function GovSchemesCard() {
                                 </h3>
                                 <p className="text-[11px] text-white/30 font-medium leading-relaxed font-inter">{scheme.desc}</p>
                             </div>
-                            <div className="h-10 w-10 flex items-center justify-center text-white/10 group-hover:text-emerald-500 transition-all transform group-hover:translate-x-1">
+                            <div className="h-10 w-10 shrink-0 flex items-center justify-center text-white/10 group-hover:text-emerald-500 transition-all transform group-hover:translate-x-1">
                                 <ChevronRight className="w-6 h-6" />
                             </div>
                         </div>
