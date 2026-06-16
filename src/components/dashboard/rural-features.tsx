@@ -19,11 +19,13 @@ import { doc, getDoc, setDoc, updateDoc, arrayUnion, collection, query, where, g
 import { db } from "@/firebase/clientApp";
 import { getMedicinePrices, type MedicinePriceInfo } from "@/ai/flows/medicine";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 /**
  * Regional Medical Centers - Redesigned as high-fidelity node monitoring
  */
 export function RuralHospitalList() {
+    const t = useTranslations("dashboard");
     const [hospitals, setHospitals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -64,12 +66,12 @@ export function RuralHospitalList() {
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-3 text-white">
                         <Activity className="w-6 h-6 text-indigo-400" />
-                        Nearby Hospitals
+                        {t("nearbyHospitals")}
                     </h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Local Health Centers</p>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">{t("localHealthCenters")}</p>
                 </div>
                 <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-400 text-[9px] border border-emerald-500/20 uppercase tracking-widest px-3 py-1 font-bold">
-                    {loading ? "Syncing..." : "Sync Active"}
+                    {loading ? t("syncing") : t("syncActive")}
                 </Badge>
             </div>
 
@@ -107,14 +109,14 @@ export function RuralHospitalList() {
                                     {[...Array(5)].map((_, i) => (
                                         <Star key={i} className={`w-3 h-3 ${i < hospital.rating ? 'fill-indigo-500 text-indigo-500' : 'fill-white/5 text-white/10'}`} />
                                     ))}
-                                    <span className="text-[9px] ml-2 text-white/20 font-bold uppercase tracking-tighter">Hospital Rating</span>
+                                    <span className="text-[9px] ml-2 text-white/20 font-bold uppercase tracking-tighter">{t("hospitalRating")}</span>
                                 </div>
                             </div>
 
                             <div className="flex gap-4 mt-6">
                                 <Button className="flex-1 bg-white text-black hover:bg-emerald-400 hover:text-black rounded-xl h-12 font-bold text-xs font-space transition-all active:scale-95" asChild>
                                     <a href={`https://wa.me/91${hospital.phone || '9876543210'}?text=Hello,%20I%20would%20like%20to%20book%20an%20appointment.`} target="_blank" rel="noopener noreferrer">
-                                        <MessageCircle className="w-4 h-4 mr-2" /> Chat Now
+                                        <MessageCircle className="w-4 h-4 mr-2" /> {t("chatNow")}
                                     </a>
                                 </Button>
                                 <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 border-white/10 rounded-xl bg-white/5 hover:bg-white/10" asChild>
@@ -135,6 +137,7 @@ export function RuralHospitalList() {
  * Medicine Price Comparison - Redesigned as Dermal-Cost Review Interface
  */
 export function MedicinePriceCard() {
+    const t = useTranslations("dashboard");
     const [searchQuery, setSearchQuery] = useState("");
     const [medicineData, setMedicineData] = useState<MedicinePriceInfo | null>(null);
     const [loading, setLoading] = useState(false);
@@ -165,15 +168,15 @@ export function MedicinePriceCard() {
                     <Pill className="w-6 h-6 text-indigo-400" />
                 </div>
                 <div className="space-y-0.5">
-                    <h2 className="font-space font-bold text-2xl text-white">Medicine Prices</h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Check & Compare Costs</p>
+                    <h2 className="font-space font-bold text-2xl text-white">{t("medicinePrices")}</h2>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">{t("checkCompareCosts")}</p>
                 </div>
             </div>
 
             <div className="space-y-6 flex-1 flex flex-col">
                 <form onSubmit={handleSearch} className="flex gap-3">
                     <Input
-                        placeholder="Search medicine name..."
+                        placeholder={t("searchMedicine")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-14 bg-white/5 border-white/10 rounded-2xl text-sm text-white placeholder:text-white/10 px-6 font-inter focus:ring-indigo-500/20"
@@ -196,7 +199,7 @@ export function MedicinePriceCard() {
                                 <div className="border-b border-white/5 pb-6 mb-8 flex justify-between items-start text-left">
                                     <div className="space-y-1">
                                         <h3 className="font-bold text-2xl text-white font-space tracking-tight">{medicineData.searchedName}</h3>
-                                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[9px] font-bold tracking-widest px-2">VERIFIED</Badge>
+                                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[9px] font-bold tracking-widest px-2">{t("verified")}</Badge>
                                     </div>
                                     <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center">
                                         <Zap className="w-4 h-4 text-emerald-400" />
@@ -206,30 +209,30 @@ export function MedicinePriceCard() {
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="flex justify-between items-end p-6 rounded-2xl bg-emerald-500/[0.03] border border-emerald-500/10">
                                         <div className="space-y-1 text-left">
-                                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Generic Medicine</span>
+                                            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">{t("genericMedicine")}</span>
                                             <div className="text-lg font-medium text-white/80 font-space">{medicineData.genericName}</div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-3xl font-bold text-emerald-400 tracking-tighter">₹{medicineData.genericPrice}</div>
-                                            <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold">Govt Hospital Price</span>
+                                            <span className="text-[9px] text-white/20 uppercase tracking-widest font-bold">{t("govtHospitalPrice")}</span>
                                         </div>
                                     </div>
 
                                     <div className="flex justify-between items-end p-6 rounded-2xl bg-white/[0.02] border border-white/10 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-help">
                                         <div className="space-y-1 text-left">
-                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Branded Medicine</span>
+                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{t("brandedMedicine")}</span>
                                             <div className="text-base font-medium text-white/40">{medicineData.brandedName}</div>
                                         </div>
                                         <div className="text-right">
                                             <div className="text-xl font-bold text-white/20 tracking-tighter">₹{medicineData.brandedPrice}</div>
-                                            <span className="text-[9px] text-white/10 uppercase tracking-widest font-bold">Market Price</span>
+                                            <span className="text-[9px] text-white/10 uppercase tracking-widest font-bold">{t("marketPrice")}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <Link href={medicineData.purchaseLink} target="_blank" className="mt-10 block">
                                     <Button className="w-full h-16 bg-white text-black hover:bg-emerald-400 hover:text-black font-bold rounded-2xl shadow-[0_20px_50px_rgba(255,255,255,0.05)] transition-all font-space uppercase tracking-widest text-sm">
-                                        Buy Online
+                                        {t("buyOnline")}
                                     </Button>
                                 </Link>
                             </div>
@@ -238,7 +241,7 @@ export function MedicinePriceCard() {
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-white/5 rounded-[2.5rem] bg-white/[0.01]">
                             <Server className="w-12 h-12 text-white/5 mb-6 animate-pulse" />
                             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/20 leading-relaxed max-w-[200px]">
-                                Search for a medicine to compare prices
+                                {t("searchPrompt")}
                             </p>
                         </div>
                     )}
@@ -252,6 +255,7 @@ export function MedicinePriceCard() {
  * Kinsman Network - Family Hub with Biometric styling
  */
 export function FamilyCardsList() {
+    const t = useTranslations("dashboard");
     const { user } = useFirebaseContext();
     const [familyMembers, setFamilyMembers] = useState<any[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
@@ -322,12 +326,12 @@ export function FamilyCardsList() {
                 <div className="space-y-1">
                     <h2 className="font-space font-bold text-2xl flex items-center gap-4 text-white">
                         <Users className="w-7 h-7 text-indigo-400" />
-                        Family Members
+                        {t("familyMembers")}
                     </h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Your connected family accounts</p>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">{t("connectedAccounts")}</p>
                 </div>
                 <Badge variant="outline" className="border-white/10 text-white/40 font-bold text-[10px] tracking-widest px-3 py-1">
-                    {familyMembers.length + 1} MEMBERS
+                    {t("membersCount", { count: familyMembers.length + 1 })}
                 </Badge>
             </div>
             
@@ -341,20 +345,20 @@ export function FamilyCardsList() {
                             <div className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white/20 group-hover:text-emerald-400 transition-colors">
                                 <Plus className="w-6 h-6" />
                             </div>
-                            <p className="text-[12px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white">Add Member</p>
+                            <p className="text-[12px] font-bold text-white/20 uppercase tracking-widest group-hover:text-white">{t("addMember")}</p>
                         </motion.div>
                     </DialogTrigger>
                     <DialogContent className="max-w-[450px] bg-[#0a0a0a] border border-white/5 shadow-[0_0_100px_rgba(0,0,0,1)] rounded-[3rem] p-10 font-space overflow-hidden">
                         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/5 blur-[100px] pointer-events-none" />
                         <DialogHeader className="text-left mb-8 relative z-10">
-                            <DialogTitle className="text-3xl font-bold tracking-tighter">Add Family Member</DialogTitle>
+                            <DialogTitle className="text-3xl font-bold tracking-tighter">{t("addMember")}</DialogTitle>
                             <DialogDescription className="text-white/40 font-inter font-light text-base mt-2">
-                                Link a family member&apos;s account to share health details safely.
+                                {t("linkFamilyDesc")}
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleAddFamily} className="space-y-8 relative z-10">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Email Address</Label>
+                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">{t("emailAddress")}</Label>
                                 <Input
                                     placeholder="name@example.com"
                                     className="h-16 bg-white/[0.03] border-white/10 rounded-2xl text-white font-inter"
@@ -364,7 +368,7 @@ export function FamilyCardsList() {
                                 />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Relationship to you</Label>
+                                <Label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">{t("relationship")}</Label>
                                 <Input
                                     placeholder="Spouse, Sibling, Ward"
                                     className="h-16 bg-white/[0.03] border-white/10 rounded-2xl text-white font-inter"
@@ -374,7 +378,7 @@ export function FamilyCardsList() {
                                 />
                             </div>
                             <Button type="submit" disabled={loading} className="w-full h-16 bg-white text-black hover:bg-emerald-400 font-bold text-lg rounded-2xl transition-all shadow-2xl">
-                                {loading ? "Adding..." : "Add Member"}
+                                {loading ? t("adding") : t("addMember")}
                             </Button>
                         </form>
                     </DialogContent>
@@ -404,6 +408,7 @@ export function FamilyCardsList() {
  * Government Schemes - Redesigned as Sovereign Protocols
  */
 export function GovSchemesCard() {
+    const t = useTranslations("dashboard");
     return (
         <GlassCard className="h-[500px] flex flex-col p-8 border-white/5 bg-[#0a0a0a]/40 backdrop-blur-3xl rounded-[2.5rem]">
             <div className="flex items-center gap-4 mb-8 shrink-0 text-left">
@@ -411,8 +416,8 @@ export function GovSchemesCard() {
                     <Shield className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div className="space-y-0.5">
-                    <h2 className="font-space font-bold text-2xl text-white">Govt Schemes</h2>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">Important Health Benefits</p>
+                    <h2 className="font-space font-bold text-2xl text-white">{t("govtSchemes")}</h2>
+                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.25em]">{t("importantBenefits")}</p>
                 </div>
             </div>
 

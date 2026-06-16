@@ -36,6 +36,9 @@ export default function DashboardPage() {
     const [scrolled, setScrolled] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
+    const t = useTranslations("dashboard");
+    const tNav = useTranslations("nav");
+    
     const [vitals, setVitals] = useState<any>(null);
     const [vitalsHistory, setVitalsHistory] = useState<any[]>([]);
 
@@ -89,11 +92,11 @@ export default function DashboardPage() {
     }
 
     const navItems = [
-        { icon: LayoutDashboard, label: "Home", active: true, path: `/${locale}/dashboard` },
-        { icon: Activity, label: "Health Checks", path: `/${locale}/symptom-checker` },
-        { icon: ShieldCheck, label: "Govt Schemes", path: `/${locale}/govt-schemes` },
-        { icon: Database, label: "Health Records", path: `/${locale}/health-records` },
-        { icon: Zap, label: "Health Trends", path: `/${locale}/health-trends` },
+        { icon: LayoutDashboard, label: tNav("home"), active: true, path: `/${locale}/dashboard` },
+        { icon: Activity, label: tNav("symptomChecker"), path: `/${locale}/symptom-checker` },
+        { icon: ShieldCheck, label: tNav("govtSchemes"), path: `/${locale}/govt-schemes` },
+        { icon: Database, label: tNav("healthRecords"), path: `/${locale}/health-records` },
+        { icon: Zap, label: tNav("trends"), path: `/${locale}/health-trends` },
     ];
 
     return (
@@ -175,17 +178,17 @@ export default function DashboardPage() {
                             </button>
                             <div className="space-y-1">
                                 <p className="text-[10px] text-emerald-400/60 font-space font-bold tracking-[0.3em] uppercase">
-                                    Welcome to Diagnoverse
+                                    {t("welcome")}
                                 </p>
                                 <h1 className="text-4xl font-space font-bold tracking-tighter text-white">
-                                    Health <span className="text-white/40">Dashboard</span>
+                                    {t("health")} <span className="text-white/40">{t("dashboardSpan")}</span>
                                 </h1>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 self-end sm:self-auto">
                             <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
                                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-space font-bold uppercase tracking-widest text-white/60">System Online</span>
+                                <span className="text-[10px] font-space font-bold uppercase tracking-widest text-white/60">{t("systemOnline")}</span>
                             </div>
                             <AddVitalsModal />
                             <VoiceAssistantButton />
@@ -204,23 +207,23 @@ export default function DashboardPage() {
                                 <div className="space-y-10">
                                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">AI Helper Ready</span>
+                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">{t("aiHelperReady")}</span>
                                     </div>
                                     
                                     <div className="space-y-4">
                                         <h2 className="text-6xl md:text-7xl font-space font-bold tracking-tighter leading-[0.9]">
-                                            Quick <br/> 
-                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-white/40">Health Check</span>
+                                            {t("quick")} <br/> 
+                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-white/40">{t("healthCheck")}</span>
                                         </h2>
                                         <p className="text-xl text-white/40 font-medium leading-relaxed max-w-lg">
-                                            Use our easy AI tools to check your symptoms, get advice, and stay healthy.
+                                            {t("heroDesc")}
                                         </p>
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-6 pt-4">
                                         <Link href={`/${locale}/skin-scan`}>
                                             <button className="h-16 px-10 rounded-2xl bg-white text-black font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-emerald-500/10 group">
-                                                Start Scan
+                                                {t("startScan")}
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         </Link>
@@ -230,7 +233,7 @@ export default function DashboardPage() {
                                                     <div key={i} className="h-8 w-8 rounded-full border-2 border-[#0a0a0a] bg-white/10 flex items-center justify-center text-[8px] font-bold">U{i}</div>
                                                 ))}
                                             </div>
-                                            <span className="text-xs font-bold text-white/30 uppercase tracking-widest">Connect with doctors</span>
+                                            <span className="text-xs font-bold text-white/30 uppercase tracking-widest">{t("connectDoctors")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -272,10 +275,10 @@ export default function DashboardPage() {
                     {/* Footer System Status */}
                     <footer className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 opacity-30">
                         <div className="flex items-center gap-6">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Version 1.0</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Location Services Active</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">{t("version")}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em]">{t("locationActive")}</span>
                         </div>
-                        <p className="text-[10px] font-bold">© 2026 PULSECHECK AI. ALL RIGHTS RESERVED.</p>
+                        <p className="text-[10px] font-bold">{t("copyright")}</p>
                     </footer>
 
                 </div>
