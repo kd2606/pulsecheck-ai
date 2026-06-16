@@ -1,57 +1,142 @@
-import { NextRequest, NextResponse } from "next/server";
+// src/app/api/skin-scan/route.ts
+// Production-hardened: Zod validation, 8MB payload cap, structured error codes,
+// real analyzeSkinScan flow call, latency logging.
+// Schema adapted to existing flow input/output — frontend unchanged.
 
-export const maxDuration = 60;
-export const dynamic = "force-dynamic";
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { analyzeSkinScan } from '@/ai/flows/skin-scan';
+import { logger } from '@/lib/logger';
 
-export async function POST(req: NextRequest) {
-    try {
-        const body = await req.json();
-        const { imageBase64, itchingLevel, spreadRate, recentChanges } = body;
-        if (!imageBase64) {
-            return NextResponse.json({ error: "imageBase64 field is required" }, { status: 400 });
-        }
+// --- Constants ---
+// 8 MB cap on the base64 string. Raw image ≈ 6 MB (base64 ~33% overhead).
+// Aligns with Gemini 1.5 inline_data limits and serverless body caps.
+const MAX_BASE64_BYTES = 8 * 1024 * 1024;
 
-        // Add small delay to simulate processing
-        await new Promise(resolve => setTimeout(resolve, 500));
+// --- Request schema (matches existing frontend contract) ---
+const SkinScanRequestSchema = z.object({
+  imageBase64: z
+    .string()
+    .min(100, 'Image payload is empty or too small to be valid.'),
+  itchingLevel: z.string().min(1, 'Itching level is required.'),
+  spreadRate: z.string().min(1, 'Spread rate is required.'),
+  recentChanges: z.string().min(1, 'Recent changes is required.'),
+});
 
-        // Mock Skin Scan Results
-        const mockResult = {
-            triagePriority: itchingLevel === "Severe" ? "High Triage Priority" : "Elevated Triage Priority",
-            simpleExplanation: "Your skin analysis shows mild to moderate inflammation with some redness and irritation. Based on the symptoms you've described, this appears to be a common skin condition that typically responds well to basic skincare and over-the-counter treatments. The condition doesn't appear to be severe but should be monitored.",
-            otcMedicines: [
-                { name: "Hydrocortisone Cream 1%", dosage: "Apply thin layer to affected area 2-3 times daily" },
-                { name: "Moisturizing Lotion", dosage: "Apply 2-3 times daily, especially after bathing" },
-                { name: "Antihistamine Tablets", dosage: "1 tablet daily if itching is severe" }
-            ],
-            precautions: [
-                "Avoid scratching the affected area to prevent infection",
-                "Use gentle, fragrance-free cleansers",
-                "Apply cool compresses to reduce inflammation",
-                "Wear loose-fitting cotton clothing",
-                "Avoid harsh soaps and hot water"
-            ],
-            recommendations: [
-                "Keep the area clean and dry",
-                "Use hypoallergenic skincare products",
-                "Monitor for changes in size or color",
-                "Consult a dermatologist if condition worsens"
-            ],
-            possibleConditions: [
-                "Contact Dermatitis",
-                "Eczema",
-                "Allergic Reaction"
-            ],
-            visualFeatures: [
-                { feature: "Mild erythema (redness)", confidence: 0.75 },
-                { feature: "Slight swelling", confidence: 0.60 },
-                { feature: "Dry patches", confidence: 0.80 },
-                { feature: "No ulceration", confidence: 0.95 }
-            ]
-        };
-
-        return NextResponse.json(mockResult);
-    } catch (error: any) {
-        console.error("Skin scan error:", error);
-        return NextResponse.json({ error: error.message || "AI service error" }, { status: 500 });
-    }
+// --- Structured error response ---
+export interface ApiErrorResponse {
+  success: false;
+  errorCode:
+    | 'PAYLOAD_TOO_LARGE'
+    | 'INVALID_PAYLOAD'
+    | 'AI_FLOW_FAILED'
+    | 'AI_OUTPUT_INVALID'
+    | 'INTERNAL_ERROR';
+  message: string;
+  retryable: boolean;
 }
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const startedAt = Date.now();
+
+  try {
+    // 1. Parse body defensively — malformed JSON should never crash the route.
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json<ApiErrorResponse>(
+        { success: false, errorCode: 'INVALID_PAYLOAD', message: 'Request body is not valid JSON.', retryable: false },
+        { status: 400 }
+      );
+    }
+
+    // 2. Validate schema.
+    const parsed = SkinScanRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json<ApiErrorResponse>(
+        {
+          success: false,
+          errorCode: 'INVALID_PAYLOAD',
+          message: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+          retryable: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { imageBase64, itchingLevel, spreadRate, recentChanges } = parsed.data;
+
+    // 3. Enforce payload size cap.
+    const byteLength = Buffer.byteLength(imageBase64, 'utf8');
+
+    if (byteLength > MAX_BASE64_BYTES) {
+      logger.warn('skin-scan: payload rejected', { byteLength });
+      return NextResponse.json<ApiErrorResponse>(
+        {
+          success: false,
+          errorCode: 'PAYLOAD_TOO_LARGE',
+          message: `Image exceeds ${MAX_BASE64_BYTES / 1024 / 1024} MB limit. Please compress before uploading.`,
+          retryable: false,
+        },
+        { status: 413 }
+      );
+    }
+
+    // 4. Invoke the real Genkit flow. Any throw here is an AI-layer failure.
+    let flowOutput;
+    try {
+      flowOutput = await analyzeSkinScan({
+        imageBase64,
+        itchingLevel,
+        spreadRate,
+        recentChanges,
+      });
+    } catch (err) {
+      logger.error('skin-scan: genkit flow threw', { err: (err as Error).message });
+      return NextResponse.json<ApiErrorResponse>(
+        {
+          success: false,
+          errorCode: 'AI_FLOW_FAILED',
+          message: 'The AI analysis service is temporarily unavailable. Please retry shortly.',
+          retryable: true,
+        },
+        { status: 502 }
+      );
+    }
+
+    // 5. Validate the flow output before trusting it (defense against schema drift).
+    if (
+      !flowOutput ||
+      !flowOutput.triagePriority ||
+      !flowOutput.simpleExplanation
+    ) {
+      logger.error('skin-scan: malformed flow output', { flowOutput });
+      return NextResponse.json<ApiErrorResponse>(
+        {
+          success: false,
+          errorCode: 'AI_OUTPUT_INVALID',
+          message: 'AI returned an unexpected response shape. Incident logged.',
+          retryable: true,
+        },
+        { status: 502 }
+      );
+    }
+
+    // 6. Return the flow output directly — matches existing frontend expectations.
+    const latencyMs = Date.now() - startedAt;
+    logger.info('skin-scan: success', { latencyMs, triagePriority: flowOutput.triagePriority });
+
+    return NextResponse.json(flowOutput, { status: 200 });
+  } catch (err) {
+    logger.error('skin-scan: unhandled exception', { err: (err as Error).message });
+    return NextResponse.json<ApiErrorResponse>(
+      { success: false, errorCode: 'INTERNAL_ERROR', message: 'Unexpected server error.', retryable: true },
+      { status: 500 }
+    );
+  }
+}
+
+// Increase the body parser ceiling so Next.js doesn't truncate before our validator runs.
+export const runtime = 'nodejs';
+export const maxDuration = 30;
