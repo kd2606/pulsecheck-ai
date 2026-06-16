@@ -33,6 +33,7 @@ export async function GET(request: Request) {
             method: "POST",
             headers: {
                 "Content-Type": "text/plain",
+                "User-Agent": "PulseCheckAI/1.0 (contact@pulsecheck.ai)",
             },
             body: query,
         });
