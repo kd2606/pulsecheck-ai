@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         // Call the dedicated Pulse Genkit flow with resilience wrapper
         const result = await callWithResilience(
             () => chatWithPulse(previousHistory, lastUserContent, userContext),
-            { maxAttempts: 3, label: 'pulse-chat-flow' }
+            { maxAttempts: 2, label: 'pulse-chat-flow', maxDelayMs: 2_000 }
         );
         const responseText = result.content;
 

@@ -95,7 +95,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           spreadRate,
           recentChanges,
         }),
-        { maxAttempts: 3, label: 'skin-scan-flow' }
+        { maxAttempts: 2, label: 'skin-scan-flow', maxDelayMs: 2_000 }
       );
     } catch (err) {
       // Quota / rate-limit exhaustion → 503 with Retry-After.
