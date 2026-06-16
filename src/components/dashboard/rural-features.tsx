@@ -20,6 +20,7 @@ import { db } from "@/firebase/clientApp";
 import { getMedicinePrices, type MedicinePriceInfo } from "@/ai/flows/medicine";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { VoiceCallInterface } from "@/components/voice-call-interface";
 
 /**
  * Regional Medical Centers - Redesigned as high-fidelity node monitoring
@@ -556,57 +557,24 @@ export function EmergencyButton() {
 }
 
 /**
- * Telemetry Voice Interface Button
+ * Telemetry Voice Interface Button (Now triggers Full Voice Call UI)
  */
 export function VoiceAssistantButton() {
-    const [listening, setListening] = useState(false);
-
-    const toggleListening = () => {
-        if (!listening) {
-            toast.success("Voice Helper Ready", { description: "I am listening to you." });
-        }
-        setListening(!listening);
-    };
+    const [callActive, setCallActive] = useState(false);
 
     return (
-        <div className="relative">
-            <AnimatePresence>
-                {listening && (
-                    <>
-                        <motion.div 
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1.5, opacity: 0.3 }}
-                            exit={{ scale: 1, opacity: 0 }}
-                            transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
-                            className="absolute inset-0 bg-emerald-500 rounded-xl blur-xl"
-                        />
-                        <motion.div 
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 2, opacity: 0.1 }}
-                            exit={{ scale: 1, opacity: 0 }}
-                            transition={{ repeat: Infinity, duration: 2, ease: "easeOut", delay: 0.5 }}
-                            className="absolute inset-0 bg-emerald-500 rounded-xl blur-2xl"
-                        />
-                    </>
-                )}
-            </AnimatePresence>
+        <>
             <motion.button
-                onClick={toggleListening}
-                className={`flex items-center justify-center h-12 w-12 rounded-xl shadow-2xl transition-all backdrop-blur-3xl border relative z-10 ${listening ? 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_30px_rgba(16,185,129,0.4)]' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
+                onClick={() => setCallActive(true)}
+                className="flex items-center justify-center h-12 w-12 rounded-xl shadow-2xl transition-all backdrop-blur-3xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 relative z-10"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                title="Start Voice Search"
+                title="Start Voice Call"
             >
-                <Mic className={`h-6 w-6 transition-transform duration-500 ${listening ? 'scale-110' : 'scale-100'}`} />
-                {listening && (
-                    <motion.div 
-                        initial={{ height: "4px" }}
-                        animate={{ height: ["4px", "12px", "4px"] }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-[2px] bg-white rounded-full opacity-40 shadow-sm"
-                    />
-                )}
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-xl blur-md animate-pulse pointer-events-none" />
+                <Phone className="h-5 w-5" />
             </motion.button>
-        </div>
+            {callActive && <VoiceCallInterface onClose={() => setCallActive(false)} />}
+        </>
     );
 }
