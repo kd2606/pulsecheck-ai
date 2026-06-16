@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
-import { Mic, MicOff, Loader2, ExternalLink, MapPin, AlertTriangle, Activity, ShieldCheck } from "lucide-react";
+import { Mic, MicOff, Loader2, ExternalLink, MapPin, AlertTriangle, Activity, ShieldCheck, Save } from "lucide-react";
 import { analyzeCough } from "@/ai/flows/cough-analysis";
 import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";

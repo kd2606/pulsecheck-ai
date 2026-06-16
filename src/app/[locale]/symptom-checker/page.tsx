@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
 import { FadeIn } from "@/components/ui/fade-in";
-import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck, Info, Heart, Activity } from "lucide-react";
+import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck, Info, Heart, Activity, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/firebase/auth/useUser";
 import { saveHealthRecord } from "@/firebase/healthRecords";

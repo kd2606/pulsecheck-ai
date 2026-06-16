@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MedicalDisclaimer } from "@/components/medical-disclaimer";
-import { Camera, Upload, Loader2, CheckCircle, XCircle, ExternalLink, Activity, ShieldCheck, Moon, Laptop, HeartPulse } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, XCircle, ExternalLink, Activity, ShieldCheck, Moon, Laptop, HeartPulse, Save } from "lucide-react";
 import { analyzeVisionScan } from "@/ai/flows/vision-scan";
 import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
