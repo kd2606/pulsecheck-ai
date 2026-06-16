@@ -56,6 +56,7 @@ export function FloatingChat() {
     const [isListening, setIsListening] = useState(false);
     const [agentContext, setAgentContext] = useState<any>(null);
     const [isSpeaking, setIsSpeaking] = useState<string | null>(null);
+    const [cooldownSeconds, setCooldownSeconds] = useState(0);
     const scrollRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
@@ -244,6 +245,18 @@ export function FloatingChat() {
         }
     };
 
+    // Cooldown timer for 503 AI_CAPACITY_EXHAUSTED
+    useEffect(() => {
+        if (cooldownSeconds <= 0) return;
+        const timer = setInterval(() => {
+            setCooldownSeconds(prev => {
+                if (prev <= 1) { clearInterval(timer); return 0; }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [cooldownSeconds]);
+
     // Auto-scroll
     useEffect(() => {
         if (scrollRef.current) {
@@ -314,6 +327,26 @@ export function FloatingChat() {
                     userContext: agentContext
                 }),
             });
+
+            // Intercept 503 AI_CAPACITY_EXHAUSTED before SSE parsing
+            if (response.status === 503) {
+                const body = await response.json().catch(() => ({}));
+                if (body?.error === 'AI_CAPACITY_EXHAUSTED') {
+                    setIsLoading(false);
+                    setMessages(prev => {
+                        const filtered = prev.filter(m => m.id !== modelMsgId);
+                        return [...filtered, {
+                            id: Date.now().toString(),
+                            role: "model" as const,
+                            content: "⚠️ I'm experiencing high demand right now. For urgent symptoms (e.g., chest pain, breathing issues), please contact emergency services immediately.\n\n🔄 I'll be ready again shortly.",
+                            timestamp: new Date(),
+                            type: "text" as const,
+                        }];
+                    });
+                    setCooldownSeconds(30);
+                    return;
+                }
+            }
 
             if (!response.ok) throw new Error("Network response was not ok");
             if (!response.body) throw new Error("No response body");
@@ -549,15 +582,15 @@ export function FloatingChat() {
                                 <Input
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    placeholder={isListening ? "Listening..." : "Ask Pulse anything..."}
+                                    placeholder={cooldownSeconds > 0 ? `⏳ Retry in ${cooldownSeconds}s...` : isListening ? "Listening..." : "Ask Pulse anything..."}
                                     className="flex-1 rounded-full border-muted-foreground/20 focus-visible:ring-emerald-500/50 bg-background h-10"
-                                    disabled={isLoading || isListening}
+                                    disabled={isLoading || isListening || cooldownSeconds > 0}
                                     autoComplete="off"
                                 />
                                 <Button
                                     type="submit"
                                     size="icon"
-                                    disabled={!input.trim() || isLoading}
+                                    disabled={!input.trim() || isLoading || cooldownSeconds > 0}
                                     className="h-10 w-10 rounded-full shrink-0 bg-teal-600 hover:bg-teal-700 text-white"
                                 >
                                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4" />}
