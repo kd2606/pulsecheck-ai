@@ -20,7 +20,7 @@ export function ExpandableCard({ children }: { children: React.ReactNode }) {
                 </div>
             </div>
             <DialogContent className="max-w-[95vw] md:max-w-[80vw] w-full max-h-[95vh] h-[95vh] md:h-auto overflow-hidden bg-transparent border-none shadow-none p-0 [&>button]:hidden">
-                <div className="relative h-full w-full bg-[#0a0a0a] rounded-[3rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-y-auto">
+                <div className="relative h-full w-full bg-[#0a0a0a] rounded-[3rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-y-auto custom-scroll overflow-x-hidden">
                     {/* Background glows */}
                     <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/5 blur-[150px] -mr-96 -mt-96 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[150px] -ml-48 -mb-48 pointer-events-none" />
