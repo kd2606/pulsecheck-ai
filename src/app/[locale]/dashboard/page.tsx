@@ -89,11 +89,11 @@ export default function DashboardPage() {
     }
 
     const navItems = [
-        { icon: LayoutDashboard, label: "Home", active: true },
-        { icon: Activity, label: "Health Checks", path: `/${locale}/vision-scan` },
-        { icon: ShieldCheck, label: "Govt Schemes" },
-        { icon: Database, label: "Hospitals" },
-        { icon: Zap, label: "Health News" },
+        { icon: LayoutDashboard, label: "Home", active: true, path: `/${locale}/dashboard` },
+        { icon: Activity, label: "Health Checks", path: `/${locale}/symptom-checker` },
+        { icon: ShieldCheck, label: "Govt Schemes", path: `/${locale}/govt-schemes` },
+        { icon: Database, label: "Health Records", path: `/${locale}/health-records` },
+        { icon: Zap, label: "Health Trends", path: `/${locale}/health-trends` },
     ];
 
     return (
@@ -109,9 +109,11 @@ export default function DashboardPage() {
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
             `}>
                 <div className="mb-12">
-                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center emerald-glow group cursor-pointer transition-transform duration-500 hover:rotate-12">
-                        <HeartPulse className="w-6 h-6 text-white" />
-                    </div>
+                    <Link href={`/${locale}/dashboard`}>
+                        <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center emerald-glow group cursor-pointer transition-transform duration-500 hover:rotate-12">
+                            <HeartPulse className="w-6 h-6 text-white" />
+                        </div>
+                    </Link>
                 </div>
                 
                 <nav className="flex flex-col gap-8 flex-1">
@@ -127,7 +129,9 @@ export default function DashboardPage() {
                 </nav>
 
                 <div className="flex flex-col gap-6 pt-8 border-t border-white/5 w-full items-center">
-                    <Settings className="w-6 h-6 text-white/20 hover:text-white/60 cursor-pointer transition-colors" />
+                    <UserProfileModal>
+                        <Settings className="w-6 h-6 text-white/20 hover:text-white/60 cursor-pointer transition-colors" />
+                    </UserProfileModal>
                     <UserProfileModal>
                         <button className="h-10 w-10 rounded-full border border-white/10 overflow-hidden hover:border-emerald-500/50 transition-all">
                             {user.photoURL ? (
