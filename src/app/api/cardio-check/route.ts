@@ -127,7 +127,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const latencyMs = Date.now() - startedAt;
     logger.info('cardio-check: success', { latencyMs, triagePriority: flowOutput.triagePriority });
 
-    logAudit('/api/cardio-check', flowOutput.triagePriority, JSON.stringify({ age, weight, symptoms, isSmoker, hasHypertension }));
+    logAudit('/api/cardio-check', flowOutput.triagePriority, JSON.stringify(inputData));
 
     return NextResponse.json(flowOutput, { status: 200 });
   } catch (err) {
