@@ -3,7 +3,7 @@ import { ShieldCheck, Ban, Lock, Mail } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
     return (
-        <div className="container max-w-4xl py-10 px-4 space-y-12">
+        <div className="container mx-auto max-w-4xl py-10 px-4 space-y-12">
             <div className="space-y-4 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-ull bg-emerald-500/10">
                     <ShieldCheck className="h-8 w-8 text-emerald-500" />
@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
 
             {/* Section 1 - Simple Summary */}
             <div className="grid gap-6 md:grid-cols-3">
-                <Card className="bg-white/5 dark:bg-black/20 border-white/10">
+                <Card>
                     <CardHeader>
                         <Lock className="h-8 w-8 text-indigo-400 mb-2" />
                         <CardTitle className="text-lg">Your Data Stays With You</CardTitle>
@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white/5 dark:bg-black/20 border-white/10">
+                <Card>
                     <CardHeader>
                         <Ban className="h-8 w-8 text-rose-400 mb-2" />
                         <CardTitle className="text-lg">No Ads. Ever.</CardTitle>
@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white/5 dark:bg-black/20 border-white/10">
+                <Card>
                     <CardHeader>
                         <ShieldCheck className="h-8 w-8 text-emerald-400 mb-2" />
                         <CardTitle className="text-lg">Secure Storage</CardTitle>
@@ -49,13 +49,13 @@ export default function PrivacyPolicyPage() {
                 </Card>
             </div>
 
-            <div className="space-y-8 max-w-3xl border-t border-white/10 pt-10">
+            <div className="space-y-8 max-w-3xl border-t border-border pt-10">
                 <section className="space-y-4">
                     <h2 className="text-2xl font-semibold text-emerald-400">What We Collect</h2>
                     <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                        <li><strong className="text-white">Profile Data:</strong> Name, age, gender (for personalization).</li>
-                        <li><strong className="text-white">Health Inputs:</strong> Symptom checker inputs and scan results (stored securely per user).</li>
-                        <li><strong className="text-white">Device Info:</strong> Basic device telemetry for app performance troubleshooting.</li>
+                        <li><strong className="text-foreground">Profile Data:</strong> Name, age, gender (for personalization).</li>
+                        <li><strong className="text-foreground">Health Inputs:</strong> Symptom checker inputs and scan results (stored securely per user).</li>
+                        <li><strong className="text-foreground">Device Info:</strong> Basic device telemetry for app performance troubleshooting.</li>
                     </ul>
                 </section>
 
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
                     </ul>
                 </section>
 
-                <section className="space-y-4 border-t border-white/10 pt-8">
+                <section className="space-y-4 border-t border-border pt-8">
                     <h2 className="text-2xl font-semibold">Contact Us</h2>
                     <p className="text-muted-foreground flex items-center">
                         <Mail className="mr-2 h-5 w-5" />

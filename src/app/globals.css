@@ -49,9 +49,38 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-glow: var(--accent-glow);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 }
 
 :root {
+  --bg-primary: #08090E;
+  --bg-secondary: #0F1117;
+  --bg-tertiary: #161922;
+  --border-subtle: #1F2330;
+  --border-default: #2A2F3E;
+  --text-primary: #F5F7FA;
+  --text-secondary: #B8BFCC;
+  --text-tertiary: #6B7385;
+  --accent-primary: #14B8A6;
+  --accent-hover: #0F9488;
+  --accent-glow: rgba(20, 184, 166, 0.15);
+  --danger: #EF4444;
+  --success: #10B981;
+  --warning: #F59E0B;
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -123,6 +152,9 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html, body {
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground;
