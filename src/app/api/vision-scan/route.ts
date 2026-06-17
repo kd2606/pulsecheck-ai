@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { analyzeVisionScan } from '@/ai/flows/vision-scan';
 import { callWithResilience, isCapacityExhausted } from '@/ai/resilience';
 import { logger } from '@/lib/logger';
+import { logAudit } from '@/lib/auditLogger';
 
 // --- Constants ---
 const MAX_BASE64_BYTES = 8 * 1024 * 1024;
@@ -139,6 +140,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // 6. Return the flow output directly — matches existing frontend expectations.
     const latencyMs = Date.now() - startedAt;
     logger.info('vision-scan: success', { latencyMs, triagePriority: flowOutput.triagePriority });
+
+    logAudit('/api/vision-scan', flowOutput.triagePriority, imageBase64);
 
     return NextResponse.json(flowOutput, { status: 200 });
   } catch (err) {

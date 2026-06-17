@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { analyzeSkinScan } from '@/ai/flows/skin-scan';
 import { callWithResilience, isCapacityExhausted } from '@/ai/resilience';
 import { logger } from '@/lib/logger';
+import { logAudit } from '@/lib/auditLogger';
 
 // --- Constants ---
 // 8 MB cap on the base64 string. Raw image ≈ 6 MB (base64 ~33% overhead).
@@ -146,6 +147,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // 6. Return the flow output directly — matches existing frontend expectations.
     const latencyMs = Date.now() - startedAt;
     logger.info('skin-scan: success', { latencyMs, triagePriority: flowOutput.triagePriority });
+
+    logAudit('/api/skin-scan', flowOutput.triagePriority, imageBase64);
 
     return NextResponse.json(flowOutput, { status: 200 });
   } catch (err) {

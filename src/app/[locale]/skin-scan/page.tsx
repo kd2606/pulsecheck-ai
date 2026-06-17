@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { saveOfflineSkinScan } from "@/lib/offlineSkinScans";
+import { EmergencyOverlay } from "@/components/emergency-overlay";
 
 
 export default function SkinScanPage() {
@@ -28,6 +29,7 @@ export default function SkinScanPage() {
     const [step, setStep] = useState(1);
     const [imageData, setImageData] = useState<string | null>(null);
     const [showCamera, setShowCamera] = useState(false);
+    const [isEmergency, setIsEmergency] = useState(false);
     
     // Metadata states
     const [itchingLevel, setItchingLevel] = useState<string>("");
@@ -55,6 +57,34 @@ export default function SkinScanPage() {
         return () => clearInterval(timer);
     }, [cooldownSeconds]);
 
+    if (isEmergency) {
+        return <EmergencyOverlay onDismiss={() => setIsEmergency(false)} />;
+    }
+
+    const compressImage = (fileOrBlob: Blob): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(fileOrBlob);
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                    // WebP at 70% quality to compress from ~8MB to ~400KB
+                    const dataUrl = canvas.toDataURL("image/webp", 0.7);
+                    resolve(dataUrl.split(",")[1]);
+                } else {
+                    reject("No canvas context");
+                }
+                URL.revokeObjectURL(url);
+            };
+            img.onerror = () => reject("Image load error");
+            img.src = url;
+        });
+    };
+
     const startCamera = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -77,7 +107,7 @@ export default function SkinScanPage() {
         const ctx = canvas.getContext("2d");
         if (ctx) {
             ctx.drawImage(video, 0, 0);
-            const base64 = canvas.toDataURL("image/jpeg").split(",")[1];
+            const base64 = canvas.toDataURL("image/webp", 0.7).split(",")[1];
             setImageData(base64);
             const stream = video.srcObject as MediaStream;
             stream?.getTracks().forEach((track) => track.stop());
@@ -85,15 +115,15 @@ export default function SkinScanPage() {
         }
     };
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64 = (reader.result as string).split(",")[1];
-            setImageData(base64);
-        };
-        reader.readAsDataURL(file);
+        try {
+            const compressedBase64 = await compressImage(file);
+            setImageData(compressedBase64);
+        } catch (err) {
+            toast.error("Failed to compress image");
+        }
     };
 
     const isMetadataComplete = itchingLevel && spreadRate && recentChanges;
@@ -124,8 +154,12 @@ export default function SkinScanPage() {
             setResults(result);
             if (!result) return;
 
-            // Auto-save the health record
             const topPriority = result.triagePriority;
+            if (topPriority === "High Triage Priority" || topPriority === "CRITICAL_EMERGENCY") {
+                setIsEmergency(true);
+            }
+
+            // Auto-save the health record
             const severityLevel = topPriority === "High Triage Priority" ? "high" : topPriority === "Elevated Triage Priority" ? "moderate" : "low";
             const verdictStr = topPriority === "High Triage Priority" ? "doctor_today" : topPriority === "Elevated Triage Priority" ? "monitor" : "rest";
 

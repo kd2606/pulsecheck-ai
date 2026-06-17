@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
+import { getOfflineSkinScans } from "@/lib/offlineSkinScans";
 import { DiagnoverseLogo } from "@/components/diagnoverse-logo";
 import {
     LayoutDashboard,
@@ -52,6 +54,20 @@ export function AppSidebar({ locale }: { locale: string }) {
     const pathname = usePathname();
     const isDemo = useIsDemo();
     const router = useRouter();
+    const [pendingSyncs, setPendingSyncs] = useState(0);
+
+    useEffect(() => {
+        const checkSyncs = async () => {
+            try {
+                const scans = await getOfflineSkinScans();
+                setPendingSyncs(scans.length);
+            } catch(e) {}
+        };
+        checkSyncs();
+        // Setup an interval to re-check
+        const intv = setInterval(checkSyncs, 5000);
+        return () => clearInterval(intv);
+    }, []);
 
     const navItems = [
         { title: t("dashboard"), url: `/${locale}/dashboard`, icon: LayoutDashboard },
@@ -136,17 +152,22 @@ export function AppSidebar({ locale }: { locale: string }) {
                         </SidebarGroupContent>
                     </SidebarGroup>
 
-                    {/* Demo CTA at bottom of sidebar */}
+                    {/* Sync Status Indicator */}
+                    <div className="mt-auto p-4 pb-2">
+                        {pendingSyncs > 0 && (
+                            <div className="mb-2 w-full text-center bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold rounded-lg py-2 px-3 animate-pulse">
+                                ⏳ Pending Sync: {pendingSyncs}
+                            </div>
+                        )}
                     {isDemo && (
-                        <div className="mt-auto p-4 pb-2">
-                            <Link
-                                href={`/${locale}/signup`}
-                                className="block w-full text-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-semibold rounded-lg py-2 px-3 hover:bg-yellow-500/20 transition-colors"
-                            >
-                                🔓 Sign up to save data
-                            </Link>
-                        </div>
+                        <Link
+                            href={`/${locale}/signup`}
+                            className="block w-full text-center bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-semibold rounded-lg py-2 px-3 hover:bg-yellow-500/20 transition-colors"
+                        >
+                            🔓 Sign up to save data
+                        </Link>
                     )}
+                    </div>
                     
                 </SidebarContent>
             </Sidebar>

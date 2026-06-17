@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { analyzeCough } from '@/ai/flows/cough-analysis';
 import { callWithResilience, isCapacityExhausted } from '@/ai/resilience';
 import { logger } from '@/lib/logger';
+import { logAudit } from '@/lib/auditLogger';
 
 const MAX_BASE64_BYTES = 8 * 1024 * 1024;
 
@@ -122,6 +123,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const latencyMs = Date.now() - startedAt;
     logger.info('cough-analysis: success', { latencyMs, triagePriority: flowOutput.triagePriority });
+
+    logAudit('/api/cough-analysis', flowOutput.triagePriority, audioBase64);
 
     return NextResponse.json(flowOutput, { status: 200 });
   } catch (err) {

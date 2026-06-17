@@ -14,6 +14,7 @@ import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
 import { saveHealthRecord } from "@/firebase/healthRecords";
+import { EmergencyOverlay } from "@/components/emergency-overlay";
 
 export default function CardioCheckPage() {
     const t = useTranslations("cardioCheck");
@@ -24,6 +25,7 @@ export default function CardioCheckPage() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [results, setResults] = useState<any>(null);
+    const [isEmergency, setIsEmergency] = useState(false);
 
     const [formData, setFormData] = useState({
         age: "",
@@ -39,6 +41,10 @@ export default function CardioCheckPage() {
     const updateForm = (key: string, value: string) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
+
+    if (isEmergency) {
+        return <EmergencyOverlay onDismiss={() => setIsEmergency(false)} />;
+    }
 
     const handleNext = () => {
         if (!formData.age || !formData.gender) {
@@ -71,8 +77,13 @@ export default function CardioCheckPage() {
             const data = await response.json();
             setResults(data);
 
-            // Auto-save the health record
             const isHighPriority = data.triagePriority === "High Priority";
+            
+            if (isHighPriority) {
+                setIsEmergency(true);
+            }
+
+            // Auto-save the health record
             const severityLevel = isHighPriority ? "high" : data.triagePriority === "Elevated Priority" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "urgent_support" : data.triagePriority === "Elevated Priority" ? "monitor" : "rest";
 

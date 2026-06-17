@@ -16,8 +16,9 @@ import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
 import { saveHealthRecord } from "@/firebase/healthRecords";
+import { EmergencyOverlay } from "@/components/emergency-overlay";
 
-type Results = Awaited<ReturnType<typeof analyzeCough>>;
+type Results = any;
 
 export default function CoughAnalysisPage() {
     const t = useTranslations("scan.cough");
@@ -41,6 +42,7 @@ export default function CoughAnalysisPage() {
 
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<Results | null>(null);
+    const [isEmergency, setIsEmergency] = useState(false);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -110,17 +112,28 @@ export default function CoughAnalysisPage() {
         setStep("analyzing");
         setLoading(true);
         try {
-            const result = await analyzeCough({
-                audioBase64: audioData,
-                duration,
-                fever,
-                breathingDifficulty,
+            const response = await fetch('/api/cough-analysis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    audioBase64: audioData,
+                    duration,
+                    fever,
+                    breathingDifficulty,
+                })
             });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Failed to analyze");
+            
             setResults(result);
             if (!result) return;
 
+            const isHighPriority = result.triagePriority === "High Triage Priority" || result.triagePriority === "CRITICAL_EMERGENCY";
+            if (isHighPriority) {
+                setIsEmergency(true);
+            }
+
             // Auto-save the health record
-            const isHighPriority = result.triagePriority === "High Triage Priority";
             const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Triage Priority" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
@@ -168,6 +181,10 @@ export default function CoughAnalysisPage() {
         barking: "bg-red-500",
         unknown: "bg-gray-500",
     };
+
+    if (isEmergency) {
+        return <EmergencyOverlay onDismiss={() => setIsEmergency(false)} />;
+    }
 
     return (
         <div className="space-y-6">

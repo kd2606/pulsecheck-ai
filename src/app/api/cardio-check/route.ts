@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { analyzeCardioCheck } from '@/ai/flows/cardio-check';
 import { callWithResilience, isCapacityExhausted } from '@/ai/resilience';
 import { logger } from '@/lib/logger';
+import { logAudit } from '@/lib/auditLogger';
 
 const CardioCheckRequestSchema = z.object({
   age: z.union([z.number(), z.string()]).transform(val => Number(val)).pipe(z.number().min(0).max(120, 'Invalid age')),
@@ -125,6 +126,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const latencyMs = Date.now() - startedAt;
     logger.info('cardio-check: success', { latencyMs, triagePriority: flowOutput.triagePriority });
+
+    logAudit('/api/cardio-check', flowOutput.triagePriority, JSON.stringify({ age, weight, symptoms, isSmoker, hasHypertension }));
 
     return NextResponse.json(flowOutput, { status: 200 });
   } catch (err) {

@@ -15,6 +15,9 @@ import { Loader2, ExternalLink, MapPin, Stethoscope, AlertTriangle, ShieldCheck,
 import { toast } from "sonner";
 import { useUser } from "@/firebase/auth/useUser";
 import { saveHealthRecord } from "@/firebase/healthRecords";
+import { EmergencyOverlay } from "@/components/emergency-overlay";
+
+const ANIMATION_URL = "https://lottie.host/933a216f-a63e-4d45-ae57-4180860d5bfa/YkX9Nl6zH4.json";
 
 type Results = any;
 
@@ -35,6 +38,7 @@ export default function SymptomCheckerPage() {
 
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<Results | null>(null);
+    const [isEmergency, setIsEmergency] = useState(false);
 
     const handleNextStep = () => {
         if (!symptoms.trim()) {
@@ -69,10 +73,16 @@ export default function SymptomCheckerPage() {
 
             const result = await response.json();
             setResults(result);
+            setResults(result);
             if (!result) return;
 
+            const isHighPriority = result.triagePriority === "High Triage Priority" || result.triagePriority === "CRITICAL_EMERGENCY";
+            
+            if (isHighPriority) {
+                setIsEmergency(true);
+            }
+
             // Auto-save the health record
-            const isHighPriority = result.triagePriority === "High Triage Priority";
             const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Triage Priority" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 

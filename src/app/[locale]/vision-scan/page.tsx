@@ -17,8 +17,11 @@ import { useUser } from "@/firebase/auth/useUser";
 import { useScanStore } from "@/firebase/firestore/useScanStore";
 import { toast } from "sonner";
 import { FadeIn } from "@/components/ui/fade-in";
+import { EmergencyOverlay } from "@/components/emergency-overlay";
 import { saveHealthRecord } from "@/firebase/healthRecords";
 import { motion, AnimatePresence } from "framer-motion";
+
+const ANIMATION_URL = "https://lottie.host/933a216f-a63e-4d45-ae57-4180860d5bfa/YkX9Nl6zH4.json";
 
 
 type Results = Awaited<ReturnType<typeof analyzeVisionScan>>;
@@ -45,6 +48,7 @@ export default function VisionScanPage() {
 
     const [loading, setLoading] = useState(false);
     const [results, setResults] = useState<Results | null>(null);
+    const [isEmergency, setIsEmergency] = useState(false);
 
     const startCamera = useCallback(async () => {
         try {
@@ -59,6 +63,30 @@ export default function VisionScanPage() {
         }
     }, []);
 
+    const compressImage = (fileOrBlob: Blob): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(fileOrBlob);
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                    // WebP at 70% quality to compress from ~8MB to ~400KB
+                    const dataUrl = canvas.toDataURL("image/webp", 0.7);
+                    resolve(dataUrl.split(",")[1]);
+                } else {
+                    reject("No canvas context");
+                }
+                URL.revokeObjectURL(url);
+            };
+            img.onerror = () => reject("Image load error");
+            img.src = url;
+        });
+    };
+
     const capturePhoto = () => {
         if (!videoRef.current || !canvasRef.current) return;
         const canvas = canvasRef.current;
@@ -68,7 +96,7 @@ export default function VisionScanPage() {
         const ctx = canvas.getContext("2d");
         if (ctx) {
             ctx.drawImage(video, 0, 0);
-            const base64 = canvas.toDataURL("image/jpeg").split(",")[1];
+            const base64 = canvas.toDataURL("image/webp", 0.7).split(",")[1];
             setImageData(base64);
             const stream = video.srcObject as MediaStream;
             stream?.getTracks().forEach((track) => track.stop());
@@ -76,15 +104,15 @@ export default function VisionScanPage() {
         }
     };
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64 = (reader.result as string).split(",")[1];
-            setImageData(base64);
-        };
-        reader.readAsDataURL(file);
+        try {
+            const compressedBase64 = await compressImage(file);
+            setImageData(compressedBase64);
+        } catch (err) {
+            toast.error("Failed to compress image");
+        }
     };
 
     const handleNextStep = () => {
@@ -110,8 +138,12 @@ export default function VisionScanPage() {
             setResults(result);
             if (!result) return;
 
+            const isHighPriority = result.triagePriority === "High Fatigue Priority" || result.triagePriority === "CRITICAL_EMERGENCY";
+            if (isHighPriority) {
+                setIsEmergency(true);
+            }
+
             // Auto-save the health record
-            const isHighPriority = result.triagePriority === "High Fatigue Priority";
             const severityLevel = isHighPriority ? "high" : result.triagePriority === "Elevated Strain Profile" ? "moderate" : "low";
             const verdictStr = isHighPriority ? "doctor_today" : severityLevel === "moderate" ? "monitor" : "rest";
 
