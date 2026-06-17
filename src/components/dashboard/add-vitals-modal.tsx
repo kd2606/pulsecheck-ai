@@ -128,7 +128,7 @@ export function AddVitalsModal() {
                     <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full h-16 mt-4 rounded-2xl bg-white text-black hover:bg-emerald-400 font-bold text-base transition-all shadow-[0_20px_50px_rgba(255,255,255,0.05)] uppercase tracking-widest font-space"
+                        className="w-full h-16 mt-4 rounded-2xl bg-[#0B1120] text-black hover:bg-emerald-400 font-bold text-base transition-all shadow-[0_20px_50px_rgba(255,255,255,0.05)] uppercase tracking-widest font-space"
                     >
                         {loading ? (
                             <span className="flex items-center gap-3">

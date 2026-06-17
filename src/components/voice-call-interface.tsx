@@ -70,6 +70,7 @@ export function VoiceCallInterface({ onClose }: { onClose: () => void }) {
             if (recognitionRef.current) recognitionRef.current.stop();
             if (audioPlayerRef.current) {
                 audioPlayerRef.current.pause();
+                audioPlayerRef.current.src = "";
                 audioPlayerRef.current = null;
             }
         };
@@ -155,7 +156,10 @@ export function VoiceCallInterface({ onClose }: { onClose: () => void }) {
     const endCall = () => {
         setCallState("ended");
         if (recognitionRef.current) recognitionRef.current.stop();
-        if (audioPlayerRef.current) audioPlayerRef.current.pause();
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.pause();
+            audioPlayerRef.current.src = "";
+        }
         setTimeout(onClose, 500);
     };
 

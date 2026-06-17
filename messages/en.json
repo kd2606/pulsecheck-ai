@@ -21,7 +21,7 @@
         "visionScan": "Vision Scan",
         "coughAnalysis": "Cough Analysis",
         "skinScan": "Skin Scan",
-        "mentalHealth": "Wellness Screener",
+        "mentalHealth": "Mental Health",
         "cardioCheck": "Cardio Wellness",
         "trends": "Health Trends",
         "people": "Family Members",
@@ -130,7 +130,7 @@
             "results": "Skin Analysis Report"
         },
         "mentalHealth": {
-            "title": "Wellness Screener",
+            "title": "Mental Health Assessment",
             "description": "Answer a few quick questions based on lifestyle and stress factors for a wellness assessment.",
             "question": "Question {number} of {total}",
             "options": {

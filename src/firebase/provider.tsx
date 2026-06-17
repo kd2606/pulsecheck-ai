@@ -29,8 +29,8 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
         const handleRedirect = async () => {
             try {
                 const result = await getRedirectResult(auth);
-                if (result) {
-                    console.log("Redirect sign-in successful for:", result.user.email);
+                if (result?.user) {
+                    // Redirect sign-in successful
                 }
             } catch (error: any) {
                 console.error("Critical Redirect sign-in error:", error);

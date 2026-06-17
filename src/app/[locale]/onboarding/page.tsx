@@ -186,7 +186,7 @@ export default function OnboardingPage() {
                             </div>
 
                             <div className="pt-6 space-y-6">
-                                <Button onClick={handleNext} className="w-full max-w-sm h-16 text-lg bg-white text-black hover:bg-indigo-50 rounded-2xl font-bold shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                <Button onClick={handleNext} className="w-full max-w-sm h-16 text-lg bg-[#0B1120] text-black hover:bg-indigo-50 rounded-2xl font-bold shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98]">
                                     Begin Onboarding <ArrowRight className="ml-2 w-5 h-5" />
                                 </Button>
                                 <p className="text-xs text-white/20 font-bold tracking-[0.2em] uppercase">Security Clearance Level 1</p>
@@ -260,7 +260,7 @@ export default function OnboardingPage() {
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <Button onClick={handleNext} className="w-full h-14 bg-white text-black rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl">
+                                <Button onClick={handleNext} className="w-full h-14 bg-[#0B1120] text-black rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl">
                                     Validate & Continue <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>
                                 <button onClick={handleNext} className="text-[10px] font-bold text-white/20 hover:text-white/50 transition-colors uppercase tracking-[0.2em] py-2">
@@ -320,7 +320,7 @@ export default function OnboardingPage() {
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <Button onClick={handleFinish} disabled={isSaving} className="w-full h-14 bg-white text-black rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl">
+                                <Button onClick={handleFinish} disabled={isSaving} className="w-full h-14 bg-[#0B1120] text-black rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl">
                                     {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Finalize Configuration <ArrowRight className="ml-2 w-4 h-4" /></>}
                                 </Button>
                                 <button onClick={handleFinish} disabled={isSaving} className="text-[10px] font-bold text-white/20 hover:text-white/50 transition-colors uppercase tracking-[0.2em] py-2">

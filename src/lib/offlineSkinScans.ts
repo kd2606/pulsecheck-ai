@@ -86,7 +86,7 @@ export async function saveOfflineSkinScan(scanData: {
     await txPromise(db, STORE_NAME, 'readwrite', (store) => store.put(record));
     logger.info('offlineSkinScans: saved', { id: record.id, userId: scanData.userId });
   } finally {
-    db.close();
+    // db.close() omitted to prevent interrupting IDB transactions
   }
 }
 
@@ -100,7 +100,7 @@ export async function getOfflineSkinScans(): Promise<OfflineSkinScan[]> {
   try {
     return await txPromise(db, STORE_NAME, 'readonly', (store) => store.getAll());
   } finally {
-    db.close();
+    // db.close() omitted to prevent interrupting IDB transactions
   }
 }
 
@@ -112,7 +112,7 @@ async function removeScan(id: string): Promise<void> {
   try {
     await txPromise(db, STORE_NAME, 'readwrite', (store) => store.delete(id));
   } finally {
-    db.close();
+    // db.close() omitted to prevent interrupting IDB transactions
   }
 }
 
@@ -126,7 +126,7 @@ async function incrementRetry(scan: OfflineSkinScan): Promise<void> {
       store.put({ ...scan, retryCount: scan.retryCount + 1 })
     );
   } finally {
-    db.close();
+    // db.close() omitted to prevent interrupting IDB transactions
   }
 }
 

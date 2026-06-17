@@ -62,6 +62,20 @@ export function FloatingChat() {
     const audioChunksRef = useRef<Blob[]>([]);
     const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
 
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.pause();
+                audioPlayerRef.current.src = "";
+                audioPlayerRef.current = null;
+            }
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+                mediaRecorderRef.current.stop();
+            }
+        };
+    }, []);
+
     // Fetch user context when chat opens
     useEffect(() => {
         let fallbackTimeout: NodeJS.Timeout;
@@ -441,8 +455,8 @@ export function FloatingChat() {
                         <div className="bg-card border-b p-3 flex items-center justify-between shadow-sm shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="relative">
-                                    <div className="h-10 w-10 border border-emerald-500/20 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                                        <HeartPulse className="h-5 w-5 text-emerald-500" />
+                                    <div className="h-10 w-10 border border-[#0D9488]/20 dark:border-[#14B8A6]/20 rounded-full bg-[#0D9488]/10 dark:bg-[#14B8A6]/10 flex items-center justify-center">
+                                        <HeartPulse className="h-5 w-5 text-[#0D9488] dark:text-[#14B8A6]" />
                                     </div>
                                     <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-card"></span>
                                 </div>
@@ -475,7 +489,7 @@ export function FloatingChat() {
                                                 <p className="text-xs text-muted-foreground mb-3">{msg.cardData.description}</p>
                                                 <Button
                                                     onClick={() => handleCardClick(msg.cardData!.href)}
-                                                    className="w-full bg-teal-600 hover:bg-teal-700 text-white h-8 text-xs font-semibold"
+                                                    className="w-full bg-[#0D9488] hover:bg-[#0F766E] text-white dark:bg-[#14B8A6] dark:hover:bg-[#0D9488] dark:text-slate-900 h-8 text-xs font-semibold"
                                                 >
                                                     Open <ArrowRight className="h-3 w-3 ml-1" />
                                                 </Button>
@@ -500,12 +514,12 @@ export function FloatingChat() {
                                         className={`flex items-start gap-2 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"}`}
                                     >
                                         <div className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                                            <div className={`p-3 rounded-2xl text-sm whitespace-pre-wrap ${msg.role === "user" ? "bg-teal-600 text-white rounded-tr-sm" : "bg-card border shadow-sm rounded-tl-sm text-foreground"}`}>
+                                            <div className={`p-3 rounded-2xl text-sm whitespace-pre-wrap ${msg.role === "user" ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-tr-sm" : "bg-[#0D9488]/10 text-[#0D9488] dark:bg-[#14B8A6]/20 dark:text-[#14B8A6] border-none shadow-sm rounded-tl-sm"}`}>
                                                 {msg.content}
                                                 {msg.role === "model" && msg.content && (
                                                     <button 
                                                         onClick={() => playTTS(msg.content, idx.toString())}
-                                                        className="mt-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 hover:opacity-80 transition-opacity"
+                                                        className="mt-2 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0D9488] dark:text-[#14B8A6] hover:opacity-80 transition-opacity"
                                                     >
                                                         {isSpeaking === idx.toString() ? (
                                                             <><VolumeX className="h-3 w-3" /> Stop</>
@@ -526,9 +540,9 @@ export function FloatingChat() {
                             {isLoading && (
                                 <div className="flex items-start gap-2 max-w-[85%] mr-auto">
                                     <div className="p-4 rounded-2xl bg-card border shadow-sm rounded-tl-sm flex items-center gap-1.5 h-10">
-                                        <span className="h-1.5 w-1.5 bg-emerald-500/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                        <span className="h-1.5 w-1.5 bg-emerald-500/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                        <span className="h-1.5 w-1.5 bg-emerald-500/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        <span className="h-1.5 w-1.5 bg-[#0D9488] dark:bg-[#14B8A6] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <span className="h-1.5 w-1.5 bg-[#0D9488] dark:bg-[#14B8A6] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                        <span className="h-1.5 w-1.5 bg-[#0D9488] dark:bg-[#14B8A6] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                     </div>
                                 </div>
                             )}
@@ -548,7 +562,7 @@ export function FloatingChat() {
                                             <button
                                                 key={i}
                                                 onClick={() => handleSend(reply)}
-                                                className="px-3 py-1.5 bg-card border shadow-sm rounded-full text-xs hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-colors whitespace-nowrap whitespace-pre"
+                                                className="px-3 py-1.5 bg-card border shadow-sm rounded-full text-xs hover:border-[#0D9488]/30 hover:bg-[#0D9488]/5 dark:hover:border-[#14B8A6]/30 dark:hover:bg-[#14B8A6]/10 transition-colors whitespace-nowrap whitespace-pre"
                                             >
                                                 {reply}
                                             </button>
@@ -583,7 +597,7 @@ export function FloatingChat() {
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder={cooldownSeconds > 0 ? `⏳ Retry in ${cooldownSeconds}s...` : isListening ? "Listening..." : "Ask Pulse anything..."}
-                                    className="flex-1 rounded-full border-muted-foreground/20 focus-visible:ring-emerald-500/50 bg-background h-10"
+                                    className="flex-1 rounded-full border-muted-foreground/20 focus-visible:ring-[#0D9488]/50 dark:focus-visible:ring-[#14B8A6]/50 bg-background h-10"
                                     disabled={isLoading || isListening || cooldownSeconds > 0}
                                     autoComplete="off"
                                 />
@@ -591,7 +605,7 @@ export function FloatingChat() {
                                     type="submit"
                                     size="icon"
                                     disabled={!input.trim() || isLoading || cooldownSeconds > 0}
-                                    className="h-10 w-10 rounded-full shrink-0 bg-teal-600 hover:bg-teal-700 text-white"
+                                    className="h-10 w-10 rounded-full shrink-0 bg-[#0D9488] hover:bg-[#0F766E] text-white dark:bg-[#14B8A6] dark:hover:bg-[#0D9488] dark:text-slate-900"
                                 >
                                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Send className="h-4 w-4" />}
                                 </Button>

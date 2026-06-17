@@ -113,7 +113,7 @@ export default function SignupPage() {
                                     minLength={6}
                                 />
                             </div>
-                            <Button type="submit" className="w-full h-12 rounded-2xl bg-white text-black font-bold hover:bg-indigo-50 transition-all shadow-xl mt-4" disabled={loading}>
+                            <Button type="submit" className="w-full h-12 rounded-2xl bg-[#0B1120] text-black font-bold hover:bg-indigo-50 transition-all shadow-xl mt-4" disabled={loading}>
                                 <ShieldCheck className="w-4 h-4 mr-2" />
                                 {loading ? "Registering..." : "Create Identity"}
                             </Button>

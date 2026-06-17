@@ -82,10 +82,10 @@ export default function DashboardPage() {
 
     if (loading || !user) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+            <div className="min-h-screen bg-[#FAFAF9] dark:bg-[#0B1120] flex items-center justify-center">
                 <div className="relative">
-                    <div className="h-24 w-24 rounded-full border-t-2 border-emerald-500 animate-spin" />
-                    <HeartPulse className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-emerald-500 animate-pulse" />
+                    <div className="h-24 w-24 rounded-full border-t-2 border-[#0D9488] dark:border-[#14B8A6] animate-spin" />
+                    <HeartPulse className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-[#0D9488] dark:text-[#14B8A6] animate-pulse" />
                 </div>
             </div>
         );
@@ -100,13 +100,11 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white font-inter flex overflow-hidden">
-            {/* Global Grid Pattern */}
-            <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+        <div className="min-h-screen bg-[#FAFAF9] dark:bg-[#0B1120] text-slate-600 dark:text-slate-400 font-sans flex overflow-hidden">
             
             {/* Sidebar Navigation */}
             <aside className={`
-                fixed inset-y-0 left-0 z-50 w-24 bg-[#0a0a0a]/80 backdrop-blur-3xl border-r border-white/5 
+                fixed inset-y-0 left-0 z-50 w-24 bg-[#0B1120] dark:bg-[#0B1120]/80 backdrop-blur-3xl border-r border-slate-200 dark:border-slate-800 
                 flex flex-col items-center py-10 transition-transform duration-500 ease-in-out
                 md:relative md:translate-x-0
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -122,29 +120,29 @@ export default function DashboardPage() {
                 <nav className="flex flex-col gap-8 flex-1">
                     {navItems.map((item, index) => (
                         <Link key={index} href={item.path || "#"} className="group relative" onClick={() => setIsSidebarOpen(false)}>
-                            <item.icon className={`w-6 h-6 transition-all duration-300 ${item.active ? 'text-emerald-400' : 'text-white/20 group-hover:text-white/60'}`} />
-                            {item.active && <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-1 h-6 bg-emerald-500 rounded-r-full shadow-[0_0_15px_rgba(0,252,64,0.5)]" />}
-                            <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter z-50 shadow-xl border border-black/10">
+                            <item.icon className={`w-6 h-6 transition-all duration-300 ${item.active ? 'text-[#0D9488] dark:text-[#14B8A6]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+                            {item.active && <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#0D9488] dark:bg-[#14B8A6] rounded-r-full shadow-[0_0_15px_rgba(13,148,136,0.5)] dark:shadow-[0_0_15px_rgba(20,184,166,0.5)]" />}
+                            <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#0B1120] dark:bg-slate-800 text-slate-800 dark:text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter z-50 shadow-xl border border-slate-200 dark:border-slate-700">
                                 {item.label}
                             </span>
                         </Link>
                     ))}
                 </nav>
 
-                <div className="flex flex-col gap-6 pt-8 border-t border-white/5 w-full items-center">
+                <div className="flex flex-col gap-6 pt-8 border-t border-slate-200 dark:border-slate-800 w-full items-center">
                     <UserProfileModal>
-                        <Settings className="w-6 h-6 text-white/20 hover:text-white/60 cursor-pointer transition-colors" />
+                        <Settings className="w-6 h-6 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer transition-colors" />
                     </UserProfileModal>
                     <UserProfileModal>
-                        <button className="h-10 w-10 rounded-full border border-white/10 overflow-hidden hover:border-emerald-500/50 transition-all">
+                        <button className="h-10 w-10 rounded-full border border-slate-300 dark:border-slate-700 overflow-hidden hover:border-[#0D9488]/50 dark:hover:border-[#14B8A6]/50 transition-all">
                             {user.photoURL ? (
                                 <img src={user.photoURL} alt="P" className="w-full h-full object-cover" />
                             ) : (
-                                <div className="w-full h-full bg-white/5 flex items-center justify-center text-[10px] font-bold">U</div>
+                                <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">U</div>
                             )}
                         </button>
                     </UserProfileModal>
-                    <button onClick={handleLogout} className="p-2 text-white/20 hover:text-red-400 transition-colors">
+                    <button onClick={handleLogout} className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors">
                         <LogOut className="w-5 h-5" />
                     </button>
                 </div>
@@ -172,23 +170,23 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-6">
                             <button 
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="p-3 bg-white/5 border border-white/10 rounded-xl md:hidden hover:bg-white/10 transition-all"
+                                className="p-3 bg-[#0B1120] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl md:hidden hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
                             >
                                 <Menu className="w-5 h-5" />
                             </button>
                             <div className="space-y-1">
-                                <p className="text-[10px] text-emerald-400/60 font-space font-bold tracking-[0.3em] uppercase">
+                                <p className="text-[10px] text-[#0D9488]/80 dark:text-[#14B8A6]/80 font-sans font-bold tracking-[0.3em] uppercase">
                                     {t("welcome")}
                                 </p>
-                                <h1 className="text-4xl font-space font-bold tracking-tighter text-white">
-                                    {t("health")} <span className="text-white/40">{t("dashboardSpan")}</span>
+                                <h1 className="text-4xl font-heading font-bold tracking-tighter text-[#0F172A] dark:text-[#F8FAFC]">
+                                    {t("health")} <span className="text-slate-400 dark:text-slate-500">{t("dashboardSpan")}</span>
                                 </h1>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 self-end sm:self-auto">
-                            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
-                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className="text-[10px] font-space font-bold uppercase tracking-widest text-white/60">{t("systemOnline")}</span>
+                            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0B1120] dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                <div className="h-2 w-2 rounded-full bg-[#0D9488] dark:bg-[#14B8A6] animate-pulse" />
+                                <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t("systemOnline")}</span>
                             </div>
                             <AddVitalsModal />
                             <VoiceAssistantButton />
@@ -199,62 +197,50 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-12 gap-8">
                         
                         {/* Hero Section: AI Diagnostic Vector */}
-                        <section className="col-span-12 group relative rounded-[3rem] border border-white/5 bg-gradient-to-br from-[#0e0e0e]/80 to-transparent p-12 overflow-hidden backdrop-blur-3xl">
-                            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-500/[0.03] blur-[150px] -mr-96 -mt-96 transition-all duration-1000 group-hover:bg-emerald-500/[0.05]" />
-                            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/[0.02] blur-[150px] -ml-48 -mb-48" />
+                        <section className="col-span-12 group relative rounded-[24px] border border-slate-100 dark:border-slate-800 bg-[#0B1120] dark:bg-[#1E293B] p-12 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             
                             <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
                                 <div className="space-y-10">
-                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em]">{t("aiHelperReady")}</span>
+                                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0D9488]/10 dark:bg-[#14B8A6]/10 border border-[#0D9488]/20 dark:border-[#14B8A6]/20">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-[#0D9488] dark:bg-[#14B8A6] animate-pulse" />
+                                        <span className="text-[10px] font-bold text-[#0D9488] dark:text-[#14B8A6] uppercase tracking-[0.2em]">{t("aiHelperReady")}</span>
                                     </div>
                                     
                                     <div className="space-y-4">
-                                        <h2 className="text-6xl md:text-7xl font-space font-bold tracking-tighter leading-[0.9]">
+                                        <h2 className="text-5xl md:text-6xl font-heading font-bold tracking-tight leading-tight text-slate-800 dark:text-white">
                                             {t("quick")} <br/> 
-                                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-white to-white/40">{t("healthCheck")}</span>
+                                            <span className="text-[#0D9488] dark:text-[#14B8A6]">{t("healthCheck")}</span>
                                         </h2>
-                                        <p className="text-xl text-white/40 font-medium leading-relaxed max-w-lg">
+                                        <p className="text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-lg">
                                             {t("heroDesc")}
                                         </p>
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-6 pt-4">
                                         <Link href={`/${locale}/skin-scan`}>
-                                            <button className="h-16 px-10 rounded-2xl bg-white text-black font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-emerald-500/10 group">
+                                            <button className="h-16 px-10 rounded-[16px] bg-[#0D9488] text-white dark:bg-[#14B8A6] dark:text-slate-900 font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#0D9488]/20 dark:shadow-[#14B8A6]/20 group">
                                                 {t("startScan")}
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         </Link>
-                                        <div className="flex items-center gap-4 px-6 h-16 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl">
+                                        <div className="flex items-center gap-4 px-6 h-16 rounded-[16px] border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-[#1E293B]/50 backdrop-blur-xl">
                                             <div className="flex -space-x-3">
                                                 {[1, 2, 3].map(i => (
-                                                    <div key={i} className="h-8 w-8 rounded-full border-2 border-[#0a0a0a] bg-white/10 flex items-center justify-center text-[8px] font-bold">U{i}</div>
+                                                    <div key={i} className="h-8 w-8 rounded-full border-2 border-[#FAFAF9] dark:border-[#0B1120] bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold">U{i}</div>
                                                 ))}
                                             </div>
-                                            <span className="text-xs font-bold text-white/30 uppercase tracking-widest">{t("connectDoctors")}</span>
+                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t("connectDoctors")}</span>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div className="relative hidden lg:block">
-                                    <div className="aspect-square rounded-full border border-white/5 flex items-center justify-center relative bg-white/[0.01]">
-                                        <div className="absolute inset-0 border-t-2 border-emerald-500/20 rounded-full animate-[spin_20s_linear_infinite]" />
-                                        <div className="absolute inset-8 border-b-2 border-indigo-500/20 rounded-full animate-[spin_15s_linear_reverse_infinite]" />
-                                        <div className="absolute inset-16 border-l-2 border-emerald-500/10 rounded-full animate-[spin_30s_linear_infinite]" />
-                                        
-                                        <motion.div 
-                                            animate={{ 
-                                                scale: [1, 1.1, 1],
-                                                rotate: [0, 90, 0]
-                                            }}
-                                            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                            className="h-48 w-48 rounded-[3rem] bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center shadow-[0_0_80px_rgba(0,252,64,0.2)] relative z-20 overflow-hidden"
-                                        >
-                                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-                                            <Zap className="w-20 h-20 text-white relative z-10" />
-                                        </motion.div>
+
+                                <div className="hidden lg:flex items-center justify-center relative">
+                                    <div className="relative w-72 h-72 rounded-full bg-[#0D9488]/5 dark:bg-[#14B8A6]/5 flex items-center justify-center">
+                                        <div className="absolute inset-0 rounded-full border border-[#0D9488]/10 dark:border-[#14B8A6]/10 animate-[spin_15s_linear_infinite]"></div>
+                                        <div className="absolute inset-8 rounded-full border border-dashed border-[#0D9488]/20 dark:border-[#14B8A6]/20 animate-[spin_25s_linear_reverse_infinite]"></div>
+                                        <div className="w-32 h-32 rounded-full bg-[#0B1120] dark:bg-[#1E293B] shadow-[0_0_40px_rgba(13,148,136,0.15)] dark:shadow-[0_0_40px_rgba(20,184,166,0.1)] flex items-center justify-center relative z-10 transition-transform duration-700 hover:scale-110">
+                                            <Activity className="w-14 h-14 text-[#0D9488] dark:text-[#14B8A6]" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>

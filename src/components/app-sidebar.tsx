@@ -89,8 +89,8 @@ export function AppSidebar({ locale }: { locale: string }) {
 
     return (
         <TooltipProvider delayDuration={200}>
-            <Sidebar>
-                <SidebarHeader className="border-b p-4">
+            <Sidebar className="!bg-[#0B1120] dark:!bg-[#0B1120] !border-r !border-slate-200 dark:!border-slate-800">
+                <SidebarHeader className="border-b border-slate-200 dark:border-slate-800 p-4">
                     <Link href={`/${locale}/dashboard`}>
                         <DiagnoverseLogo size={40} />
                     </Link>
@@ -108,7 +108,7 @@ export function AppSidebar({ locale }: { locale: string }) {
                                         <SidebarMenuButton
                                             asChild={!locked}
                                             isActive={pathname === item.url}
-                                            className={locked ? "opacity-60 cursor-pointer" : ""}
+                                            className={`rounded-lg transition-all ${locked ? "opacity-60 cursor-pointer" : ""} ${pathname === item.url ? "!bg-teal-50 !text-[#0D9488] font-bold dark:!bg-teal-900/20 dark:!text-[#14B8A6] hover:!bg-teal-50 hover:!text-[#0D9488]" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800"}`}
                                             onClick={
                                                 locked
                                                     ? (e) => {

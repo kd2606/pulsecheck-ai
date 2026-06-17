@@ -43,25 +43,11 @@ export default function MentalHealthPage() {
     const { user } = useUser();
     const { saveScan } = useScanStore();
     
-    const [dynamicQuestions, setDynamicQuestions] = useState<string[]>([]);
-    const [fetchingQuestions, setFetchingQuestions] = useState(true);
-
+    const [dynamicQuestions, setDynamicQuestions] = useState<string[]>(DEEP_PSYCH_QUESTIONS);
+    const [fetchingQuestions, setFetchingQuestions] = useState(false);
 
     useEffect(() => {
-        const fetchQuestions = async () => {
-            try {
-                const res = await fetch("/api/mental-health/questions");
-                if (!res.ok) throw new Error("Failed to fetch");
-                const data = await res.json();
-                setDynamicQuestions(data.questions || DEEP_PSYCH_QUESTIONS);
-            } catch (err) {
-                console.error(err);
-                setDynamicQuestions(DEEP_PSYCH_QUESTIONS);
-            } finally {
-                setFetchingQuestions(false);
-            }
-        };
-        fetchQuestions();
+        // Using static questions to bypass infinite loading
     }, []);
 
     const handleAnswer = async (value: number) => {

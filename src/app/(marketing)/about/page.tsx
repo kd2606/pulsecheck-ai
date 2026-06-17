@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-[#0B1120]">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-20 px-4 md:px-6 lg:px-8 text-center bg-blue-50">
@@ -40,11 +40,11 @@ export default function AboutPage() {
         <section className="py-16 px-4 md:px-6 lg:px-8 bg-gray-50 max-w-4xl mx-auto border border-gray-200 rounded-xl my-12">
           <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">Team Hackboard</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center md:text-left">
+            <div className="bg-[#0B1120] p-6 rounded-lg shadow-sm border border-gray-100 text-center md:text-left">
               <h3 className="font-semibold text-xl text-gray-900">Core Team</h3>
               <p className="text-gray-600 mt-3">Dedicated to revolutionizing rural healthcare through technology.</p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center md:text-left">
+            <div className="bg-[#0B1120] p-6 rounded-lg shadow-sm border border-gray-100 text-center md:text-left">
               <h3 className="font-semibold text-xl text-gray-900">Advisors</h3>
               <p className="text-gray-600 mt-3">Guided by medical professionals and healthcare legal experts.</p>
             </div>

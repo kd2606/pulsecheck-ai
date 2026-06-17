@@ -21,7 +21,7 @@
         "visionScan": "दृष्टि स्कैन",
         "coughAnalysis": "खांसी विश्लेषण",
         "skinScan": "त्वचा स्कैन",
-        "mentalHealth": "कल्याण जांचक",
+        "mentalHealth": "मानसिक स्वास्थ्य",
         "cardioCheck": "हृदय स्वास्थ्य (Cardio Wellness)",
         "trends": "स्वास्थ्य रुझान",
         "people": "परिवार के सदस्य",
@@ -130,7 +130,7 @@
             "results": "त्वचा विश्लेषण रिपोर्ट"
         },
         "mentalHealth": {
-            "title": "कल्याण जांचक",
+            "title": "मानसिक स्वास्थ्य जांच",
             "description": "कल्याण मूल्यांकन के लिए जीवनशैली और तनाव के कारकों पर आधारित कुछ त्वरित प्रश्नों के उत्तर दें।",
             "question": "प्रश्न {number} / {total}",
             "options": {

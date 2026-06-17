@@ -69,19 +69,14 @@ export async function generateWithModelFallback(
     for (let i = 0; i < modelsToTry.length; i++) {
         const model = modelsToTry[i];
         try {
-            console.log(`[AI] Trying model ${i + 1}/${modelsToTry.length}: ${model}`);
-
             const result = await withTimeout(
                 ai.generate({ ...request, model }),
                 MODEL_TIMEOUT_MS,
                 model
             );
 
-            console.log(`[AI] ✅ Success with: ${model}`);
             return result;
         } catch (error) {
-            const msg = (error as any)?.message || String(error);
-            console.warn(`[AI] ❌ ${model}: ${msg.substring(0, 150)}`);
             lastError = error;
 
             // Small delay before trying next model
@@ -107,19 +102,14 @@ export async function generateWithGeminiOnly(
     for (let i = 0; i < geminiModels.length; i++) {
         const model = geminiModels[i];
         try {
-            console.log(`[AI:Vision] Trying ${model}`);
-
             const result = await withTimeout(
                 ai.generate({ ...request, model }),
                 25_000, // Vision gets more time since image processing is slower
                 model
             );
 
-            console.log(`[AI:Vision] ✅ Success with: ${model}`);
             return result;
         } catch (error) {
-            const msg = (error as any)?.message || String(error);
-            console.warn(`[AI:Vision] ❌ ${model}: ${msg.substring(0, 150)}`);
             lastError = error;
 
             if (i < geminiModels.length - 1) {
