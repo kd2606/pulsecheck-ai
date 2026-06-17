@@ -15,9 +15,8 @@ export default function Footer() {
         <div>
           <h4 className={styles.footerColTitle}>Product</h4>
           <div className={styles.footerLinks}>
-            <Link href="/login" className={styles.footerLink}>Web App</Link>
+            <Link href="/dashboard" className={styles.footerLink}>Web App / Features</Link>
             <Link href="#how-it-works" className={styles.footerLink}>How It Works</Link>
-            <Link href="/features" className={styles.footerLink}>Features</Link>
           </div>
         </div>
         <div>
@@ -25,14 +24,12 @@ export default function Footer() {
           <div className={styles.footerLinks}>
             <Link href="/about" className={styles.footerLink}>About Us</Link>
             <Link href="/contact" className={styles.footerLink}>Contact</Link>
-            <Link href="/careers" className={styles.footerLink}>Careers</Link>
           </div>
         </div>
         <div>
           <h4 className={styles.footerColTitle}>Legal</h4>
           <div className={styles.footerLinks}>
             <Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link>
-            <Link href="/terms" className={styles.footerLink}>Terms of Service</Link>
             <Link href="/disclaimer" className={styles.footerLink}>Medical Disclaimer</Link>
           </div>
         </div>

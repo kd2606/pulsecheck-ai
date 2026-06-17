@@ -1,67 +1,26 @@
-import React from 'react';
+import React from "react";
 
 export default function AboutPage() {
-  return (
-    <div className="flex flex-col min-h-screen bg-[#0B1120]">
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="py-20 px-4 md:px-6 lg:px-8 text-center bg-blue-50">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">About DiagnoVerse</h1>
-            <p className="text-xl text-gray-600">Bringing accessible, AI-powered healthcare diagnostics to rural India.</p>
-          </div>
-        </section>
+    return (
+        <div className="min-h-screen bg-[#0B1120] text-slate-300 font-sans">
+            <main className="max-w-4xl mx-auto px-6 py-16 prose prose-invert prose-slate">
+                <h1 className="text-[#F8FAFC] font-bold tracking-tight mb-8">Deep-Tier Technical Blueprint & Organizational Vision</h1>
+                
+                <h2 className="text-[#F8FAFC] font-bold mt-12 mb-4">1. Executive Mandate & Architectural Vision</h2>
+                <p className="leading-relaxed mb-6">
+                    DiagnoVerse (PulseCheck AI) is an engineered last-mile healthcare infrastructure designed to eliminate the fatal latency constraints of the "Golden Hour" across rural India. In regional ecosystems where the local physician density sits at a stark 1:10,000 ratio, initial clinical data is lost, allowing survivable anomalies to degrade into acute crises. Founded by Lead Engineer Krrish Dewangan, DiagnoVerse bypasses traditional SaaS operational dependencies by functioning entirely as an edge-first, network-agnostic primary triage platform. 
+                </p>
 
-        {/* Problem Section */}
-        <section className="py-16 px-4 md:px-6 lg:px-8 max-w-4xl mx-auto">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-6">The Problem</h2>
-          <p className="text-gray-700 leading-relaxed mb-4 text-lg">
-            Millions of people in rural India lack access to timely and accurate medical diagnostics. The distance to healthcare facilities and the shortage of medical professionals often lead to delayed treatments and worsened health outcomes.
-          </p>
-        </section>
+                <h2 className="text-[#F8FAFC] font-bold mt-12 mb-4">2. Engineering Paradigm Shift: Surviving the Last Mile</h2>
+                <p className="leading-relaxed mb-6">
+                    Our engineering framework assumes that mobile networks are inherently unstable (2G/EDGE standard) and smartphone hardware in rural sectors is strictly resource-constrained (shared devices with low active RAM heaps). By offloading primary file compression to an offscreen HTML5 canvas execution tier, we compress 10MB diagnostic payloads down to ~400KB WebP files directly in the browser runtime. This prevents upstream network timeouts (HTTP 413) and keeps the UI running smoothly. When connectivity fails entirely, an asynchronous transactional IndexedDB queue safely warehouses the encrypted payloads locally, flushing to our serverless endpoints sequentially only upon deterministic network restoration via foreground listeners.
+                </p>
 
-        {/* What we're building Section */}
-        <section className="py-16 px-4 md:px-6 lg:px-8 max-w-4xl mx-auto border-t border-gray-100">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-6">What We're Building</h2>
-          <p className="text-gray-700 leading-relaxed mb-4 text-lg">
-            We are building a robust, AI-driven diagnostic platform tailored for the unique challenges of rural healthcare. Our solution aims to empower frontline health workers with reliable tools to screen, triage, and guide patients effectively in a clinical, trust-first environment.
-          </p>
-        </section>
-
-        {/* Safety Section */}
-        <section className="py-16 px-4 md:px-6 lg:px-8 max-w-4xl mx-auto border-t border-gray-100">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-6">Safety & Compliance</h2>
-          <p className="text-gray-700 leading-relaxed mb-4 text-lg">
-            Patient safety is our highest priority. We adhere strictly to the CDSCO Medical Device Rules and India's DPDP Act 2023 to ensure data privacy and clinical efficacy in every aspect of our platform.
-          </p>
-        </section>
-
-        {/* Team Hackboard Section */}
-        <section className="py-16 px-4 md:px-6 lg:px-8 bg-gray-50 max-w-4xl mx-auto border border-gray-200 rounded-xl my-12">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">Team Hackboard</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-[#0B1120] p-6 rounded-lg shadow-sm border border-gray-100 text-center md:text-left">
-              <h3 className="font-semibold text-xl text-gray-900">Core Team</h3>
-              <p className="text-gray-600 mt-3">Dedicated to revolutionizing rural healthcare through technology.</p>
-            </div>
-            <div className="bg-[#0B1120] p-6 rounded-lg shadow-sm border border-gray-100 text-center md:text-left">
-              <h3 className="font-semibold text-xl text-gray-900">Advisors</h3>
-              <p className="text-gray-600 mt-3">Guided by medical professionals and healthcare legal experts.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section className="py-16 px-4 md:px-6 lg:px-8 text-center max-w-4xl mx-auto border-t border-gray-100">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-6">Contact Us</h2>
-          <p className="text-gray-700 mb-8 text-lg">
-            Have questions or want to partner with us? Reach out to our team.
-          </p>
-          <a href="mailto:team@diagnoverse.in" className="inline-flex items-center justify-center bg-blue-600 text-white font-medium py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-200">
-            team@diagnoverse.in
-          </a>
-        </section>
-      </main>
-    </div>
-  );
+                <h2 className="text-[#F8FAFC] font-bold mt-12 mb-4">3. Collaborative Synthesis</h2>
+                <p className="leading-relaxed mb-6">
+                    We do not operate as an autonomous diagnostic authority. The underlying neural architecture serves strictly as a high-throughput pre-processor and administrative co-pilot. By converting raw user reports into structured clinical summaries, we optimize the operational capacity of Accredited Social Health Activists (ASHA workers) and local primary clinics, shifting healthcare from reactive emergency intervention to predictive edge screening.
+                </p>
+            </main>
+        </div>
+    );
 }
