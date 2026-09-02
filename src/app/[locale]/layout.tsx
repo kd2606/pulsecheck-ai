@@ -6,8 +6,7 @@ import { Plus_Jakarta_Sans, DM_Sans, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
 import { Toaster } from "@/components/ui/sonner";
-import { FloatingChat } from "@/components/floating-chat";
-import { DemoBanner } from "@/components/demo-banner";
+import { PatientLayoutWrapper } from "@/components/patient-layout-wrapper";
 import "../globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -54,9 +53,9 @@ export default async function LocaleLayout({ children, params }: Props) {
                 >
                     <NextIntlClientProvider messages={messages}>
                         <FirebaseProvider>
-                            <DemoBanner />
-                            {children}
-                            <FloatingChat />
+                            <PatientLayoutWrapper locale={locale}>
+                                {children}
+                            </PatientLayoutWrapper>
                             <Toaster />
                         </FirebaseProvider>
                     </NextIntlClientProvider>
