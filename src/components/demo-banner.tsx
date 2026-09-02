@@ -17,7 +17,7 @@ export function DemoBanner() {
     // Reset dismissal each visit (sessionStorage so it hides per tab session)
     useEffect(() => {
         const wasDismissed = sessionStorage.getItem("demoBannerDismissed") === "true";
-        setDismissed(wasDismissed);
+        setTimeout(() => setDismissed(wasDismissed), 0);
     }, []);
 
     const dismiss = () => {

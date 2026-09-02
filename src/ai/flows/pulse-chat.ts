@@ -148,7 +148,7 @@ If user asks "how am I doing?" or "mera health kaisa hai?" — answer using this
         }
 
         // Normalize consecutive same-role messages (existing logic).
-        let validHistory: PulseChatMessage[] = [];
+        const validHistory: PulseChatMessage[] = [];
         for (const m of history) {
             if (validHistory.length > 0 && validHistory[validHistory.length - 1].role === m.role) {
                 validHistory[validHistory.length - 1].content += "\n\n" + m.content;

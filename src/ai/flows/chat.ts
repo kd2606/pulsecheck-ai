@@ -33,7 +33,7 @@ Keep your responses strictly under 2 short paragraphs, prioritizing quick answer
 export async function chatWithAI(history: ChatMessage[], newMessage: string): Promise<ChatMessage> {
     try {
         // Ensure first history item is from the user for provider compatibility.
-        let validHistory = [...history];
+        const validHistory = [...history];
         while (validHistory.length > 0 && validHistory[0].role !== "user") {
             validHistory.shift();
         }

@@ -27,7 +27,7 @@ export default function PeopleScreen() {
         (async () => {
             setLoading(true);
             try {
-                let { status } = await Location.requestForegroundPermissionsAsync();
+                const { status } = await Location.requestForegroundPermissionsAsync();
                 if (status !== "granted") {
                     if (isMounted) setErrorMsg("Permission to access location was denied");
                     return;

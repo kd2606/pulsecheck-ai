@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { ShieldCheck, Lock, Activity, Users } from 'lucide-react';
 import styles from './landing.module.css';
 
@@ -12,7 +13,7 @@ export default function Hero() {
           ensuring everyone has access to accurate and timely health assessments.
         </p>
         <div className={styles.heroActions}>
-          <a href="/login" className={styles.btnPrimary}>Open Web App</a>
+          <Link href="/auth" className={styles.btnPrimary}>Access Portal</Link>
         </div>
         <div className={styles.trustStrip}>
           <div className={styles.trustItem}>

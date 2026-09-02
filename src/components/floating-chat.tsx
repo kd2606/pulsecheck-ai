@@ -94,7 +94,7 @@ export function FloatingChat() {
 
             try {
                 const docRef = doc(db, "users", user.uid, "agentContext", "data");
-                let docSnap = await getDoc(docRef);
+                const docSnap = await getDoc(docRef);
 
                 clearTimeout(fallbackTimeout);
 
