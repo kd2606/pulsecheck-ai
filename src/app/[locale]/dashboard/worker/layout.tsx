@@ -36,16 +36,17 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
   return (
     <div className="flex h-screen bg-slate-950 text-slate-50 overflow-hidden font-sans">
       {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 md:hidden" 
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <div 
+        className={cn(
+          "fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity duration-300 ease-in-out",
+          sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setSidebarOpen(false)}
+      />
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed md:static inset-y-0 left-0 z-50 w-[280px] bg-[#1e3a5f] flex flex-col transition-transform duration-300 ease-in-out border-r border-slate-800/50 shadow-xl",
+        "fixed md:static inset-y-0 left-0 z-50 w-[280px] bg-[#1e3a5f] flex flex-col transition-all duration-300 ease-in-out border-r border-slate-800/50 shadow-xl",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         {/* Logo Area */}

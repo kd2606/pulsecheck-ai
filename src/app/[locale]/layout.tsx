@@ -5,14 +5,10 @@ import { routing } from "@/i18n/routing";
 import { Plus_Jakarta_Sans, DM_Sans, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { AppHeader } from "@/components/app-header";
 import { Toaster } from "@/components/ui/sonner";
 import { FloatingChat } from "@/components/floating-chat";
 import { DemoBanner } from "@/components/demo-banner";
 import "../globals.css";
-
 
 const plusJakartaSans = Plus_Jakarta_Sans({
     variable: "--font-plus-jakarta-sans",
@@ -58,15 +54,8 @@ export default async function LocaleLayout({ children, params }: Props) {
                 >
                     <NextIntlClientProvider messages={messages}>
                         <FirebaseProvider>
-                            <SidebarProvider>
-                                <AppSidebar locale={locale} />
-                                <SidebarInset className="overflow-hidden w-full max-w-full">
-                                    <DemoBanner />
-                                    <AppHeader locale={locale} />
-                                    <main className="flex-1 p-4 md:p-6 w-full max-w-full overflow-x-hidden">{children}</main>
-                                </SidebarInset>
-
-                            </SidebarProvider>
+                            <DemoBanner />
+                            {children}
                             <FloatingChat />
                             <Toaster />
                         </FirebaseProvider>
