@@ -118,6 +118,21 @@ export default function PatientDashboardPage() {
               <p className="text-slate-400 text-sm">Check for cataracts and other common eye conditions.</p>
             </CardContent>
           </Card>
+
+          <Card 
+            className="bg-slate-900 border-slate-800 hover:border-red-500/50 hover:bg-slate-800/80 transition-all cursor-pointer group flex flex-col"
+            onClick={() => router.push(`/${locale}/cardio-check`)}
+          >
+            <CardHeader className="pb-2">
+              <div className="bg-red-900/30 w-12 h-12 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Activity className="w-6 h-6 text-red-400" />
+              </div>
+              <CardTitle className="text-lg text-slate-200 group-hover:text-white">Cardio Wellness</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-400 text-sm">Assess your cardiovascular health through AI heart rate analysis.</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
 

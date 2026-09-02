@@ -9,7 +9,15 @@ import {
   ScanEye,
   Mic,
   Stethoscope,
-  Brain
+  Brain,
+  HeartPulse,
+  LineChart,
+  FileText,
+  Landmark,
+  MapPin,
+  Users,
+  Shield,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
@@ -28,6 +36,15 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
     { icon: Mic, label: "Cough Analysis", href: `/${locale}/cough-analysis` },
     { icon: Stethoscope, label: "Skin Scan", href: `/${locale}/skin-scan` },
     { icon: Brain, label: "Mental Health", href: `/${locale}/mental-health-screen` },
+    { icon: HeartPulse, label: "Cardio Wellness", href: `/${locale}/cardio-check` },
+    { icon: LineChart, label: "Health Trends", href: `/${locale}/health-trends` },
+    { icon: FileText, label: "Health Records", href: `/${locale}/health-records` },
+    { icon: Landmark, label: "Govt Schemes", href: `/${locale}/govt-schemes` },
+    { icon: Bell, label: "Reminders", href: `/${locale}/reminders` },
+    { icon: MapPin, label: "Nearby Hospitals", href: `/${locale}/nearby-hospitals` },
+    { icon: Users, label: "Family Members", href: `/${locale}/people` },
+    { icon: Shield, label: "Privacy Policy", href: `/${locale}/privacy-policy` },
+    { icon: Info, label: "About", href: `/${locale}/about` },
   ];
 
   return (
@@ -88,9 +105,8 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-900 border-t border-slate-800 flex items-center justify-around z-40 px-2 pb-safe">
-        {navItems.map((item, i) => {
+        {navItems.slice(0, 5).map((item, i) => {
           const isActive = pathname === item.href;
           return (
             <Link key={i} href={item.href} className="flex-1 flex flex-col items-center justify-center gap-1 h-full min-w-[44px]">
