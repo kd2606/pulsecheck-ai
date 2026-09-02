@@ -1034,7 +1034,38 @@ export default function IntakePage() {
         ) : (
           <Button
             className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
-            onClick={() => router.push(`/${locale}/dashboard/worker`)}
+            onClick={async () => {
+              // Dynamically import the sync engine to avoid breaking SSR
+              const { saveAndQueueForSync } = await import('@/lib/diagnoverse/offline');
+              
+              // Construct a dummy InternalTriageCase for offline saving compliance
+              const triageCase = {
+                id: crypto.randomUUID() as any, // Using standard UUID for dummy case
+                schemaVersion: '1.0.0' as const,
+                subject: {
+                  identifiers: { mr: selectedPatient?.id || 'UNKNOWN' },
+                  demographics: {
+                    name: selectedPatient?.name || 'Unknown Patient',
+                    gender: selectedPatient?.gender?.toLowerCase() as 'male' | 'female' | 'other' || 'unknown',
+                    age: selectedPatient?.age || 0,
+                  }
+                },
+                encounter: {
+                  startTime: new Date().toISOString(),
+                  endTime: new Date().toISOString(),
+                  location: 'CHW_FIELD',
+                  device: 'ASHA_MOBILE',
+                  actor: MOCK_WORKER_ID,
+                },
+                candidateDuplicateOf: null,
+                protocolChecklist: checklist,
+                vitals: vitals,
+                triageResult: computeTriageResult(vitals, checklist, null)
+              };
+              
+              await saveAndQueueForSync(triageCase);
+              router.push(`/${locale}/dashboard/worker`);
+            }}
           >
             <CheckCircle2 className="size-4" />
             Complete & Save
