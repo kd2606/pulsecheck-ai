@@ -2,12 +2,14 @@
 
 import { 
   Home, 
-  FileText, 
-  Video, 
-  User, 
   Heart, 
   Bell, 
-  Settings 
+  Settings,
+  Activity,
+  ScanEye,
+  Mic,
+  Stethoscope,
+  Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useParams, usePathname } from "next/navigation";
@@ -21,9 +23,11 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
 
   const navItems = [
     { icon: Home, label: "Home", href: `/${locale}/dashboard/patient` },
-    { icon: FileText, label: "Records", href: `/${locale}/dashboard/patient/records` },
-    { icon: Video, label: "Consult", href: `/${locale}/dashboard/patient/consult` },
-    { icon: User, label: "Profile", href: `/${locale}/dashboard/patient/profile` },
+    { icon: Activity, label: "Symptom Checker", href: `/${locale}/symptom-checker` },
+    { icon: ScanEye, label: "Vision Scan", href: `/${locale}/vision-scan` },
+    { icon: Mic, label: "Cough Analysis", href: `/${locale}/cough-analysis` },
+    { icon: Stethoscope, label: "Skin Scan", href: `/${locale}/skin-scan` },
+    { icon: Brain, label: "Mental Health", href: `/${locale}/mental-health-screen` },
   ];
 
   return (
