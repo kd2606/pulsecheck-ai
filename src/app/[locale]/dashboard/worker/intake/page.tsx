@@ -1063,7 +1063,7 @@ export default function IntakePage() {
                 protocolChecklist: checklist,
                 vitals: vitals,
                 triageResult: computeTriageResult(vitals, checklist, null)
-              };
+              } as any;
               
               await saveAndQueueForSync(triageCase);
               router.push(`/${locale}/dashboard/worker`);
