@@ -9,11 +9,16 @@ export default function Hero() {
       <div className={styles.heroLeft}>
         <h1 className={styles.heroTitle}>Healthcare that reaches where doctors can&apos;t.</h1>
         <p className={styles.heroSubtitle}>
-          DiagnoVerse brings clinical-grade AI diagnostics to the remotest parts of India, 
+          DiagnoVerse brings clinical-grade AI screening & triage to the remotest parts of India, 
           ensuring everyone has access to accurate and timely health assessments.
         </p>
-        <div className={styles.heroActions}>
-          <Link href="/auth" className={styles.btnPrimary}>Access Portal</Link>
+        <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <Link href="/auth/patient" className={styles.btnPrimary}>
+            Patient Portal
+          </Link>
+          <Link href="/auth/worker" className={styles.btnPrimary} style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)' }}>
+            For Health Workers (ASHA/MO)
+          </Link>
         </div>
         <div className={styles.trustStrip}>
           <div className={styles.trustItem}>
