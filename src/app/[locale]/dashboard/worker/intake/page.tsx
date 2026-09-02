@@ -14,7 +14,7 @@
  *   5. Triage Action (Live triage computation + result display)
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -50,8 +50,8 @@ import {
   Loader2,
   CircleAlert,
   Shield,
-  ChevronDown,
-  ChevronUp,
+  Search,
+  Plus
 } from 'lucide-react';
 
 import {
@@ -69,23 +69,16 @@ import {
 } from '@/lib/diagnoverse/protocol-definitions';
 import { computeTriageResult } from '@/lib/diagnoverse/triage-engine';
 
-// ─── Mock Data ───────────────────────────────
+// ─── Interfaces & Constants ───────────────────
 
-const MOCK_FAMILIES = [
-  { id: 'FAM-001', name: 'Sharma Family', village: 'Tendua', members: [
-    { id: 'MR-001', name: 'Ramesh Sharma', age: 45, gender: 'M', relation: 'Self' },
-    { id: 'MR-002', name: 'Sunita Sharma', age: 40, gender: 'F', relation: 'Wife' },
-    { id: 'MR-003', name: 'Ankit Sharma', age: 8, gender: 'M', relation: 'Son' },
-  ]},
-  { id: 'FAM-002', name: 'Patel Family', village: 'Kachhar', members: [
-    { id: 'MR-004', name: 'Dinesh Patel', age: 55, gender: 'M', relation: 'Self' },
-    { id: 'MR-005', name: 'Kamlesh Patel', age: 50, gender: 'F', relation: 'Wife' },
-  ]},
-  { id: 'FAM-003', name: 'Yadav Family', village: 'Basantpur', members: [
-    { id: 'MR-006', name: 'Meera Yadav', age: 28, gender: 'F', relation: 'Self' },
-    { id: 'MR-007', name: 'Baby Yadav', age: 0.5, gender: 'F', relation: 'Daughter' },
-  ]},
-];
+export interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  gender: 'M' | 'F' | 'O';
+  relation?: string;
+  abhaId?: string;
+}
 
 const MOCK_WORKER_ID = 'ASHA-CG-4201' as ActorId;
 
@@ -153,12 +146,20 @@ function Step1PatientSelection({
   consentGiven,
   onConsent,
 }: {
-  selectedPatient: typeof MOCK_FAMILIES[0]['members'][0] | null;
-  onSelect: (patient: typeof MOCK_FAMILIES[0]['members'][0]) => void;
+  selectedPatient: Patient | null;
+  onSelect: (patient: Patient) => void;
   consentGiven: boolean;
   onConsent: (v: boolean) => void;
 }) {
-  const [expandedFamily, setExpandedFamily] = useState<string | null>(MOCK_FAMILIES[0].id);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // In a production environment, this would fetch from IndexedDB or Firestore.
+    // For now, representing an authentic zero-state for a fresh login.
+    setLoading(false);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -168,79 +169,79 @@ function Step1PatientSelection({
           Select Patient
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Choose a family member from your assigned families
+          Search for an existing patient or add a new one.
         </p>
       </div>
 
-      <div className="space-y-3">
-        {MOCK_FAMILIES.map((family) => (
-          <Card key={family.id} className="bg-card/50 border-border/50 overflow-hidden">
-            <button
-              onClick={() => setExpandedFamily(expandedFamily === family.id ? null : family.id)}
-              className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
-                  <Users className="size-4 text-blue-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-white">{family.name}</p>
-                  <p className="text-xs text-muted-foreground">{family.village} • {family.members.length} members</p>
-                </div>
-              </div>
-              {expandedFamily === family.id ? (
-                <ChevronUp className="size-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="size-4 text-muted-foreground" />
-              )}
-            </button>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input 
+          placeholder="Search by name, ABHA ID or phone number..." 
+          className="pl-10 h-12 bg-slate-900 border-slate-800 text-white"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
-            {expandedFamily === family.id && (
-              <div className="border-t border-border/30 px-4 pb-3 pt-2 space-y-2">
-                {family.members.map((member) => {
-                  const isSelected = selectedPatient?.id === member.id;
-                  return (
-                    <button
-                      key={member.id}
-                      onClick={() => onSelect(member)}
+      <div className="space-y-3">
+        {loading ? (
+          <div className="h-32 rounded-lg bg-slate-900 animate-pulse border border-slate-800" />
+        ) : patients.length === 0 ? (
+          <Card className="bg-slate-900 border-slate-800 border-dashed text-center p-8">
+            <Users className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+            <p className="text-slate-200 font-medium">No patients found</p>
+            <p className="text-slate-500 text-sm mt-1 mb-6 max-w-sm mx-auto">
+              Search yielded no results. Add a new patient to your assigned families to begin screening.
+            </p>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium">
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Patient
+            </Button>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {patients.map((member) => {
+              const isSelected = selectedPatient?.id === member.id;
+              return (
+                <button
+                  key={member.id}
+                  onClick={() => onSelect(member)}
+                  className={cn(
+                    'w-full flex items-center justify-between p-4 rounded-xl transition-all',
+                    isSelected
+                      ? 'bg-blue-500/15 border border-blue-500/40 ring-2 ring-blue-500/20'
+                      : 'bg-slate-900 border border-slate-800 hover:bg-slate-800/80'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
                       className={cn(
-                        'w-full flex items-center justify-between p-3 rounded-lg transition-all',
-                        isSelected
-                          ? 'bg-blue-500/15 border border-blue-500/40 ring-2 ring-blue-500/20'
-                          : 'bg-muted/20 border border-transparent hover:bg-muted/40'
+                        'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold',
+                        isSelected ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-300'
                       )}
                     >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            'w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold',
-                            isSelected ? 'bg-blue-500 text-white' : 'bg-muted text-muted-foreground'
-                          )}
-                        >
-                          {member.name.charAt(0)}
-                        </div>
-                        <div className="text-left">
-                          <p className={cn('font-medium', isSelected ? 'text-blue-300' : 'text-white')}>
-                            {member.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {member.relation} • {member.gender === 'M' ? 'Male' : 'Female'} • {member.age < 1 ? `${Math.round(member.age * 12)} months` : `${member.age} yrs`}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {member.id}
-                        </Badge>
-                        {isSelected && <CheckCircle2 className="size-5 text-blue-400" />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
-        ))}
+                      {member.name.charAt(0)}
+                    </div>
+                    <div className="text-left">
+                      <p className={cn('font-medium', isSelected ? 'text-blue-300' : 'text-slate-200')}>
+                        {member.name}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {member.relation} • {member.gender === 'M' ? 'Male' : 'Female'} • {member.age < 1 ? `${Math.round(member.age * 12)} months` : `${member.age} yrs`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs border-slate-700 text-slate-400">
+                      {member.id}
+                    </Badge>
+                    {isSelected && <CheckCircle2 className="size-5 text-blue-400" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {selectedPatient && (
@@ -898,7 +899,7 @@ export default function IntakePage() {
   const locale = params.locale as string;
 
   const [step, setStep] = useState(1);
-  const [selectedPatient, setSelectedPatient] = useState<typeof MOCK_FAMILIES[0]['members'][0] | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [consentGiven, setConsentGiven] = useState(false);
 
   // Protocol checklist state
