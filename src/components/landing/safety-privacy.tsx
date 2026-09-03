@@ -18,35 +18,35 @@ export default function SafetyPrivacy() {
     >
       <div>
         <h2 className={styles.safetyTitle}>Designed to assist care—not replace clinicians</h2>
-        <p className={styles.safetyDesc} style={{ marginBottom: '2rem', color: '#cbd5e1' }}>
+        <p className={styles.safetyDesc} style={{ marginBottom: '2rem', color: '#4b5563' }}>
           DiagnoVerse provides risk-oriented guidance and workflow support. It does not independently diagnose, prescribe or replace qualified medical professionals. High-risk cases are escalated to appropriate emergency services or healthcare facilities.
         </p>
         <div className={styles.safetyList}>
           <div className={styles.safetyItem}>
             <ShieldAlert size={24} color="#0d9488" style={{ flexShrink: 0 }} />
             <div>
-              <strong style={{ display: 'block', color: 'white' }}>Red-flag escalation</strong>
+              <strong style={{ display: 'block', color: '#111827' }}>Red-flag escalation</strong>
               <span>Emergency symptoms trigger immediate guidance to contact emergency services and seek urgent care.</span>
             </div>
           </div>
           <div className={styles.safetyItem}>
             <UserCheck size={24} color="#0d9488" style={{ flexShrink: 0 }} />
             <div>
-              <strong style={{ display: 'block', color: 'white' }}>Human-in-the-loop</strong>
+              <strong style={{ display: 'block', color: '#111827' }}>Human-in-the-loop</strong>
               <span>AI suggestions remain subject to review by qualified healthcare professionals.</span>
             </div>
           </div>
           <div className={styles.safetyItem}>
             <Lock size={24} color="#0d9488" style={{ flexShrink: 0 }} />
             <div>
-              <strong style={{ display: 'block', color: 'white' }}>Consent-based sharing</strong>
+              <strong style={{ display: 'block', color: '#111827' }}>Consent-based sharing</strong>
               <span>Patient information is shared with workers or facilities only through appropriate access and consent controls.</span>
             </div>
           </div>
           <div className={styles.safetyItem}>
             <ActivitySquare size={24} color="#0d9488" style={{ flexShrink: 0 }} />
             <div>
-              <strong style={{ display: 'block', color: 'white' }}>Audit-ready workflow</strong>
+              <strong style={{ display: 'block', color: '#111827' }}>Audit-ready workflow</strong>
               <span>Audit-ready clinical workflow with traceable triage and referral actions.</span>
             </div>
           </div>
