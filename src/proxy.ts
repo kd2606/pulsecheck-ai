@@ -41,7 +41,7 @@ export default async function proxy(request: NextRequest) {
     if (path.startsWith('/dashboard/worker')) {
       authPath = '/auth/worker';
     } else if (path.startsWith('/dashboard/district')) {
-      authPath = '/auth/worker'; // district admins use worker auth
+      authPath = '/auth/district'; 
     }
     url.pathname = localized(locale, authPath);
     url.search = `?next=${encodeURIComponent(request.nextUrl.pathname)}`;

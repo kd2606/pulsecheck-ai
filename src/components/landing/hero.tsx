@@ -7,35 +7,37 @@ export default function Hero() {
   return (
     <section className={styles.heroSection}>
       <div className={styles.heroLeft}>
-        <h1 className={styles.heroTitle}>Healthcare that reaches where doctors can&apos;t.</h1>
+        <p style={{ color: '#0d9488', fontWeight: 600, fontSize: '0.875rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '1rem' }}>
+          AI-ASSISTED RURAL CARE COORDINATION
+        </p>
+        <h1 className={styles.heroTitle}>Connect every rural patient to the care they need.</h1>
         <p className={styles.heroSubtitle}>
-          DiagnoVerse brings clinical-grade AI screening & triage to the remotest parts of India, 
-          ensuring everyone has access to accurate and timely health assessments.
+          DiagnoVerse helps ASHA workers, patients and public-health facilities work together through digital triage, smart referrals, teleconsultation support, longitudinal health records and follow-up tracking—even in low-connectivity areas.
         </p>
         <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <Link href="/en/auth/patient" className={styles.btnPrimary}>
-            User Portal
+            User Login
           </Link>
           <Link href="/en/auth/worker" className={styles.btnPrimary} style={{ background: 'transparent', border: '1px solid #0d9488', color: '#0d9488' }}>
-            For Health Workers
+            ASHA Worker Login
           </Link>
         </div>
         <div className={styles.trustStrip}>
           <div className={styles.trustItem}>
             <ShieldCheck size={18} color="#0d9488" />
-            <span>Clinical Grade</span>
+            <span>Protocol-Guided</span>
           </div>
           <div className={styles.trustItem}>
             <Lock size={18} color="#0d9488" />
-            <span>Secure</span>
+            <span>Consent-Based Records</span>
           </div>
           <div className={styles.trustItem}>
             <Activity size={18} color="#0d9488" />
-            <span>Fast Triage</span>
+            <span>Faster Referrals</span>
           </div>
           <div className={styles.trustItem}>
             <Users size={18} color="#0d9488" />
-            <span>For Everyone</span>
+            <span>Built for Rural Care</span>
           </div>
         </div>
       </div>

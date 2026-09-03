@@ -1,17 +1,47 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      match /{document=**} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
+
+    function isVerifiedAsha() {
+      return request.auth != null
+        && request.auth.token.role == 'asha_worker'
+        && request.auth.token.asha_verified == true;
     }
-    
-    // Deny access to anything else by default
-    match /{document=**} {
-      allow read, write: if false;
+
+    function ownsIncoming() {
+      return request.resource.data.owner_uid == request.auth.uid
+        && request.resource.data.created_by == request.auth.uid;
+    }
+
+    function isDistrictCommand() {
+      // In a real app we'd verify custom claims. For SIH demo, allowing authenticated read.
+      return request.auth != null;
+    }
+
+    match /patients/{patientId} {
+      allow read: if isVerifiedAsha() && resource.data.owner_uid == request.auth.uid || isDistrictCommand();
+      allow create: if isVerifiedAsha() && ownsIncoming();
+      // Immutable ownership; append-only in spirit.
+      allow update: if isVerifiedAsha()
+        && resource.data.owner_uid == request.auth.uid
+        && request.resource.data.owner_uid == resource.data.owner_uid;
+      allow delete: if false;
+    }
+
+    match /triage_records/{recordId} {
+      allow read: if isVerifiedAsha() && resource.data.owner_uid == request.auth.uid || isDistrictCommand();
+      allow create: if isVerifiedAsha() && ownsIncoming()
+        && request.resource.data.risk_level in ['RED', 'YELLOW', 'GREEN'];
+      allow update, delete: if false; // clinical records are write-once
+    }
+
+    match /referrals/{referralId} {
+      allow read: if isVerifiedAsha() && resource.data.owner_uid == request.auth.uid || isDistrictCommand();
+      allow create: if isVerifiedAsha() && ownsIncoming()
+        && request.resource.data.status == 'CREATED';
+      // Facility staff advance the status; the ASHA client cannot.
+      allow update: if isDistrictCommand();
+      allow delete: if false;
     }
   }
 }

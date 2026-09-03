@@ -1,46 +1,57 @@
 "use client";
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Stethoscope, ScanLine, Brain, Landmark, MessageCircleHeart, FileHeart } from 'lucide-react';
+import { Activity, ArrowRightCircle, MessageCircleHeart, FileHeart, MapPin, Users, WifiOff, LayoutDashboard } from 'lucide-react';
 import styles from './landing.module.css';
 
 export default function FeatureGrid() {
   const shouldReduceMotion = useReducedMotion();
   const features = [
     {
-      icon: <Stethoscope size={32} />,
-      title: "Automated Triage",
-      desc: "Instantly categorize symptom severity to prioritize urgent medical cases over routine queries."
+      icon: <Activity size={32} />,
+      title: "Assisted Digital Triage",
+      desc: "Capture symptoms, vitals and red flags through a guided workflow. DiagnoVerse helps frontline workers prioritize cases while keeping clinical decisions with qualified professionals."
     },
     {
-      icon: <ScanLine size={32} />,
-      title: "Prescription Scanning",
-      desc: "Digitize and interpret handwritten prescriptions to avoid medication errors and improve accessibility."
-    },
-    {
-      icon: <Brain size={32} />,
-      title: "AI Diagnostics",
-      desc: "Leverage advanced machine learning to detect early signs of common diseases from simple inputs."
-    },
-    {
-      icon: <Landmark size={32} />,
-      title: "Government Integration",
-      desc: "Seamlessly connects with national health registries and adheres to all local compliance laws."
+      icon: <ArrowRightCircle size={32} />,
+      title: "Smart Referral Tracking",
+      desc: "Create, track and close referrals across sub-centres, PHCs, rural hospitals and district facilities with a clear status timeline."
     },
     {
       icon: <MessageCircleHeart size={32} />,
-      title: "Multilingual Chat",
-      desc: "Engage with patients in their native languages through an intuitive and accessible conversational interface."
+      title: "Teleconsultation and Queue Support",
+      desc: "Connect patients to the appropriate public-health facility through appointment requests, queue visibility and assisted low-bandwidth consultations."
     },
     {
       icon: <FileHeart size={32} />,
-      title: "Secure Health Records",
-      desc: "Maintain immutable and fully encrypted electronic health records that patients own and control."
+      title: "Longitudinal Health Records",
+      desc: "Maintain consent-based patient records containing visits, vitals, prescriptions, reports, referrals and follow-up tasks in one continuous care history."
+    },
+    {
+      icon: <MapPin size={32} />,
+      title: "Medicine and Diagnostics Visibility",
+      desc: "Help workers and patients discover medicine availability, diagnostic services, timings and suitable alternative facilities before travelling."
+    },
+    {
+      icon: <Users size={32} />,
+      title: "Follow-up for High-Risk Families",
+      desc: "Support ASHA workers with reminders and follow-up tasks for maternal, child and chronic-care patients."
+    },
+    {
+      icon: <WifiOff size={32} />,
+      title: "Offline-First Field Work",
+      desc: "Record patient information in low-connectivity areas and securely synchronize it when the network becomes available."
+    },
+    {
+      icon: <LayoutDashboard size={32} />,
+      title: "Facility Quality Dashboard",
+      desc: "Give public-health administrators visibility into waiting time, referral completion, missed follow-ups, high-risk cases and service availability."
     }
   ];
 
   return (
     <motion.section 
+      id="features"
       className={styles.featureGridSection}
       initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 15 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -49,8 +60,8 @@ export default function FeatureGrid() {
     >
       <div className={styles.featureGridContainer}>
         <div className={styles.featureGridHeader}>
-          <h2 className={styles.featureGridTitle}>Comprehensive Care Capabilities</h2>
-          <p className={styles.featureCardDesc}>Equipping the frontier of rural healthcare with modern tools.</p>
+          <h2 className={styles.featureGridTitle}>From first contact to completed care</h2>
+          <p className={styles.featureCardDesc}>DiagnoVerse strengthens the public-health system by helping frontline workers identify risk, coordinate services and close the loop on every referral.</p>
         </div>
         <div className={styles.featureGridGrid}>
           {features.map((feature, idx) => (

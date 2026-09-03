@@ -17,12 +17,14 @@ export default function Navbar() {
       
       <div className={styles.navLinks}>
         <a href="#features" className={styles.navLink}>Features</a>
+        <a href="#how-it-works" className={styles.navLink}>How It Works</a>
+        <a href="#workers" className={styles.navLink}>For Health Workers</a>
+        <a href="#impact" className={styles.navLink}>Impact</a>
         <a href="#safety" className={styles.navLink}>Safety</a>
-        <a href="#about" className={styles.navLink}>About</a>
       </div>
 
       <div className={styles.navRight}>
-        <Link href="/en/auth" className={styles.btnPrimary}>Access Portal</Link>
+        <Link href="/en/auth/patient" className={styles.btnPrimary}>User Login</Link>
       </div>
 
       <button className={styles.mobileMenuBtn} onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
@@ -32,9 +34,11 @@ export default function Navbar() {
       {isOpen && (
         <div className={styles.mobileDrawer}>
           <a href="#features" className={styles.navLink} onClick={() => setIsOpen(false)}>Features</a>
+          <a href="#how-it-works" className={styles.navLink} onClick={() => setIsOpen(false)}>How It Works</a>
+          <a href="#workers" className={styles.navLink} onClick={() => setIsOpen(false)}>For Health Workers</a>
+          <a href="#impact" className={styles.navLink} onClick={() => setIsOpen(false)}>Impact</a>
           <a href="#safety" className={styles.navLink} onClick={() => setIsOpen(false)}>Safety</a>
-          <a href="#about" className={styles.navLink} onClick={() => setIsOpen(false)}>About</a>
-          <Link href="/en/auth" className={styles.btnPrimary} style={{ textAlign: 'center' }} onClick={() => setIsOpen(false)}>Access Portal</Link>
+          <Link href="/en/auth/patient" className={styles.btnPrimary} style={{ textAlign: 'center', marginTop: '1rem' }} onClick={() => setIsOpen(false)}>User Login</Link>
         </div>
       )}
     </nav>

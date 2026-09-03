@@ -8,8 +8,11 @@ export default function Footer() {
       <div className={styles.footerGrid}>
         <div>
           <div className={styles.navLogo} style={{ marginBottom: '1rem' }}>DiagnoVerse AI</div>
-          <p style={{ color: '#6b7280', lineHeight: 1.6 }}>
-            Accessible, accurate, and instant AI-powered healthcare triage for everyone.
+          <p style={{ color: '#6b7280', lineHeight: 1.6, marginBottom: '1rem' }}>
+            DiagnoVerse is an AI-assisted rural care coordination platform designed to improve access, referral completion and continuity across public-health services.
+          </p>
+          <p style={{ color: '#4b5563', lineHeight: 1.4, fontSize: '0.75rem' }}>
+            <strong>Disclaimer:</strong> DiagnoVerse is a healthcare workflow and triage-support prototype. It does not replace professional medical diagnosis, treatment or emergency services. In an emergency, contact local emergency services or visit the nearest healthcare facility.
           </p>
         </div>
         <div>
@@ -17,6 +20,7 @@ export default function Footer() {
           <div className={styles.footerLinks}>
             <Link href="/dashboard" className={styles.footerLink}>Web App / Features</Link>
             <Link href="#how-it-works" className={styles.footerLink}>How It Works</Link>
+            <Link href="/en/auth/district" className={styles.footerLink} style={{ color: '#0d9488' }}>District Command Login</Link>
           </div>
         </div>
         <div>

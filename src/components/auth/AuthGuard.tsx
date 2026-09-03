@@ -42,7 +42,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         if (pathname.includes('/dashboard/worker')) {
           authPath = '/auth/worker';
         } else if (pathname.includes('/dashboard/district')) {
-          authPath = '/auth/worker';
+          authPath = '/auth/district';
         }
         
         router.replace(`/${currentLocale}${authPath}?next=${encodeURIComponent(pathname)}`);

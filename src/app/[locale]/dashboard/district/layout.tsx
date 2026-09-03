@@ -26,10 +26,10 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
 
   const navItems = [
     { icon: LayoutDashboard, label: 'SLA Dashboard', href: `/${locale}/dashboard/district`, active: true },
-    { icon: Map, label: 'Facility Mapping', href: '#' },
-    { icon: AlertOctagon, label: 'Critical Incidents', href: '#' },
-    { icon: FileText, label: 'Audit Reports', href: '#' },
-    { icon: Settings, label: 'System Config', href: '#' },
+    { icon: Map, label: 'Facility Mapping', href: `/${locale}/dashboard/district/facilities` },
+    { icon: AlertOctagon, label: 'Critical Incidents', href: `/${locale}/dashboard/district/incidents` },
+    { icon: FileText, label: 'Audit Reports', href: `/${locale}/dashboard/district/audit` },
+    { icon: Settings, label: 'System Config', href: `/${locale}/dashboard/district/config` },
   ];
 
   return (
@@ -65,6 +65,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = item.href === '#' ? false : (typeof window !== 'undefined' ? window.location.pathname.includes(item.href) : false);
             return (
               <button
                 key={item.label}
@@ -74,12 +75,12 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                  item.active 
+                  isActive 
                     ? "bg-slate-100 text-slate-900" 
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                <Icon className={cn("size-5", item.active ? "text-slate-900" : "text-slate-400")} />
+                <Icon className={cn("size-5", isActive ? "text-slate-900" : "text-slate-400")} />
                 {item.label}
               </button>
             );
@@ -87,7 +88,10 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
         </div>
 
         <div className="p-4 border-t border-slate-200">
-          <div className="flex items-center gap-3 px-2 py-3">
+          <div 
+            className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors"
+            onClick={() => router.push(`/${locale}/dashboard/district/profile`)}
+          >
             <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700">
               CM
             </div>
@@ -96,7 +100,16 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
               <p className="text-xs text-slate-500">Chief Medical Officer</p>
             </div>
           </div>
-          <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-red-600 hover:bg-red-50 mt-2">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-slate-600 hover:text-red-600 hover:bg-red-50 mt-2"
+            onClick={async () => {
+              const { signOut } = await import('firebase/auth');
+              const { auth } = await import('@/firebase/clientApp');
+              await signOut(auth);
+              router.push(`/${locale}/auth/district`);
+            }}
+          >
             <LogOut className="size-4 mr-2" />
             Sign Out
           </Button>

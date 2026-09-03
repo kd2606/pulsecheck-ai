@@ -8,31 +8,42 @@ export default function PulseShowcase() {
       <div className={styles.pulseShowcaseLeft}>
         <div className={styles.chatInterface}>
           <div className={styles.chatBubbleUser}>
-            chest mein bahut dard ho raha hai
+            I want to see my referral status
           </div>
           <div className={styles.chatBubbleBot}>
-            This sounds like a possible cardiac emergency. Call 108 right now. Please do not wait.
+            Your referral to the District Hospital is active. Please visit before Friday.
           </div>
         </div>
       </div>
       <div className={styles.pulseShowcaseRight}>
-        <h2 className={styles.pulseShowcaseTitle}>Meet Pulse: Your Clinical AI Copilot</h2>
+        <h2 className={styles.pulseShowcaseTitle}>Your care journey, connected.</h2>
+        <p style={{ color: '#cbd5e1', marginBottom: '2rem', lineHeight: 1.6 }}>
+          Check symptoms, access public-health services, view your care history, receive reminders and stay connected with your healthcare worker—without losing continuity between facilities.
+        </p>
         <ul className={styles.pulseBullets}>
           <li className={styles.pulseBullet}>
             <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Understands Hinglish and local nuances natively.</span>
+            <span>Check symptoms safely</span>
           </li>
           <li className={styles.pulseBullet}>
             <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Trained on clinical guidelines to ensure accuracy.</span>
+            <span>Find nearby public facilities</span>
           </li>
           <li className={styles.pulseBullet}>
             <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Detects medical emergencies and escalates immediately.</span>
+            <span>Request appointments and teleconsultations (Coming in pilot)</span>
           </li>
           <li className={styles.pulseBullet}>
             <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Available 24/7 without any waiting time.</span>
+            <span>View prescriptions and reports (Coming in pilot)</span>
+          </li>
+          <li className={styles.pulseBullet}>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
+            <span>Track referrals and follow-ups</span>
+          </li>
+          <li className={styles.pulseBullet}>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
+            <span>Manage family health needs</span>
           </li>
         </ul>
       </div>

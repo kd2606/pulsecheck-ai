@@ -20,12 +20,19 @@ import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { HeartPulse } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "@/firebase/clientApp";
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string || "en";
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push(`/${locale}/login`);
+  };
 
   const navItems = [
     { icon: Home, label: "Dashboard", href: `/${locale}/dashboard/worker` },
@@ -107,7 +114,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
                 <span className="text-[10px] text-emerald-300 uppercase tracking-wider">ASHA Worker</span>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px]">
+            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px]" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
             </Button>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldAlert, UserCheck, Lock, ActivitySquare } from 'lucide-react';
 import styles from './landing.module.css';
 
 export default function SafetyPrivacy() {
@@ -9,6 +9,7 @@ export default function SafetyPrivacy() {
 
   return (
     <motion.section 
+      id="safety"
       className={styles.safetySection}
       initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 15 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -16,28 +17,39 @@ export default function SafetyPrivacy() {
       viewport={{ once: true, margin: "-50px" }}
     >
       <div>
-        <h2 className={styles.safetyTitle}>Your Data is Secure</h2>
+        <h2 className={styles.safetyTitle}>Designed to assist care—not replace clinicians</h2>
+        <p className={styles.safetyDesc} style={{ marginBottom: '2rem', color: '#cbd5e1' }}>
+          DiagnoVerse provides risk-oriented guidance and workflow support. It does not independently diagnose, prescribe or replace qualified medical professionals. High-risk cases are escalated to appropriate emergency services or healthcare facilities.
+        </p>
         <div className={styles.safetyList}>
           <div className={styles.safetyItem}>
-            <ShieldCheck size={24} color="#0d9488" />
-            <span>End-to-end encryption for all health records.</span>
+            <ShieldAlert size={24} color="#0d9488" style={{ flexShrink: 0 }} />
+            <div>
+              <strong style={{ display: 'block', color: 'white' }}>Red-flag escalation</strong>
+              <span>Emergency symptoms trigger immediate guidance to contact emergency services and seek urgent care.</span>
+            </div>
           </div>
           <div className={styles.safetyItem}>
-            <ShieldCheck size={24} color="#0d9488" />
-            <span>Strict access controls. Only you control your data.</span>
+            <UserCheck size={24} color="#0d9488" style={{ flexShrink: 0 }} />
+            <div>
+              <strong style={{ display: 'block', color: 'white' }}>Human-in-the-loop</strong>
+              <span>AI suggestions remain subject to review by qualified healthcare professionals.</span>
+            </div>
           </div>
           <div className={styles.safetyItem}>
-            <ShieldCheck size={24} color="#0d9488" />
-            <span>Anonymized processing for AI diagnostics.</span>
+            <Lock size={24} color="#0d9488" style={{ flexShrink: 0 }} />
+            <div>
+              <strong style={{ display: 'block', color: 'white' }}>Consent-based sharing</strong>
+              <span>Patient information is shared with workers or facilities only through appropriate access and consent controls.</span>
+            </div>
           </div>
-        </div>
-      </div>
-      <div>
-        <div className={styles.disclaimerBlock}>
-          <h3 className={styles.disclaimerTitle}>Medical Disclaimer</h3>
-          <p className={styles.disclaimerText}>
-            DiagnoVerse AI is intended for informational and triage purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
-          </p>
+          <div className={styles.safetyItem}>
+            <ActivitySquare size={24} color="#0d9488" style={{ flexShrink: 0 }} />
+            <div>
+              <strong style={{ display: 'block', color: 'white' }}>Audit-ready workflow</strong>
+              <span>Audit-ready clinical workflow with traceable triage and referral actions.</span>
+            </div>
+          </div>
         </div>
       </div>
     </motion.section>

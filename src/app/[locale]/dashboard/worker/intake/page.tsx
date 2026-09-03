@@ -1,1149 +1,657 @@
 'use client';
 
-/**
- * ASHA Worker Protocol-Driven Intake UI
- *
- * STRICT RULE: NO free-text symptom inputs.
- * All data capture is via structured checklists, numeric vitals, and coded items.
- *
- * 5-Step Intake Flow:
- *   1. Patient Selection & Consent
- *   2. Protocol Checklist (Danger Signs)
- *   3. Vitals Entry (OCR/BLE mock + manual fallback)
- *   4. AI Modality Triggers (Capture placeholders)
- *   5. Triage Action (Live triage computation + result display)
- */
+import { useCallback, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  Users,
-  ShieldCheck,
-  AlertTriangle,
-  Baby,
-  HeartPulse,
-  Activity,
-  Thermometer,
-  Heart,
-  Wind,
-  Droplets,
-  Gauge,
-  Scale,
-  Ruler,
-  Bluetooth,
-  ScanLine,
-  Camera,
-  Mic,
-  Stethoscope,
-  Zap,
-  Loader2,
-  CircleAlert,
-  Shield,
-  Search,
-  Plus,
-  ChevronDown,
-  ChevronUp,
-  Printer,
-  Download
-} from 'lucide-react';
+import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { saveIntakeOffline } from '@/lib/services/intake.service';
 
-import { QRCodeSVG } from 'qrcode.react';
+/* -------------------------------------------------------------------------- */
+/*                                   Types                                    */
+/* -------------------------------------------------------------------------- */
 
-import {
-  type ProtocolChecklistItem,
-  type StructuredVitals,
-  type VitalReading,
-  type ActorId,
-  TriageTier,
-  TRIAGE_TIER_ORDINAL,
-} from '@/lib/diagnoverse/types';
-import {
-  PROTOCOL_GROUPS,
-  createChecklistItem,
-  type ProtocolGroup,
-} from '@/lib/diagnoverse/protocol-definitions';
-import { computeTriageResult } from '@/lib/diagnoverse/triage-engine';
+type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+type RiskLevel = 'RED' | 'YELLOW' | 'GREEN';
 
-// ─── Interfaces & Constants ───────────────────
-
-export interface Patient {
-  id: string;
+interface PatientPayload {
   name: string;
-  age: number;
-  gender: 'M' | 'F' | 'O';
-  relation?: string;
-  abhaId?: string;
+  abha_id?: string;
+  gender: Gender;
+  dob: string; 
+  phone?: string;
 }
 
-const MOCK_WORKER_ID = 'ASHA-CG-4201' as ActorId;
-
-// ─── Step Indicator ──────────────────────────
-
-const STEPS = [
-  { number: 1, label: 'Patient', icon: Users },
-  { number: 2, label: 'Checklist', icon: ShieldCheck },
-  { number: 3, label: 'Vitals', icon: Activity },
-  { number: 4, label: 'AI Scan', icon: ScanLine },
-  { number: 5, label: 'Triage', icon: Zap },
-] as const;
-
-function StepIndicator({ currentStep }: { currentStep: number }) {
-  return (
-    <div className="flex items-center justify-between w-full max-w-2xl mx-auto mb-8">
-      {STEPS.map((step, idx) => {
-        const Icon = step.icon;
-        const isActive = step.number === currentStep;
-        const isCompleted = step.number < currentStep;
-        return (
-          <div key={step.number} className="flex items-center">
-            <div className="flex flex-col items-center">
-              <div
-                className={cn(
-                  'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 border-2',
-                  isCompleted && 'bg-emerald-500/20 border-emerald-500 text-emerald-400',
-                  isActive && 'bg-blue-500/20 border-blue-500 text-blue-400 ring-4 ring-blue-500/20',
-                  !isActive && !isCompleted && 'bg-muted/50 border-muted-foreground/20 text-muted-foreground/50'
-                )}
-              >
-                {isCompleted ? <Check className="size-5" /> : <Icon className="size-5" />}
-              </div>
-              <span
-                className={cn(
-                  'text-xs mt-1.5 font-medium',
-                  isActive && 'text-blue-400',
-                  isCompleted && 'text-emerald-400',
-                  !isActive && !isCompleted && 'text-muted-foreground/50'
-                )}
-              >
-                {step.label}
-              </span>
-            </div>
-            {idx < STEPS.length - 1 && (
-              <div
-                className={cn(
-                  'w-8 sm:w-12 md:w-16 h-0.5 mx-1 sm:mx-2 mt-[-18px]',
-                  step.number < currentStep ? 'bg-emerald-500' : 'bg-muted-foreground/20'
-                )}
-              />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
+interface TriagePayload {
+  symptoms: string[];
+  vitals: {
+    temperature_c: number;
+    systolic_bp: number;
+    diastolic_bp: number;
+  };
+  risk_level: RiskLevel;
+  recommended_action: string;
 }
 
-// ─── Step 1: Patient Selection ───────────────
-
-function Step1PatientSelection({
-  selectedPatient,
-  onSelect,
-  consentGiven,
-  onConsent,
-}: {
-  selectedPatient: Patient | null;
-  onSelect: (patient: Patient) => void;
-  consentGiven: boolean;
-  onConsent: (v: boolean) => void;
-}) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // In a production environment, this would fetch from IndexedDB or Firestore.
-    // For now, representing an authentic zero-state for a fresh login.
-    setLoading(false);
-  }, []);
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <Users className="size-5 text-blue-400" />
-          Select Patient
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Search for an existing patient or add a new one.
-        </p>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-        <Input 
-          placeholder="Search by name, ABHA ID or phone number..." 
-          className="pl-10 h-12 bg-slate-900 border-slate-800 text-white"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-3">
-        {loading ? (
-          <div className="h-32 rounded-lg bg-slate-900 animate-pulse border border-slate-800" />
-        ) : patients.length === 0 ? (
-          <Card className="bg-slate-900 border-slate-800 border-dashed text-center p-8">
-            <Users className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-            <p className="text-slate-200 font-medium">No patients found</p>
-            <p className="text-slate-500 text-sm mt-1 mb-6 max-w-sm mx-auto">
-              Search yielded no results. Add a new patient to your assigned families to begin screening.
-            </p>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium">
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Patient
-            </Button>
-          </Card>
-        ) : (
-          <div className="space-y-2">
-            {patients.map((member) => {
-              const isSelected = selectedPatient?.id === member.id;
-              return (
-                <button
-                  key={member.id}
-                  onClick={() => onSelect(member)}
-                  className={cn(
-                    'w-full flex items-center justify-between p-4 rounded-xl transition-all',
-                    isSelected
-                      ? 'bg-blue-500/15 border border-blue-500/40 ring-2 ring-blue-500/20'
-                      : 'bg-slate-900 border border-slate-800 hover:bg-slate-800/80'
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold',
-                        isSelected ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-300'
-                      )}
-                    >
-                      {member.name.charAt(0)}
-                    </div>
-                    <div className="text-left">
-                      <p className={cn('font-medium', isSelected ? 'text-blue-300' : 'text-slate-200')}>
-                        {member.name}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {member.relation} • {member.gender === 'M' ? 'Male' : 'Female'} • {member.age < 1 ? `${Math.round(member.age * 12)} months` : `${member.age} yrs`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs border-slate-700 text-slate-400">
-                      {member.id}
-                    </Badge>
-                    {isSelected && <CheckCircle2 className="size-5 text-blue-400" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {selectedPatient && (
-        <Card className="bg-blue-500/5 border-blue-500/20">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <button
-                onClick={() => onConsent(!consentGiven)}
-                className={cn(
-                  'mt-0.5 w-6 h-6 rounded border-2 flex items-center justify-center transition-all shrink-0',
-                  consentGiven
-                    ? 'bg-emerald-500 border-emerald-500'
-                    : 'border-muted-foreground/40 hover:border-blue-400'
-                )}
-              >
-                {consentGiven && <Check className="size-4 text-white" />}
-              </button>
-              <div>
-                <p className="text-sm font-medium text-white">Verbal Consent Obtained</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  I confirm that {selectedPatient.name} (or their guardian) has given verbal
-                  consent for this health screening as per DPDP Act 2023 requirements.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+interface IntakeFormState {
+  name: string;
+  abha_id: string;
+  gender: Gender | '';
+  dob: string;
+  phone: string;
+  symptoms: string;
+  temperature_c: string;
+  systolic_bp: string;
+  diastolic_bp: string;
+  risk_level: RiskLevel | '';
+  recommended_action: string;
 }
 
-// ─── Step 2: Protocol Checklist ──────────────
+type FieldErrors = Partial<Record<keyof IntakeFormState, string>>;
+type SubmitStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-const PROTOCOL_ICON_MAP: Record<string, typeof AlertTriangle> = {
-  AlertTriangle,
-  Baby,
-  HeartPulse,
-  Activity,
-};
+/* -------------------------------------------------------------------------- */
+/*                            Constants & helpers                             */
+/* -------------------------------------------------------------------------- */
 
-function Step2ProtocolChecklist({
-  checklist,
-  onToggle,
-}: {
-  checklist: ProtocolChecklistItem[];
-  onToggle: (code: string) => void;
-}) {
-  const [expandedGroup, setExpandedGroup] = useState<string>(PROTOCOL_GROUPS[0].id);
-
-  const presentCount = checklist.filter((i) => i.present).length;
-  const severeCounts = useMemo(() => {
-    const counts = { red: 0, orange: 0, yellow: 0 };
-    for (const item of checklist) {
-      if (!item.present) continue;
-      const group = PROTOCOL_GROUPS.find((g) => g.items.some((t) => t.code === item.code));
-      const template = group?.items.find((t) => t.code === item.code);
-      if (template) counts[template.severity]++;
-    }
-    return counts;
-  }, [checklist]);
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <ShieldCheck className="size-5 text-blue-400" />
-          Protocol Checklist
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Check all danger signs observed. <strong>No free-text entry.</strong>
-        </p>
-      </div>
-
-      {presentCount > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50">
-          <CircleAlert className="size-5 text-amber-400 shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            <span className="text-white font-semibold">{presentCount} danger sign(s)</span> identified:
-            {severeCounts.red > 0 && (
-              <Badge className="ml-2 bg-red-500/20 text-red-400 border-red-500/30">{severeCounts.red} RED</Badge>
-            )}
-            {severeCounts.orange > 0 && (
-              <Badge className="ml-1 bg-orange-500/20 text-orange-400 border-orange-500/30">{severeCounts.orange} ORANGE</Badge>
-            )}
-            {severeCounts.yellow > 0 && (
-              <Badge className="ml-1 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">{severeCounts.yellow} YELLOW</Badge>
-            )}
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-3">
-        {PROTOCOL_GROUPS.map((group: ProtocolGroup) => {
-          const GroupIcon = PROTOCOL_ICON_MAP[group.icon] ?? ShieldCheck;
-          const groupItems = checklist.filter((i) => i.protocolId === group.id);
-          const groupPresent = groupItems.filter((i) => i.present).length;
-          const isExpanded = expandedGroup === group.id;
-
-          return (
-            <Card key={group.id} className="bg-card/50 border-border/50 overflow-hidden">
-              <button
-                onClick={() => setExpandedGroup(isExpanded ? '' : group.id)}
-                className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
-                    <GroupIcon className="size-5 text-blue-400" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-white">{group.name}</p>
-                    <p className="text-xs text-muted-foreground">{group.description}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {groupPresent > 0 && (
-                    <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-                      {groupPresent}
-                    </Badge>
-                  )}
-                  {isExpanded ? (
-                    <ChevronUp className="size-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="size-4 text-muted-foreground" />
-                  )}
-                </div>
-              </button>
-
-              {isExpanded && (
-                <div className="border-t border-border/30 px-4 pb-4 pt-3 space-y-2">
-                  {groupItems.map((item) => {
-                    const template = group.items.find((t) => t.code === item.code);
-                    const severityColor = template?.severity === 'red'
-                      ? 'border-red-500/40 bg-red-500/10'
-                      : template?.severity === 'orange'
-                        ? 'border-orange-500/40 bg-orange-500/10'
-                        : 'border-yellow-500/40 bg-yellow-500/10';
-
-                    return (
-                      <button
-                        key={item.code}
-                        onClick={() => onToggle(item.code)}
-                        className={cn(
-                          'w-full flex items-center justify-between p-3 rounded-lg transition-all border',
-                          item.present
-                            ? severityColor
-                            : 'bg-muted/10 border-transparent hover:bg-muted/30'
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={cn(
-                              'w-6 h-6 rounded border-2 flex items-center justify-center transition-all shrink-0',
-                              item.present
-                                ? template?.severity === 'red'
-                                  ? 'bg-red-500 border-red-500'
-                                  : template?.severity === 'orange'
-                                    ? 'bg-orange-500 border-orange-500'
-                                    : 'bg-yellow-500 border-yellow-500'
-                                : 'border-muted-foreground/30'
-                            )}
-                          >
-                            {item.present && <Check className="size-4 text-white" />}
-                          </div>
-                          <div className="text-left">
-                            <p className={cn('text-sm font-medium', item.present ? 'text-white' : 'text-muted-foreground')}>
-                              {item.label}
-                            </p>
-                            <p className="text-xs text-muted-foreground/60 font-mono">{item.code}</p>
-                          </div>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            'text-xs capitalize',
-                            template?.severity === 'red' && 'text-red-400 border-red-500/30',
-                            template?.severity === 'orange' && 'text-orange-400 border-orange-500/30',
-                            template?.severity === 'yellow' && 'text-yellow-400 border-yellow-500/30',
-                          )}
-                        >
-                          {template?.severity}
-                        </Badge>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ─── Step 3: Vitals Entry ────────────────────
-
-interface VitalField {
-  key: keyof StructuredVitals;
-  label: string;
-  unit: string;
-  icon: typeof Thermometer;
-  placeholder: string;
-  min: number;
-  max: number;
-  step: number;
-  bleCapable: boolean;
-}
-
-const VITAL_FIELDS: VitalField[] = [
-  { key: 'spO2',            label: 'SpO2 (Oxygen)',    unit: '%',           icon: Droplets,     placeholder: '95-100', min: 50, max: 100, step: 1, bleCapable: true },
-  { key: 'heartRate',       label: 'Heart Rate',       unit: 'bpm',         icon: Heart,        placeholder: '60-100', min: 20, max: 250, step: 1, bleCapable: true },
-  { key: 'temperature',     label: 'Temperature',      unit: '°C',          icon: Thermometer,  placeholder: '36.5',   min: 30, max: 45,  step: 0.1, bleCapable: true },
-  { key: 'respiratoryRate', label: 'Respiratory Rate', unit: 'breaths/min', icon: Wind,         placeholder: '12-20',  min: 5,  max: 60,  step: 1, bleCapable: false },
-  { key: 'systolicBP',      label: 'Systolic BP',      unit: 'mmHg',        icon: Gauge,        placeholder: '120',    min: 50, max: 300, step: 1, bleCapable: true },
-  { key: 'diastolicBP',     label: 'Diastolic BP',     unit: 'mmHg',        icon: Gauge,        placeholder: '80',     min: 30, max: 200, step: 1, bleCapable: true },
-  { key: 'bloodGlucose',    label: 'Blood Glucose',    unit: 'mg/dL',       icon: Droplets,     placeholder: '80-120', min: 10, max: 600, step: 1, bleCapable: false },
-  { key: 'weight',          label: 'Weight',           unit: 'kg',          icon: Scale,        placeholder: '50-80',  min: 0.5, max: 200, step: 0.5, bleCapable: false },
-  { key: 'muac',            label: 'MUAC',             unit: 'cm',          icon: Ruler,        placeholder: '12-15',  min: 5, max: 40, step: 0.1, bleCapable: false },
+const GENDER_OPTIONS: ReadonlyArray<{ value: Gender; label: string }> = [
+  { value: 'MALE', label: 'Male' },
+  { value: 'FEMALE', label: 'Female' },
+  { value: 'OTHER', label: 'Other' },
 ];
 
-function Step3VitalsEntry({
-  vitals,
-  onVitalChange,
-}: {
-  vitals: StructuredVitals;
-  onVitalChange: (key: keyof StructuredVitals, value: string) => void;
-}) {
-  const [bleScanning, setBleScanning] = useState<string | null>(null);
+const RISK_OPTIONS: ReadonlyArray<{ value: RiskLevel; label: string; dot: string }> = [
+  { value: 'RED', label: 'RED — Emergency referral', dot: 'bg-red-500' },
+  { value: 'YELLOW', label: 'YELLOW — Needs review', dot: 'bg-amber-400' },
+  { value: 'GREEN', label: 'GREEN — Routine / home care', dot: 'bg-emerald-500' },
+];
 
-  const handleBleScan = (key: string) => {
-    setBleScanning(key);
-    // Mock BLE scan — auto-fill after 2 seconds
-    setTimeout(() => {
-      const mockValues: Record<string, string> = {
-        spO2: '97',
-        heartRate: '78',
-        temperature: '37.2',
-        systolicBP: '128',
-        diastolicBP: '82',
-      };
-      if (mockValues[key]) {
-        onVitalChange(key as keyof StructuredVitals, mockValues[key]);
-      }
-      setBleScanning(null);
-    }, 2000);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <Activity className="size-5 text-blue-400" />
-          Record Vitals
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Connect BLE device or enter manually. All fields are optional.
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
-        <Bluetooth className="size-5 text-blue-400 shrink-0" />
-        <div className="flex-1">
-          <p className="text-sm text-white font-medium">BLE Device Ready</p>
-          <p className="text-xs text-muted-foreground">Tap the Bluetooth icon on any vital to auto-import from connected device</p>
-        </div>
-        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Mock</Badge>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {VITAL_FIELDS.map((field) => {
-          const Icon = field.icon;
-          const currentReading = vitals[field.key];
-          const currentValue = currentReading?.value?.toString() ?? '';
-          const isScanning = bleScanning === field.key;
-
-          return (
-            <Card key={field.key} className="bg-card/50 border-border/50">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Icon className="size-4 text-blue-400" />
-                    <Label className="text-sm font-medium text-white">{field.label}</Label>
-                  </div>
-                  {field.bleCapable && (
-                    <button
-                      onClick={() => handleBleScan(field.key)}
-                      disabled={isScanning}
-                      className={cn(
-                        'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
-                        isScanning
-                          ? 'bg-blue-500/20 animate-pulse'
-                          : 'bg-muted/30 hover:bg-blue-500/20'
-                      )}
-                    >
-                      {isScanning ? (
-                        <Loader2 className="size-4 text-blue-400 animate-spin" />
-                      ) : (
-                        <Bluetooth className="size-4 text-blue-400" />
-                      )}
-                    </button>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    placeholder={field.placeholder}
-                    min={field.min}
-                    max={field.max}
-                    step={field.step}
-                    value={currentValue}
-                    onChange={(e) => onVitalChange(field.key, e.target.value)}
-                    className="h-11 text-lg font-mono bg-muted/20"
-                  />
-                  <span className="text-sm text-muted-foreground w-16 text-right shrink-0">
-                    {field.unit}
-                  </span>
-                </div>
-                {currentReading && (
-                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                    <Badge variant="outline" className="text-xs py-0">
-                      {currentReading.source === 'ble_pulse_oximeter' ? 'BLE' : 'Manual'}
-                    </Badge>
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ─── Step 4: AI Modality Triggers ────────────
-
-function Step4AIModalities() {
-  const [capturing, setCapturing] = useState<string | null>(null);
-
-  const modalities = [
-    {
-      id: 'skin_scan',
-      title: 'Skin Scan',
-      description: 'Capture a photo of the affected skin area for AI analysis',
-      icon: Camera,
-      color: 'blue',
-      action: 'Capture Photo',
-    },
-    {
-      id: 'cough_analysis',
-      title: 'Cough Analysis',
-      description: 'Record 5 seconds of cough audio for classification',
-      icon: Mic,
-      color: 'teal',
-      action: 'Record Audio',
-    },
-    {
-      id: 'vitals_ocr',
-      title: 'Vitals OCR',
-      description: 'Photograph a paper report to extract vital readings via OCR',
-      icon: ScanLine,
-      color: 'purple',
-      action: 'Scan Report',
-    },
-    {
-      id: 'auscultation',
-      title: 'Digital Auscultation',
-      description: 'Connect digital stethoscope for lung/heart sound analysis',
-      icon: Stethoscope,
-      color: 'emerald',
-      action: 'Connect Device',
-    },
-  ];
-
-  const colorMap: Record<string, string> = {
-    blue: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-    teal: 'bg-teal-500/10 border-teal-500/30 text-teal-400',
-    purple: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
-    emerald: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
-  };
-
-  const handleCapture = (id: string) => {
-    setCapturing(id);
-    setTimeout(() => setCapturing(null), 3000);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <ScanLine className="size-5 text-blue-400" />
-          AI Screening Modules
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Optional: Capture media for AI-assisted screening. All modules run through the 3-stage safety gate.
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
-        <Shield className="size-5 text-amber-400 shrink-0" />
-        <p className="text-xs text-muted-foreground">
-          <span className="text-amber-300 font-medium">AI Safety Gate Active:</span>{' '}
-          Capture QC → Out-of-Distribution Check → Conformal Inference. AI may only <strong>escalate</strong> the triage tier, never lower it.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {modalities.map((mod) => {
-          const Icon = mod.icon;
-          const isCapturing = capturing === mod.id;
-          return (
-            <Card key={mod.id} className="bg-card/50 border-border/50 overflow-hidden">
-              <CardContent className="p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center border', colorMap[mod.color])}>
-                    <Icon className="size-6" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">{mod.title}</p>
-                    <p className="text-xs text-muted-foreground">{mod.description}</p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => handleCapture(mod.id)}
-                  disabled={isCapturing}
-                  variant="outline"
-                  className="w-full h-11"
-                >
-                  {isCapturing ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Icon className="size-4" />
-                      {mod.action}
-                    </>
-                  )}
-                </Button>
-                {isCapturing && (
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Running 3-Stage Gate...</span>
-                      <span>CaptureQC → OOD → Inference</span>
-                    </div>
-                    <Progress value={66} className="h-1.5" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      <p className="text-xs text-center text-muted-foreground/60">
-        AI modules are for screening assistance only. They do not replace clinical judgment.
-      </p>
-    </div>
-  );
-}
-
-// ─── Step 5: Triage Result ───────────────────
-
-const TIER_STYLES: Record<TriageTier, { bg: string; border: string; text: string; label: string; description: string }> = {
-  [TriageTier.RED]: {
-    bg: 'bg-red-500/15',
-    border: 'border-red-500/50',
-    text: 'text-red-400',
-    label: 'EMERGENCY',
-    description: 'Immediate referral to nearest hospital. Call 108 ambulance.',
-  },
-  [TriageTier.ORANGE]: {
-    bg: 'bg-orange-500/15',
-    border: 'border-orange-500/50',
-    text: 'text-orange-400',
-    label: 'URGENT',
-    description: 'Refer to PHC within 1 hour. Monitor vitals continuously.',
-  },
-  [TriageTier.YELLOW]: {
-    bg: 'bg-yellow-500/15',
-    border: 'border-yellow-500/50',
-    text: 'text-yellow-400',
-    label: 'SEMI-URGENT',
-    description: 'Refer to PHC within 24 hours. Schedule follow-up.',
-  },
-  [TriageTier.GREEN]: {
-    bg: 'bg-emerald-500/15',
-    border: 'border-emerald-500/50',
-    text: 'text-emerald-400',
-    label: 'NON-URGENT',
-    description: 'Provide home care advice. Schedule routine follow-up.',
-  },
+const DEFAULT_ACTION: Record<RiskLevel, string> = {
+  RED: 'Immediate referral to nearest PHC/CHC. Arrange transport and inform the medical officer now.',
+  YELLOW: 'Teleconsultation within 24 hours. Re-check vitals twice daily and escalate if worsening.',
+  GREEN: 'Home care advice provided. Routine follow-up visit in 7 days.',
 };
 
-function Step5TriageResult({
-  vitals,
-  checklist,
-  patientName,
-  dpdpConsent,
-  onDpdpConsentChange,
-}: {
-  vitals: StructuredVitals;
-  checklist: ProtocolChecklistItem[];
-  patientName: string;
-  dpdpConsent: boolean;
-  onDpdpConsentChange: (val: boolean) => void;
-}) {
-  // Run the LIVE triage pipeline from our domain engine
-  const triageResult = useMemo(
-    () => computeTriageResult(vitals, checklist, null),
-    [vitals, checklist]
-  );
+const INPUT_CLASS =
+  'w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-white placeholder:text-slate-400 outline-none transition-colors focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60';
 
-  const style = TIER_STYLES[triageResult.finalTier];
-  const ordinal = TRIAGE_TIER_ORDINAL[triageResult.finalTier];
+const LABEL_CLASS = 'block text-sm font-medium text-white';
+const CARD_CLASS = 'rounded-xl border border-slate-800 bg-slate-900 p-5 sm:p-6';
 
+function createInitialState(): IntakeFormState {
+  return {
+    name: '',
+    abha_id: '',
+    gender: '',
+    dob: '',
+    phone: '',
+    symptoms: '',
+    temperature_c: '',
+    systolic_bp: '',
+    diastolic_bp: '',
+    risk_level: '',
+    recommended_action: '',
+  };
+}
+
+function parseSymptoms(raw: string): string[] {
+  const seen = new Set<string>();
+  return raw
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => {
+      if (entry.length === 0) return false;
+      const key = entry.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function normalizeAbha(raw: string): string {
+  return raw.replace(/[\s-]/g, '');
+}
+
+function normalizePhone(raw: string): string {
+  return raw.replace(/[^\d]/g, '').slice(-10);
+}
+
+function toNumber(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (trimmed === '') return null;
+  const value = Number(trimmed);
+  return Number.isFinite(value) ? value : null;
+}
+
+function validate(form: IntakeFormState): FieldErrors {
+  const errors: FieldErrors = {};
+
+  if (form.name.trim().length < 2) {
+    errors.name = 'Enter the full name (minimum 2 characters).';
+  }
+
+  if (form.abha_id.trim() !== '' && !/^\d{14}$/.test(normalizeAbha(form.abha_id))) {
+    errors.abha_id = 'ABHA number must be 14 digits, or leave it blank.';
+  }
+
+  if (form.gender === '') {
+    errors.gender = 'Select a gender.';
+  }
+
+  if (form.dob === '') {
+    errors.dob = 'Date of birth is required.';
+  } else {
+    const dob = new Date(`${form.dob}T00:00:00`);
+    if (Number.isNaN(dob.getTime())) {
+      errors.dob = 'Enter a valid date.';
+    } else if (dob.getTime() > Date.now()) {
+      errors.dob = 'Date of birth cannot be in the future.';
+    } else if (dob.getUTCFullYear() < 1900) {
+      errors.dob = 'Enter a date of birth after 1900.';
+    }
+  }
+
+  if (form.phone.trim() !== '' && !/^[6-9]\d{9}$/.test(normalizePhone(form.phone))) {
+    errors.phone = 'Enter a valid 10-digit mobile number, or leave it blank.';
+  }
+
+  if (parseSymptoms(form.symptoms).length === 0) {
+    errors.symptoms = 'Record at least one symptom.';
+  }
+
+  const temperature = toNumber(form.temperature_c);
+  if (temperature === null) {
+    errors.temperature_c = 'Temperature is required.';
+  } else if (temperature < 30 || temperature > 45) {
+    errors.temperature_c = 'Temperature must be between 30 °C and 45 °C.';
+  }
+
+  const systolic = toNumber(form.systolic_bp);
+  if (systolic === null) {
+    errors.systolic_bp = 'Systolic BP is required.';
+  } else if (!Number.isInteger(systolic) || systolic < 60 || systolic > 260) {
+    errors.systolic_bp = 'Systolic BP must be a whole number between 60 and 260.';
+  }
+
+  const diastolic = toNumber(form.diastolic_bp);
+  if (diastolic === null) {
+    errors.diastolic_bp = 'Diastolic BP is required.';
+  } else if (!Number.isInteger(diastolic) || diastolic < 30 || diastolic > 200) {
+    errors.diastolic_bp = 'Diastolic BP must be a whole number between 30 and 200.';
+  }
+
+  if (systolic !== null && diastolic !== null && !errors.systolic_bp && !errors.diastolic_bp && systolic <= diastolic) {
+    errors.diastolic_bp = 'Diastolic must be lower than systolic.';
+  }
+
+  if (form.risk_level === '') {
+    errors.risk_level = 'Select a triage risk level.';
+  }
+
+  return errors;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              Field primitives                              */
+/* -------------------------------------------------------------------------- */
+
+interface FieldProps {
+  id: string;
+  label: string;
+  children: ReactNode;
+  required?: boolean;
+  hint?: string;
+  error?: string;
+  className?: string;
+}
+
+function Field({ id, label, children, required = false, hint, error, className }: FieldProps) {
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <Zap className="size-5 text-blue-400" />
-          Triage Result
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Computed by the deterministic rules engine for <strong className="text-white">{patientName}</strong>
+    <div className={className}>
+      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+        <label htmlFor={id} className={LABEL_CLASS}>
+          {label}
+          {required ? <span className="ml-1 text-emerald-500">*</span> : null}
+        </label>
+        {!required ? <span className="text-xs text-slate-400">Optional</span> : null}
+      </div>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} className="mt-1.5 text-xs text-red-400">
+          {error}
         </p>
-      </div>
-
-      {/* ── Main Tier Card ── */}
-      <Card className={cn('overflow-hidden', style.bg, style.border, 'border-2')}>
-        <CardContent className="p-6 text-center">
-          <div
-            className={cn(
-              'w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-4 border-4',
-              style.border, style.bg
-            )}
-          >
-            <span className={cn('text-4xl font-black', style.text)}>
-              {triageResult.finalTier}
-            </span>
-          </div>
-          <h3 className={cn('text-2xl font-black mb-2', style.text)}>
-            {style.label}
-          </h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            {style.description}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* ── Triage Details ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card className="bg-card/50 border-border/50">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground mb-1">Deterministic Baseline</p>
-            <Badge className={cn('text-sm', TIER_STYLES[triageResult.deterministicTier].bg, TIER_STYLES[triageResult.deterministicTier].text)}>
-              {triageResult.deterministicTier}
-            </Badge>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/50 border-border/50">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground mb-1">AI Proposed</p>
-            <Badge variant="outline" className="text-sm">
-              {triageResult.aiProposedTier ?? 'Not Run'}
-            </Badge>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/50 border-border/50">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground mb-1">Final (Max of both)</p>
-            <Badge className={cn('text-sm font-bold', style.bg, style.text, style.border, 'border')}>
-              {triageResult.finalTier}
-            </Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ── Fired Rules ── */}
-      {triageResult.firedRuleIds.length > 0 && (
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <AlertTriangle className="size-4 text-amber-400" />
-              Rules Triggered ({triageResult.firedRuleIds.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-1">
-              {triageResult.firedRuleIds.map((ruleId) => (
-                <div key={ruleId} className="flex items-center gap-2 p-2 rounded bg-muted/20">
-                  <CircleAlert className="size-3 text-amber-400 shrink-0" />
-                  <code className="text-xs text-muted-foreground font-mono">{ruleId}</code>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Severity Gauge ── */}
-      <div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-          <span>Severity</span>
-          <span>{ordinal}/3</span>
-        </div>
-        <div className="h-3 rounded-full bg-muted/30 overflow-hidden">
-          <div
-            className={cn(
-              'h-full rounded-full transition-all duration-700',
-              triageResult.finalTier === TriageTier.GREEN && 'bg-emerald-500 w-[8%]',
-              triageResult.finalTier === TriageTier.YELLOW && 'bg-yellow-500 w-[33%]',
-              triageResult.finalTier === TriageTier.ORANGE && 'bg-orange-500 w-[66%]',
-              triageResult.finalTier === TriageTier.RED && 'bg-red-500 w-full',
-            )}
-          />
-        </div>
-        <div className="flex justify-between text-xs mt-1">
-          <span className="text-emerald-400">GREEN</span>
-          <span className="text-yellow-400">YELLOW</span>
-          <span className="text-orange-400">ORANGE</span>
-          <span className="text-red-400">RED</span>
-        </div>
-      </div>
-
-      {/* ── Actions ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {ordinal >= 2 && (
-          <Button className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-bold">
-            <AlertTriangle className="size-5" />
-            Create Emergency Referral
-          </Button>
-        )}
-        {ordinal === 1 && (
-          <Button className="flex-1 h-12 bg-amber-600 hover:bg-amber-700 text-white font-bold">
-            <AlertTriangle className="size-5" />
-            Create PHC Referral
-          </Button>
-        )}
-        <Button variant="outline" className="flex-1 h-12">
-          <CheckCircle2 className="size-5" />
-          Save & Complete Intake
-        </Button>
-      </div>
-
-      <div className="flex items-start gap-3 p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 mt-4">
-        <button
-          onClick={() => onDpdpConsentChange(!dpdpConsent)}
-          className={cn(
-            'mt-0.5 w-6 h-6 rounded border-2 flex items-center justify-center transition-all shrink-0',
-            dpdpConsent
-              ? 'bg-blue-500 border-blue-500'
-              : 'border-muted-foreground/40 hover:border-blue-400'
-          )}
-        >
-          {dpdpConsent && <Check className="size-4 text-white" />}
-        </button>
-        <div>
-          <p className="text-sm font-medium text-white">DPDP Act 2023 Consent</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            I consent to sharing this triage data with District Facilities under the DPDP Act 2023 & ABDM guidelines.
-          </p>
-        </div>
-      </div>
-
-      <p className="text-xs text-center text-muted-foreground/60 mt-4">
-        Triage computed at {triageResult.computedAt} • AI Safety: Escalation-Only Invariant Active
-      </p>
+      ) : hint ? (
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-slate-400">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }
 
-// ─── Main Intake Page ────────────────────────
+function Spinner() {
+  return (
+    <svg className="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z" />
+    </svg>
+  );
+}
 
-export default function IntakePage() {
-  const router = useRouter();
-  const params = useParams();
-  const locale = params.locale as string;
+/* -------------------------------------------------------------------------- */
+/*                                    Page                                    */
+/* -------------------------------------------------------------------------- */
 
-  const [step, setStep] = useState(1);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [consentGiven, setConsentGiven] = useState(false);
+export default function NewIntakePage() {
+  const { syncPendingData } = useOfflineSync();
 
-  // Protocol checklist state
-  const [checklist, setChecklist] = useState<ProtocolChecklistItem[]>(() => {
-    const items: ProtocolChecklistItem[] = [];
-    for (const group of PROTOCOL_GROUPS) {
-      for (const template of group.items) {
-        items.push(createChecklistItem(template, group.id, MOCK_WORKER_ID));
-      }
-    }
-    return items;
-  });
+  const [form, setForm] = useState<IntakeFormState>(createInitialState);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [status, setStatus] = useState<SubmitStatus>('idle');
+  const [message, setMessage] = useState<string | null>(null);
+  const [actionTouched, setActionTouched] = useState<boolean>(false);
 
-  // Vitals state
-  const [vitals, setVitals] = useState<StructuredVitals>({});
+  const isSaving = status === 'saving';
 
-  const [dpdpConsent, setDpdpConsent] = useState(false);
-  const [savedCase, setSavedCase] = useState<any>(null);
-
-  const handleToggleChecklist = useCallback((code: string) => {
-    setChecklist((prev) =>
-      prev.map((item) =>
-        item.code === code ? { ...item, present: !item.present } : item
-      )
-    );
+  const setField = useCallback(<K extends keyof IntakeFormState>(key: K, value: IntakeFormState[K]): void => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => {
+      if (prev[key] === undefined) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }, []);
 
-  const handleVitalChange = useCallback((key: keyof StructuredVitals, value: string) => {
-    const numVal = parseFloat(value);
-    if (value === '' || isNaN(numVal)) {
-      setVitals((prev) => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      });
+  const handleRiskChange = useCallback(
+    (value: RiskLevel | ''): void => {
+      setField('risk_level', value);
+      if (!actionTouched) {
+        setField('recommended_action', value === '' ? '' : DEFAULT_ACTION[value]);
+      }
+    },
+    [actionTouched, setField],
+  );
+
+  const resetForm = useCallback((): void => {
+    setForm(createInitialState());
+    setErrors({});
+    setActionTouched(false);
+    setStatus('idle');
+    setMessage(null);
+  }, []);
+
+  const age = useMemo<number | null>(() => {
+    if (form.dob === '') return null;
+    const dob = new Date(`${form.dob}T00:00:00`);
+    if (Number.isNaN(dob.getTime())) return null;
+
+    const today = new Date();
+    let years = today.getFullYear() - dob.getFullYear();
+    const monthDelta = today.getMonth() - dob.getMonth();
+    if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < dob.getDate())) {
+      years -= 1;
+    }
+    return years >= 0 && years < 130 ? years : null;
+  }, [form.dob]);
+
+  const symptomCount = useMemo<number>(() => parseSymptoms(form.symptoms).length, [form.symptoms]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (isSaving) return;
+
+    const validationErrors = validate(form);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setStatus('error');
+      setMessage('Please correct the highlighted fields before saving.');
       return;
     }
 
-    const reading: VitalReading = {
-      value: numVal,
-      unit: VITAL_FIELDS.find((f) => f.key === key)?.unit ?? '',
-      source: 'manual_entry',
-      capturedBy: MOCK_WORKER_ID,
-      capturedAt: new Date().toISOString(),
+    setErrors({});
+    setStatus('saving');
+    setMessage(null);
+
+    const abha = normalizeAbha(form.abha_id);
+    const phone = normalizePhone(form.phone);
+
+    const patientData: PatientPayload = {
+      name: form.name.trim().replace(/\s+/g, ' '),
+      gender: form.gender as Gender,
+      dob: form.dob,
+      ...(abha !== '' ? { abha_id: abha } : {}),
+      ...(phone !== '' ? { phone } : {}),
     };
 
-    setVitals((prev) => ({ ...prev, [key]: reading }));
-  }, []);
+    const riskLevel = form.risk_level as RiskLevel;
 
-  const canProceed = step === 1
-    ? selectedPatient !== null && consentGiven
-    : true;
+    const triageData: TriagePayload = {
+      symptoms: parseSymptoms(form.symptoms),
+      vitals: {
+        temperature_c: Number(form.temperature_c),
+        systolic_bp: Number(form.systolic_bp),
+        diastolic_bp: Number(form.diastolic_bp),
+      },
+      risk_level: riskLevel,
+      recommended_action: form.recommended_action.trim() || DEFAULT_ACTION[riskLevel],
+    };
 
-  const progress = (step / STEPS.length) * 100;
+    try {
+      await saveIntakeOffline(patientData, triageData, { triggerSync: true });
+
+      setForm(createInitialState());
+      setActionTouched(false);
+      setStatus('saved');
+      setMessage(
+        `Intake for ${patientData.name} saved on this device. It will upload automatically once a connection is available.`,
+      );
+
+      try {
+        await syncPendingData('post-intake');
+      } catch {
+        /* queued for the next sync window */
+      }
+    } catch (error) {
+      setStatus('error');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Could not save this intake to local storage. Please retry, and do not close the app.',
+      );
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto pb-8">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => step > 1 ? setStep(step - 1) : router.push(`/${locale}/dashboard/worker`)}
-          className="shrink-0"
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-        <div>
-          <h1 className="text-lg font-bold text-white">New Patient Intake</h1>
-          <p className="text-xs text-muted-foreground">
-            Step {step} of {STEPS.length} • Protocol-Driven Assessment
+    <main className="min-h-screen bg-[#0B1120] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl">
+        <header className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Field Operations</p>
+          <h1 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">New Patient Intake</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            Every record is written to this device first, then synced. You can complete intakes with no network.
           </p>
-        </div>
-      </div>
+        </header>
 
-      {/* Progress */}
-      <Progress value={progress} className="mb-6 h-1.5" />
-
-      {/* Step Indicator */}
-      <StepIndicator currentStep={step} />
-
-      {/* Step Content */}
-      <div className="min-h-[400px]">
-        {step === 1 && (
-          <Step1PatientSelection
-            selectedPatient={selectedPatient}
-            onSelect={setSelectedPatient}
-            consentGiven={consentGiven}
-            onConsent={setConsentGiven}
-          />
-        )}
-        {step === 2 && (
-          <Step2ProtocolChecklist
-            checklist={checklist}
-            onToggle={handleToggleChecklist}
-          />
-        )}
-        {step === 3 && (
-          <Step3VitalsEntry
-            vitals={vitals}
-            onVitalChange={handleVitalChange}
-          />
-        )}
-              {step === 4 && <Step4AIModalities />}
-        {step === 5 && (
-          <Step5TriageResult
-            vitals={vitals}
-            checklist={checklist}
-            patientName={selectedPatient?.name || 'Patient'}
-            dpdpConsent={dpdpConsent}
-            onDpdpConsentChange={setDpdpConsent}
-          />
-        )}
-      </div>
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/30">
-        <Button
-          variant="ghost"
-          onClick={() => setStep(Math.max(1, step - 1))}
-          disabled={step === 1}
-          className="h-11"
-        >
-          <ArrowLeft className="size-4" />
-          Previous
-        </Button>
-
-        {step < STEPS.length ? (
-          <Button
-            onClick={() => setStep(step + 1)}
-            disabled={!canProceed}
-            className="h-11 bg-blue-600 hover:bg-blue-700 text-white"
+        {message !== null ? (
+          <div
+            role={status === 'error' ? 'alert' : 'status'}
+            aria-live="polite"
+            className={
+              status === 'error'
+                ? 'mb-6 rounded-lg border border-red-900 bg-red-950/40 px-4 py-3 text-sm text-red-300'
+                : 'mb-6 rounded-lg border border-emerald-800 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-300'
+            }
           >
-            Next Step
-            <ArrowRight className="size-4" />
-          </Button>
-        ) : !savedCase ? (
-          <Button
-            className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-700 disabled:text-slate-400"
-            disabled={!dpdpConsent}
-            onClick={async () => {
-              const { saveAndQueueForSync } = await import('@/lib/diagnoverse/offline');
-              const triageCase = {
-                id: crypto.randomUUID() as any,
-                schemaVersion: '1.0.0' as const,
-                subject: {
-                  identifiers: { mr: selectedPatient?.id || 'UNKNOWN' },
-                  demographics: {
-                    name: selectedPatient?.name || 'Unknown Patient',
-                    gender: selectedPatient?.gender?.toLowerCase() as 'male' | 'female' | 'other' || 'unknown',
-                    age: selectedPatient?.age || 0,
-                  }
-                },
-                encounter: {
-                  startTime: new Date().toISOString(),
-                  endTime: new Date().toISOString(),
-                  location: 'CHW_FIELD',
-                  device: 'ASHA_MOBILE',
-                  actor: MOCK_WORKER_ID,
-                },
-                candidateDuplicateOf: null,
-                protocolChecklist: checklist,
-                vitals: vitals,
-                triageResult: computeTriageResult(vitals, checklist, null)
-              } as any;
-              
-              await saveAndQueueForSync(triageCase);
-              setSavedCase(triageCase);
-            }}
-          >
-            <CheckCircle2 className="size-4" />
-            Complete & Save
-          </Button>
+            {message}
+          </div>
         ) : null}
-      </div>
 
-      {savedCase && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-sm bg-slate-900 border-slate-800 shadow-2xl animate-in fade-in zoom-in duration-300">
-            <CardHeader className="text-center pb-2">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3">
-                <CheckCircle2 className="size-6" />
-              </div>
-              <CardTitle className="text-xl text-white">Intake Complete</CardTitle>
-              <CardDescription>Case saved for offline sync.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="bg-white p-4 rounded-xl flex items-center justify-center mx-auto w-fit">
-                <QRCodeSVG 
-                  value={JSON.stringify({
-                    caseId: savedCase.id,
-                    triageTier: savedCase.triageResult.finalTier,
-                    targetFacility: 'CHC / District Hospital',
-                    timestamp: new Date().toISOString()
-                  })} 
-                  size={200}
+        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+          {/* ------------------------- Card 1: Patient ------------------------- */}
+          <section className={CARD_CLASS} aria-labelledby="patient-details-heading">
+            <div className="mb-5 border-b border-slate-800 pb-4">
+              <h2 id="patient-details-heading" className="text-base font-semibold text-white">
+                1. Patient Details
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">Identity and contact information for this beneficiary.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Field className="sm:col-span-2" error={errors.name} id="name" label="Full Name" required>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="e.g. Sunita Devi"
+                  className={INPUT_CLASS}
+                  value={form.name}
+                  disabled={isSaving}
+                  aria-invalid={errors.name !== undefined}
+                  aria-describedby={errors.name !== undefined ? 'name-error' : undefined}
+                  onChange={(event) => setField('name', event.target.value)}
                 />
-              </div>
-              <p className="text-xs text-center text-slate-400">
-                Scan this QR code at the referral facility to instantly transfer patient data.
+              </Field>
+
+              <Field error={errors.abha_id} hint="14-digit ABHA number, if the patient has one." id="abha_id" label="ABHA ID">
+                <input
+                  id="abha_id"
+                  name="abha_id"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="12 3456 7890 1234"
+                  className={INPUT_CLASS}
+                  value={form.abha_id}
+                  disabled={isSaving}
+                  aria-invalid={errors.abha_id !== undefined}
+                  aria-describedby={errors.abha_id !== undefined ? 'abha_id-error' : 'abha_id-hint'}
+                  onChange={(event) => setField('abha_id', event.target.value)}
+                />
+              </Field>
+
+              <Field error={errors.gender} id="gender" label="Gender" required>
+                <select
+                  id="gender"
+                  name="gender"
+                  className={INPUT_CLASS}
+                  value={form.gender}
+                  disabled={isSaving}
+                  aria-invalid={errors.gender !== undefined}
+                  aria-describedby={errors.gender !== undefined ? 'gender-error' : undefined}
+                  onChange={(event) => setField('gender', event.target.value as Gender | '')}
+                >
+                  <option value="" className="bg-slate-950 text-slate-400">
+                    Select gender
+                  </option>
+                  {GENDER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-slate-950 text-white">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field error={errors.dob} hint={age !== null ? `Approximate age: ${age} year${age === 1 ? '' : 's'}.` : undefined} id="dob" label="Date of Birth" required>
+                <input
+                  id="dob"
+                  name="dob"
+                  type="date"
+                  max={new Date().toISOString().slice(0, 10)}
+                  className={`${INPUT_CLASS} [color-scheme:dark]`}
+                  value={form.dob}
+                  disabled={isSaving}
+                  aria-invalid={errors.dob !== undefined}
+                  aria-describedby={errors.dob !== undefined ? 'dob-error' : age !== null ? 'dob-hint' : undefined}
+                  onChange={(event) => setField('dob', event.target.value)}
+                />
+              </Field>
+
+              <Field error={errors.phone} id="phone" label="Phone">
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="98765 43210"
+                  className={INPUT_CLASS}
+                  value={form.phone}
+                  disabled={isSaving}
+                  aria-invalid={errors.phone !== undefined}
+                  aria-describedby={errors.phone !== undefined ? 'phone-error' : undefined}
+                  onChange={(event) => setField('phone', event.target.value)}
+                />
+              </Field>
+            </div>
+          </section>
+
+          {/* --------------------- Card 2: Vitals & Triage --------------------- */}
+          <section className={CARD_CLASS} aria-labelledby="triage-heading">
+            <div className="mb-5 border-b border-slate-800 pb-4">
+              <h2 id="triage-heading" className="text-base font-semibold text-white">
+                2. Vitals &amp; Triage
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Record what you observed in the field, then assign a risk level.
               </p>
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => window.print()}>
-                  <Printer className="w-4 h-4 mr-2" />
-                  Print
-                </Button>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => router.push(`/${locale}/dashboard/worker`)}>
-                  Done
-                </Button>
+            </div>
+
+            <div className="space-y-5">
+              <Field hint={symptomCount > 0 ? `${symptomCount} symptom${symptomCount === 1 ? '' : 's'} recorded.` : 'Separate each symptom with a comma.'} error={errors.symptoms} id="symptoms" label="Symptoms" required>
+                <textarea
+                  id="symptoms"
+                  name="symptoms"
+                  rows={3}
+                  placeholder="fever, dry cough, breathlessness"
+                  className={`${INPUT_CLASS} resize-y`}
+                  value={form.symptoms}
+                  disabled={isSaving}
+                  aria-invalid={errors.symptoms !== undefined}
+                  aria-describedby={errors.symptoms !== undefined ? 'symptoms-error' : 'symptoms-hint'}
+                  onChange={(event) => setField('symptoms', event.target.value)}
+                />
+              </Field>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                <Field error={errors.temperature_c} id="temperature_c" label="Temperature (°C)" required>
+                  <input
+                    id="temperature_c"
+                    name="temperature_c"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.1"
+                    min="30"
+                    max="45"
+                    placeholder="37.0"
+                    className={INPUT_CLASS}
+                    value={form.temperature_c}
+                    disabled={isSaving}
+                    aria-invalid={errors.temperature_c !== undefined}
+                    aria-describedby={errors.temperature_c !== undefined ? 'temperature_c-error' : undefined}
+                    onChange={(event) => setField('temperature_c', event.target.value)}
+                  />
+                </Field>
+
+                <Field error={errors.systolic_bp} id="systolic_bp" label="Systolic BP (mmHg)" required>
+                  <input
+                    id="systolic_bp"
+                    name="systolic_bp"
+                    type="number"
+                    inputMode="numeric"
+                    step="1"
+                    min="60"
+                    max="260"
+                    placeholder="120"
+                    className={INPUT_CLASS}
+                    value={form.systolic_bp}
+                    disabled={isSaving}
+                    aria-invalid={errors.systolic_bp !== undefined}
+                    aria-describedby={errors.systolic_bp !== undefined ? 'systolic_bp-error' : undefined}
+                    onChange={(event) => setField('systolic_bp', event.target.value)}
+                  />
+                </Field>
+
+                <Field error={errors.diastolic_bp} id="diastolic_bp" label="Diastolic BP (mmHg)" required>
+                  <input
+                    id="diastolic_bp"
+                    name="diastolic_bp"
+                    type="number"
+                    inputMode="numeric"
+                    step="1"
+                    min="30"
+                    max="200"
+                    placeholder="80"
+                    className={INPUT_CLASS}
+                    value={form.diastolic_bp}
+                    disabled={isSaving}
+                    aria-invalid={errors.diastolic_bp !== undefined}
+                    aria-describedby={errors.diastolic_bp !== undefined ? 'diastolic_bp-error' : undefined}
+                    onChange={(event) => setField('diastolic_bp', event.target.value)}
+                  />
+                </Field>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <Field error={errors.risk_level} id="risk_level" label="Risk Level" required>
+                  <div className="relative">
+                    <select
+                      id="risk_level"
+                      name="risk_level"
+                      className={INPUT_CLASS}
+                      value={form.risk_level}
+                      disabled={isSaving}
+                      aria-invalid={errors.risk_level !== undefined}
+                      aria-describedby={errors.risk_level !== undefined ? 'risk_level-error' : undefined}
+                      onChange={(event) => handleRiskChange(event.target.value as RiskLevel | '')}
+                    >
+                      <option value="" className="bg-slate-950 text-slate-400">
+                        Select risk level
+                      </option>
+                      {RISK_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value} className="bg-slate-950 text-white">
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {form.risk_level !== '' ? (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                      <span
+                        aria-hidden="true"
+                        className={`h-2 w-2 rounded-full ${
+                          RISK_OPTIONS.find((option) => option.value === form.risk_level)?.dot ?? 'bg-slate-400'
+                        }`}
+                      />
+                      Triage flag set to {form.risk_level}.
+                    </div>
+                  ) : null}
+                </Field>
+
+                <Field error={errors.recommended_action} hint="Pre-filled from the risk level. Edit if your assessment differs." id="recommended_action" label="Recommended Action">
+                  <textarea
+                    id="recommended_action"
+                    name="recommended_action"
+                    rows={3}
+                    placeholder="Select a risk level to load the standard protocol."
+                    className={`${INPUT_CLASS} resize-y`}
+                    value={form.recommended_action}
+                    disabled={isSaving}
+                    aria-describedby="recommended_action-hint"
+                    onChange={(event) => {
+                      setActionTouched(true);
+                      setField('recommended_action', event.target.value);
+                    }}
+                  />
+                </Field>
+              </div>
+            </div>
+          </section>
+
+          {/* ------------------------------ Actions ---------------------------- */}
+          <div className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <p className="text-sm text-slate-400">
+              Saved locally in an encrypted queue. Nothing is lost if you lose signal mid-visit.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={isSaving}
+                className="rounded-md border border-slate-800 px-4 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Clear
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSaving ? <Spinner/> : null}
+                {isSaving ? 'Saving intake…' : 'Save Intake'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </main>
   );
 }
