@@ -61,7 +61,7 @@ function LoginContent() {
                 console.warn("Auth check timed out, forcing dashboard redirect for speed");
                 redirected = true;
                 setLoading(false);
-                router.push(`/${locale}/dashboard`);
+                router.push(`/${locale}/dashboard/patient`);
             }
         }, 1000); // Reduced to 1000ms for blazing fast UX
 
@@ -75,7 +75,7 @@ function LoginContent() {
                 setLoading(false);
                 
                 if (userDoc.exists() && userDoc.data().onboardingDone) {
-                    router.push(`/${locale}/dashboard`);
+                    router.push(`/${locale}/dashboard/patient`);
                 } else {
                     router.push(`/${locale}/onboarding`);
                 }
@@ -86,7 +86,7 @@ function LoginContent() {
                 clearTimeout(timeoutId);
                 redirected = true;
                 setLoading(false);
-                router.push(`/${locale}/dashboard`);
+                router.push(`/${locale}/dashboard/patient`);
             }
         }
     };
@@ -121,7 +121,7 @@ function LoginContent() {
         try {
             await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
             toast.success("Demo login successful! 👋");
-            router.push(`/${locale}/dashboard`);
+            router.push(`/${locale}/dashboard/patient`);
         } catch (error: any) {
             // Auto-create demo account if it doesn't exist yet
             if (
@@ -132,7 +132,7 @@ function LoginContent() {
                 try {
                     await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
                     toast.success("Demo account ready! 👋");
-                    router.push(`/${locale}/dashboard`);
+                    router.push(`/${locale}/dashboard/patient`);
                 } catch (createError: any) {
                     toast.error("Demo setup failed: " + createError.message);
                 }
@@ -211,7 +211,7 @@ function LoginContent() {
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-2xl shadow-emerald-500/20 group animate-in zoom-in duration-500">
                             <HeartPulse className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Diagnoverse <span className="text-emerald-400">AI</span></CardTitle>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Patient <span className="text-emerald-400">Portal</span></CardTitle>
                         <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">Simple Health Check</CardDescription>
                     </CardHeader>
 
