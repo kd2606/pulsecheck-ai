@@ -53,8 +53,12 @@ import {
   Search,
   Plus,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Printer,
+  Download
 } from 'lucide-react';
+
+import { QRCodeSVG } from 'qrcode.react';
 
 import {
   type ProtocolChecklistItem,
@@ -743,10 +747,14 @@ function Step5TriageResult({
   vitals,
   checklist,
   patientName,
+  dpdpConsent,
+  onDpdpConsentChange,
 }: {
   vitals: StructuredVitals;
   checklist: ProtocolChecklistItem[];
   patientName: string;
+  dpdpConsent: boolean;
+  onDpdpConsentChange: (val: boolean) => void;
 }) {
   // Run the LIVE triage pipeline from our domain engine
   const triageResult = useMemo(
@@ -886,7 +894,27 @@ function Step5TriageResult({
         </Button>
       </div>
 
-      <p className="text-xs text-center text-muted-foreground/60">
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 mt-4">
+        <button
+          onClick={() => onDpdpConsentChange(!dpdpConsent)}
+          className={cn(
+            'mt-0.5 w-6 h-6 rounded border-2 flex items-center justify-center transition-all shrink-0',
+            dpdpConsent
+              ? 'bg-blue-500 border-blue-500'
+              : 'border-muted-foreground/40 hover:border-blue-400'
+          )}
+        >
+          {dpdpConsent && <Check className="size-4 text-white" />}
+        </button>
+        <div>
+          <p className="text-sm font-medium text-white">DPDP Act 2023 Consent</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            I consent to sharing this triage data with District Facilities under the DPDP Act 2023 & ABDM guidelines.
+          </p>
+        </div>
+      </div>
+
+      <p className="text-xs text-center text-muted-foreground/60 mt-4">
         Triage computed at {triageResult.computedAt} • AI Safety: Escalation-Only Invariant Active
       </p>
     </div>
@@ -917,6 +945,9 @@ export default function IntakePage() {
 
   // Vitals state
   const [vitals, setVitals] = useState<StructuredVitals>({});
+
+  const [dpdpConsent, setDpdpConsent] = useState(false);
+  const [savedCase, setSavedCase] = useState<any>(null);
 
   const handleToggleChecklist = useCallback((code: string) => {
     setChecklist((prev) =>
@@ -1002,12 +1033,14 @@ export default function IntakePage() {
             onVitalChange={handleVitalChange}
           />
         )}
-        {step === 4 && <Step4AIModalities />}
+              {step === 4 && <Step4AIModalities />}
         {step === 5 && (
           <Step5TriageResult
             vitals={vitals}
             checklist={checklist}
-            patientName={selectedPatient?.name ?? 'Unknown'}
+            patientName={selectedPatient?.name || 'Patient'}
+            dpdpConsent={dpdpConsent}
+            onDpdpConsentChange={setDpdpConsent}
           />
         )}
       </div>
@@ -1033,16 +1066,14 @@ export default function IntakePage() {
             Next Step
             <ArrowRight className="size-4" />
           </Button>
-        ) : (
+        ) : !savedCase ? (
           <Button
-            className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-700 disabled:text-slate-400"
+            disabled={!dpdpConsent}
             onClick={async () => {
-              // Dynamically import the sync engine to avoid breaking SSR
               const { saveAndQueueForSync } = await import('@/lib/diagnoverse/offline');
-              
-              // Construct a dummy InternalTriageCase for offline saving compliance
               const triageCase = {
-                id: crypto.randomUUID() as any, // Using standard UUID for dummy case
+                id: crypto.randomUUID() as any,
                 schemaVersion: '1.0.0' as const,
                 subject: {
                   identifiers: { mr: selectedPatient?.id || 'UNKNOWN' },
@@ -1066,14 +1097,53 @@ export default function IntakePage() {
               } as any;
               
               await saveAndQueueForSync(triageCase);
-              router.push(`/${locale}/dashboard/worker`);
+              setSavedCase(triageCase);
             }}
           >
             <CheckCircle2 className="size-4" />
             Complete & Save
           </Button>
-        )}
+        ) : null}
       </div>
+
+      {savedCase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-sm bg-slate-900 border-slate-800 shadow-2xl animate-in fade-in zoom-in duration-300">
+            <CardHeader className="text-center pb-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="size-6" />
+              </div>
+              <CardTitle className="text-xl text-white">Intake Complete</CardTitle>
+              <CardDescription>Case saved for offline sync.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-white p-4 rounded-xl flex items-center justify-center mx-auto w-fit">
+                <QRCodeSVG 
+                  value={JSON.stringify({
+                    caseId: savedCase.id,
+                    triageTier: savedCase.triageResult.finalTier,
+                    targetFacility: 'CHC / District Hospital',
+                    timestamp: new Date().toISOString()
+                  })} 
+                  size={200}
+                />
+              </div>
+              <p className="text-xs text-center text-slate-400">
+                Scan this QR code at the referral facility to instantly transfer patient data.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => window.print()}>
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => router.push(`/${locale}/dashboard/worker`)}>
+                  Done
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

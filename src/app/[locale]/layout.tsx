@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseProvider } from "@/firebase/provider";
 import { Toaster } from "@/components/ui/sonner";
 import { PatientLayoutWrapper } from "@/components/patient-layout-wrapper";
+import { RoleSwitcher } from "@/components/role-switcher";
 import "../globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -57,6 +58,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                                 {children}
                             </PatientLayoutWrapper>
                             <Toaster />
+                            <RoleSwitcher />
                         </FirebaseProvider>
                     </NextIntlClientProvider>
                 </ThemeProvider>
