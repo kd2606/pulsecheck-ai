@@ -13,8 +13,9 @@ export function PatientLayoutWrapper({ children, locale }: { children: React.Rea
     const isDistrict = pathname?.includes('/district');
     const isMarketing = pathname === `/${locale}` || pathname === `/`;
     const isAuth = pathname?.includes('/auth');
+    const isOnboarding = pathname?.includes('/onboarding');
 
-    if (isWorker || isDistrict || isMarketing || isAuth) {
+    if (isWorker || isDistrict || isMarketing || isAuth || isOnboarding) {
         return <>{children}</>;
     }
 
