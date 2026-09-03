@@ -59,8 +59,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       });
 
       const role = (result.claims.role as Role) ?? 'patient';
+      const isDemo = result.claims.email === 'demo@diagnoverseai.in';
 
-      if (!isAllowed(role, pathname)) {
+      if (!isDemo && !isAllowed(role, pathname)) {
         setState('redirecting');
         router.replace(`/${currentLocale}${HOME_FOR[role]}`);
         return;

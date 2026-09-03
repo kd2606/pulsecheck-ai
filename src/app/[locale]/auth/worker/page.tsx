@@ -55,6 +55,18 @@ function LoginContent() {
         
         let redirected = false;
         
+        // Set the session cookie BEFORE redirecting, otherwise middleware will bounce us back
+        try {
+            const token = await authenticatedUser.getIdToken();
+            await fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: token }),
+            });
+        } catch (e) {
+            console.error("Failed to set session cookie:", e);
+        }
+
         // Fast redirect timeout - if Firestore check takes > 1s, just go to dashboard
         const timeoutId = setTimeout(() => {
             if (!redirected) {

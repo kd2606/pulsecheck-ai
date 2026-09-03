@@ -16,7 +16,7 @@ export default function Hero() {
           <Link href="/en/auth/patient" className={styles.btnPrimary}>
             User Portal
           </Link>
-          <Link href="/en/auth/worker" className={styles.btnPrimary} style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)' }}>
+          <Link href="/en/auth/worker" className={styles.btnPrimary} style={{ background: 'transparent', border: '1px solid #0d9488', color: '#0d9488' }}>
             For Health Workers
           </Link>
         </div>
