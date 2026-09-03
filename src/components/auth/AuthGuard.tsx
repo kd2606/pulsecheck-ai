@@ -15,9 +15,10 @@ const HOME_FOR: Record<Role, string> = {
 };
 
 function isAllowed(role: Role, path: string) {
-  if (role === 'patient') return path.startsWith('/dashboard/patient');
-  if (role === 'worker') return path.startsWith('/dashboard/worker');
-  return path.startsWith('/dashboard/district') || path.startsWith('/dashboard/worker');
+  // Check if the path contains the required route, ignoring the /[locale] prefix
+  if (role === 'patient') return path.includes('/dashboard/patient');
+  if (role === 'worker') return path.includes('/dashboard/worker');
+  return path.includes('/dashboard/district') || path.includes('/dashboard/worker');
 }
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -31,10 +32,12 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const unsubscribe = onIdTokenChanged(auth, async (user: User | null) => {
       if (cancelled) return;
 
+      const currentLocale = pathname.split('/')[1] || 'en';
+
       if (!user) {
         setState('redirecting');
         await fetch('/api/auth/session', { method: 'DELETE' });
-        router.replace(`/auth?next=${encodeURIComponent(pathname)}`);
+        router.replace(`/${currentLocale}/auth?next=${encodeURIComponent(pathname)}`);
         return;
       }
 
@@ -51,7 +54,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
       if (!isAllowed(role, pathname)) {
         setState('redirecting');
-        router.replace(HOME_FOR[role]);
+        router.replace(`/${currentLocale}${HOME_FOR[role]}`);
         return;
       }
 
