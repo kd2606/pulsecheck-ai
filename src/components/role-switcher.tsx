@@ -10,6 +10,14 @@ export function RoleSwitcher() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   // Show only in non-production environments or if explicitly requested via query param
   const isDev = process.env.NODE_ENV !== "production";
   const isVercelDemo = typeof window !== "undefined" && window.location.hostname.includes("vercel.app");

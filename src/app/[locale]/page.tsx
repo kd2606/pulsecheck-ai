@@ -14,7 +14,7 @@ export default async function LocalePage({ params }: { params: Promise<{ locale:
     const { locale } = await params;
 
     return (
-        <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="bg-[#0B1120] text-white min-h-screen flex flex-col">
             <Navbar />
             <main style={{ flex: 1 }}>
                 <Hero />
