@@ -131,7 +131,14 @@ function LoginContent() {
         const DEMO_EMAIL = "demo@diagnoverseai.in";
         const DEMO_PASSWORD = "demo123456";
         try {
-            await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+            const userCred = await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+            // Wait for cookie setting
+            const token = await userCred.user.getIdToken();
+            await fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: token }),
+            });
             toast.success("Demo login successful! 👋");
             router.push(`/${locale}/dashboard/worker`);
         } catch (error: any) {
@@ -142,7 +149,13 @@ function LoginContent() {
                 error.code === "auth/invalid-login-credentials"
             ) {
                 try {
-                    await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+                    const createCred = await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+                    const token = await createCred.user.getIdToken();
+                    await fetch('/api/auth/session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken: token }),
+                    });
                     toast.success("Demo account ready! 👋");
                     router.push(`/${locale}/dashboard/worker`);
                 } catch (createError: any) {
