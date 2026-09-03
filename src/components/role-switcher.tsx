@@ -9,16 +9,13 @@ import { cn } from "@/lib/utils";
 export function RoleSwitcher() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState(false);
 
-  useEffect(() => {
-    // Show only in non-production environments or if explicitly requested via query param
-    const isDev = process.env.NODE_ENV !== "production";
-    const isVercelDemo = typeof window !== "undefined" && window.location.hostname.includes("vercel.app");
-    const hasDemoParam = typeof window !== "undefined" && window.location.search.includes("demo=true");
-    
-    setIsDemoMode(isDev || isVercelDemo || hasDemoParam);
-  }, []);
+  // Show only in non-production environments or if explicitly requested via query param
+  const isDev = process.env.NODE_ENV !== "production";
+  const isVercelDemo = typeof window !== "undefined" && window.location.hostname.includes("vercel.app");
+  const hasDemoParam = typeof window !== "undefined" && window.location.search.includes("demo=true");
+  
+  const isDemoMode = isDev || isVercelDemo || hasDemoParam;
 
   if (!isDemoMode) return null;
 
