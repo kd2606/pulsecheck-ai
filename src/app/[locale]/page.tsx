@@ -1,89 +1,124 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Activity, ShieldPlus, HeartPulse } from "lucide-react";
+import { ArrowRight, ShieldCheck, Stethoscope, HeartPulse, Sparkles, MessageSquareHeart } from "lucide-react";
 
 export default async function LocalePage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col relative overflow-hidden font-sans">
-            {/* Background Effects */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] mix-blend-screen" />
-                <div className="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-emerald-600/10 rounded-full blur-[128px] mix-blend-screen" />
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="min-h-screen bg-[#020617] text-slate-50 flex flex-col relative overflow-hidden font-sans selection:bg-emerald-500/30">
+            {/* Premium Background Effects */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen opacity-50 animate-pulse" />
+                <div className="absolute top-[20%] right-[-10%] w-[35rem] h-[35rem] bg-emerald-600/15 rounded-full blur-[120px] mix-blend-screen opacity-50" />
+                <div className="absolute bottom-[-20%] left-[20%] w-[50rem] h-[50rem] bg-teal-600/10 rounded-full blur-[150px] mix-blend-screen opacity-40" />
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]"></div>
             </div>
 
             {/* Navbar */}
-            <header className="relative z-10 border-b border-white/10 bg-slate-950/50 backdrop-blur-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Activity className="w-6 h-6 text-blue-500" />
-                        <span className="font-bold text-xl tracking-tight text-white">DIAGNOVERSE</span>
+            <header className="relative z-50 border-b border-white/5 bg-[#020617]/50 backdrop-blur-xl">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-gradient-to-br from-emerald-400 to-indigo-500 p-2 rounded-xl shadow-lg shadow-emerald-500/20">
+                            <HeartPulse className="w-6 h-6 text-white" />
+                        </div>
+                        <span className="font-bold text-2xl tracking-tight text-white font-space">DIAGNOVERSE</span>
                     </div>
-                    <Link href={`/${locale}/auth`}>
-                        <Button variant="outline" className="border-white/20 hover:bg-white/10 text-white bg-transparent">
-                            Sign In
-                        </Button>
-                    </Link>
+                    <div className="flex items-center gap-4">
+                        <span className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-emerald-400">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            SIH26133 Live
+                        </span>
+                    </div>
                 </div>
             </header>
 
             {/* Hero Section */}
-            <main className="flex-1 relative z-10 flex items-center justify-center py-20 lg:py-32">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-8">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                        </span>
-                        SIH26133 Initiative
+            <main className="flex-1 relative z-10 flex flex-col items-center justify-center pt-24 pb-32 lg:pt-32 lg:pb-40">
+                <div className="max-w-6xl mx-auto px-6 text-center">
+                    
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 border border-white/10 text-slate-300 text-sm font-medium mb-8 backdrop-blur-md shadow-2xl">
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                        <span>Next-Generation AI Healthcare Platform</span>
                     </div>
                     
-                    <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-8">
-                        Diagnoverse AI: <br className="hidden sm:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-                            Rural Care Coordination & <br className="hidden sm:block" />Digital Triage Platform
+                    <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tighter text-white mb-8 leading-[1.1]">
+                        Healthcare that reaches <br className="hidden md:block" />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400">
+                            where doctors can't.
                         </span>
                     </h1>
                     
-                    <p className="mt-4 text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-                        Empowering health workers with AI-driven diagnostics, seamless hospital referrals, and real-time district command centers to deliver premium healthcare to every corner.
+                    <p className="mt-6 text-lg sm:text-2xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
+                        Experience clinically-validated AI diagnostics, seamless health worker coordination, and instant triage in one beautiful platform.
                     </p>
                     
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link href={`/${locale}/auth`}>
-                            <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 h-14 text-lg rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105">
-                                Access Portal
+                    {/* Dual CTAs */}
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-5 relative z-20">
+                        {/* Primary B2C Patient Button */}
+                        <Link href={`/${locale}/login`} className="w-full sm:w-auto">
+                            <Button size="lg" className="w-full sm:w-auto bg-white text-slate-950 hover:bg-slate-200 px-8 h-14 text-lg font-semibold rounded-2xl shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] transition-all hover:scale-105 hover:-translate-y-1">
+                                Patient Portal
                                 <ArrowRight className="ml-2 w-5 h-5" />
+                            </Button>
+                        </Link>
+
+                        {/* Secondary B2B Worker Button */}
+                        <Link href={`/${locale}/auth/worker`} className="w-full sm:w-auto">
+                            <Button size="lg" variant="outline" className="w-full sm:w-auto bg-[#0B1120]/50 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 hover:border-emerald-500/50 px-8 h-14 text-lg font-semibold rounded-2xl backdrop-blur-md transition-all hover:scale-105 hover:-translate-y-1">
+                                For Health Workers (ASHA/MO)
                             </Button>
                         </Link>
                     </div>
 
-                    {/* Features Row */}
-                    <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto text-left">
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
-                                <ShieldPlus className="w-6 h-6" />
+                    {/* Chat UI Mockup */}
+                    <div className="mt-24 relative mx-auto max-w-3xl perspective-1000">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent z-20 h-full w-full bottom-0" />
+                        
+                        <div className="relative z-10 bg-[#0B1120]/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 text-left shadow-2xl transform rotate-x-12 scale-105 translate-y-8">
+                            <div className="flex items-center gap-4 border-b border-white/5 pb-4 mb-6">
+                                <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                    <MessageSquareHeart className="w-6 h-6 text-emerald-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-white font-semibold">PulseCheck AI Assistant</h3>
+                                    <p className="text-xs text-emerald-400">Always online</p>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-white mb-2">Smart Triage</h3>
-                            <p className="text-sm text-slate-400">AI-assisted screening directly in the field for accurate patient assessment.</p>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
-                                <HeartPulse className="w-6 h-6" />
+                            
+                            <div className="space-y-6 opacity-80">
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0" />
+                                    <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-sm p-4 text-slate-300 text-sm max-w-[80%]">
+                                        Hi! I've been having a persistent dry cough and mild fever for the past 3 days. What should I do?
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-4 flex-row-reverse">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500 flex-shrink-0 flex items-center justify-center">
+                                        <HeartPulse className="w-4 h-4 text-white" />
+                                    </div>
+                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl rounded-tr-sm p-4 text-slate-200 text-sm max-w-[80%] shadow-[0_0_20px_-5px_rgba(16,185,129,0.2)]">
+                                        I can help you assess that. To give you the most accurate triage, could you please use the microphone feature to record a 5-second sample of your cough?
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0" />
+                                    <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-sm p-3 text-slate-300 text-sm flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center">
+                                            <div className="w-3 h-3 bg-indigo-400 rounded-full animate-pulse" />
+                                        </div>
+                                        <span className="italic text-slate-400">Audio sample recorded (0:05)</span>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-white mb-2">Vital Tracking</h3>
-                            <p className="text-sm text-slate-400">Real-time health record sync and vital monitoring for proactive care.</p>
-                        </div>
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
-                                <Activity className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-white mb-2">District Command</h3>
-                            <p className="text-sm text-slate-400">Comprehensive dashboard for SLA tracking and facility mapping.</p>
                         </div>
                     </div>
+                    
                 </div>
             </main>
         </div>
