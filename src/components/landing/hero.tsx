@@ -13,11 +13,11 @@ export default function Hero() {
           ensuring everyone has access to accurate and timely health assessments.
         </p>
         <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link href="/login" className={styles.btnPrimary}>
-            Patient Portal
+          <Link href="/auth/patient" className={styles.btnPrimary}>
+            User Portal
           </Link>
           <Link href="/auth/worker" className={styles.btnPrimary} style={{ background: 'transparent', border: '1px solid var(--primary-color)', color: 'var(--primary-color)' }}>
-            For Health Workers (ASHA/MO)
+            For Health Workers
           </Link>
         </div>
         <div className={styles.trustStrip}>
