@@ -36,7 +36,14 @@ export default async function proxy(request: NextRequest) {
 
   if (!claims) {
     const url = request.nextUrl.clone();
-    url.pathname = localized(locale, '/auth'); // Redirecting to your auth page
+    // Redirect to role-specific auth page based on what dashboard they tried to access
+    let authPath = '/auth/patient'; // default
+    if (path.startsWith('/dashboard/worker')) {
+      authPath = '/auth/worker';
+    } else if (path.startsWith('/dashboard/district')) {
+      authPath = '/auth/worker'; // district admins use worker auth
+    }
+    url.pathname = localized(locale, authPath);
     url.search = `?next=${encodeURIComponent(request.nextUrl.pathname)}`;
     const res = NextResponse.redirect(url);
     res.cookies.delete(SESSION_COOKIE);

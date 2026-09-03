@@ -37,7 +37,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       if (!user) {
         setState('redirecting');
         await fetch('/api/auth/session', { method: 'DELETE' });
-        router.replace(`/${currentLocale}/auth?next=${encodeURIComponent(pathname)}`);
+        
+        let authPath = '/auth/patient';
+        if (pathname.includes('/dashboard/worker')) {
+          authPath = '/auth/worker';
+        } else if (pathname.includes('/dashboard/district')) {
+          authPath = '/auth/worker';
+        }
+        
+        router.replace(`/${currentLocale}${authPath}?next=${encodeURIComponent(pathname)}`);
         return;
       }
 
