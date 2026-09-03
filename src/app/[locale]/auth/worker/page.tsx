@@ -1,148 +1,312 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useUser } from "@/firebase/auth/useUser";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/firebase/clientApp";
+import { doc, getDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, ArrowLeft, Building2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { HeartPulse, Mail, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
-export default function WorkerAuthPage() {
-  const router = useRouter();
-  const params = useParams();
-  const locale = params?.locale || "en";
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState(["", "", "", ""]);
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-[90vh] items-center justify-center p-4">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
+    );
+}
 
-  const handleSendOtp = () => {
-    if (phone.length === 10) {
-      setStep("otp");
-    }
-  };
+function LoginContent() {
+    const t = useTranslations("auth");
+    const { user, loading: globalLoading, signInWithGoogle } = useUser();
+    const router = useRouter();
+    const params = useParams();
+    const searchParams = useSearchParams();
+    const locale = params.locale as string;
+    const isAutoDemo = searchParams.get("demo") === "1";
 
-  const handleVerify = () => {
-    if (otp.join("").length === 4) {
-      router.push(`/${locale}/dashboard/worker`);
-    }
-  };
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [authChecking, setAuthChecking] = useState(true);
+    const hasTriggeredDemo = useRef(false);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length <= 1) {
-      const newOtp = [...otp];
-      newOtp[index] = value;
-      setOtp(newOtp);
-      // Auto-focus next input (simplified for mock)
-      if (value !== "" && index < 3) {
-        const nextInput = document.getElementById(`otp-${index + 1}`);
-        if (nextInput) nextInput.focus();
-      }
-    }
-  };
+    useEffect(() => {
+        // Redirection logic when user is authenticated
+        if (user && !globalLoading && !loading) {
+            handleAuthSuccess(user);
+        }
+    }, [user, globalLoading, loading]);
 
-  return (
-    <div className="min-h-screen bg-slate-950 flex flex-col font-sans text-slate-100">
-      <div className="bg-[#1e3a5f] text-white py-2 px-4 text-xs font-medium text-center tracking-wide border-b border-blue-900/50">
-        Ministry of Health & Family Welfare | Ayushman Bharat Digital Mission
-      </div>
+    const handleAuthSuccess = async (authenticatedUser: any) => {
+        if (!authenticatedUser) return;
+        
+        let redirected = false;
+        
+        // Fast redirect timeout - if Firestore check takes > 1s, just go to dashboard
+        const timeoutId = setTimeout(() => {
+            if (!redirected) {
+                console.warn("Auth check timed out, forcing dashboard redirect for speed");
+                redirected = true;
+                setLoading(false);
+                router.push(`/${locale}/dashboard/worker`);
+            }
+        }, 1000); // Reduced to 1000ms for blazing fast UX
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-6">
-          <Button 
-            variant="ghost" 
-            className="text-slate-400 hover:text-white mb-4 -ml-4"
-            onClick={() => router.push(`/${locale}/auth`)}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Roles
-          </Button>
+        try {
+            const userDocPath = `users/${authenticatedUser.uid}/profile/data`;
+            const userDoc = await getDoc(doc(db, userDocPath));
+            
+            if (!redirected) {
+                clearTimeout(timeoutId);
+                redirected = true;
+                setLoading(false);
+                
+                if (userDoc.exists() && userDoc.data().onboardingDone) {
+                    router.push(`/${locale}/dashboard/worker`);
+                } else {
+                    router.push(`/${locale}/onboarding`);
+                }
+            }
+        } catch (firestoreError) {
+            console.warn("Firestore check failed during auth success:", firestoreError);
+            if (!redirected) {
+                clearTimeout(timeoutId);
+                redirected = true;
+                setLoading(false);
+                router.push(`/${locale}/dashboard/worker`);
+            }
+        }
+    };
 
-          <Card className="bg-slate-900 border-slate-800 shadow-xl overflow-hidden">
-            <div className="h-1.5 bg-blue-600" />
-            <CardHeader className="space-y-4 pb-6">
-              <div className="flex items-center justify-center space-x-3 mb-2">
-                <div className="w-12 h-12 rounded-xl bg-blue-950/50 flex items-center justify-center border border-blue-900/50">
-                  <Shield className="w-6 h-6 text-blue-400" />
-                </div>
-              </div>
-              <div className="text-center">
-                <CardTitle className="text-2xl text-white">Health Worker Login</CardTitle>
-                <CardDescription className="text-slate-400 mt-1">
-                  Secure access for ASHA, ANM, and MO
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {step === "phone" ? (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-slate-300">Mobile Number</Label>
-                    <div className="flex relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium z-10">
-                        +91
-                      </span>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        maxLength={10}
-                        placeholder="Enter 10 digit number"
-                        className="pl-12 bg-slate-950 border-slate-800 text-slate-100 h-12 focus-visible:ring-blue-500"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                      />
-                    </div>
-                  </div>
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 font-medium"
-                    onClick={handleSendOtp}
-                    disabled={phone.length !== 10}
-                  >
-                    Send OTP
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="text-center text-sm text-slate-400">
-                    OTP sent to +91 {phone}. <button onClick={() => setStep("phone")} className="text-blue-400 hover:underline">Edit</button>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-slate-300 text-center block mb-4">Enter 4-digit OTP</Label>
-                    <div className="flex justify-center gap-3">
-                      {otp.map((digit, i) => (
-                        <Input
-                          key={i}
-                          id={`otp-${i}`}
-                          type="text"
-                          maxLength={1}
-                          className="w-14 h-14 text-center text-2xl bg-slate-950 border-slate-800 text-slate-100 focus-visible:ring-blue-500"
-                          value={digit}
-                          onChange={(e) => handleOtpChange(i, e.target.value)}
+    useEffect(() => {
+        if (isAutoDemo && !hasTriggeredDemo.current) {
+            hasTriggeredDemo.current = true;
+            handleDemoLogin();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isAutoDemo]);
+
+
+    const handleEmailLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const userCred = await signInWithEmailAndPassword(auth, email, password);
+            toast.success("Login successful!");
+            handleAuthSuccess(userCred.user);
+        } catch (error: any) {
+            toast.error(error.message || "Failed to login");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDemoLogin = async () => {
+        setLoading(true);
+        const DEMO_EMAIL = "demo@diagnoverseai.in";
+        const DEMO_PASSWORD = "demo123456";
+        try {
+            await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+            toast.success("Demo login successful! 👋");
+            router.push(`/${locale}/dashboard/worker`);
+        } catch (error: any) {
+            // Auto-create demo account if it doesn't exist yet
+            if (
+                error.code === "auth/user-not-found" ||
+                error.code === "auth/invalid-credential" ||
+                error.code === "auth/invalid-login-credentials"
+            ) {
+                try {
+                    await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+                    toast.success("Demo account ready! 👋");
+                    router.push(`/${locale}/dashboard/worker`);
+                } catch (createError: any) {
+                    toast.error("Demo setup failed: " + createError.message);
+                }
+            } else {
+                toast.error("Demo login failed: " + error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleGoogleSignIn = async () => {
+        setLoading(true);
+        try {
+            const userCred = await signInWithGoogle();
+            if (userCred && userCred.user) {
+                toast.success("Google sign in successful!");
+                await handleAuthSuccess(userCred.user);
+            }
+            // If userCred is null, it means a redirect was initiated, 
+            // so we keep the loading state until the page reloads.
+        } catch (error: any) {
+            setLoading(false);
+            if (error.code === 'auth/configuration-not-found' || error.message?.includes('configuration-not-found')) {
+                toast.error("Configuration Error", {
+                    description: "Google Sign-In is not enabled. Please enable it in your Firebase Console.",
+                    duration: 10000,
+                });
+            } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                toast.error("Google sign in failed: " + error.message);
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 blur-[120px] rounded-full animate-pulse" />
+                <div className="relative z-10 flex flex-col items-center gap-6">
+                    <div className="h-1 plan-loading-bar w-48 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div 
+                            className="h-full bg-emerald-500"
+                            animate={{ x: [-200, 200] }}
+                            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                         />
-                      ))}
                     </div>
-                  </div>
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 font-medium"
-                    onClick={handleVerify}
-                    disabled={otp.join("").length !== 4}
-                  >
-                    Verify & Login
-                  </Button>
+                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] animate-pulse">Loading Account...</p>
                 </div>
-              )}
-              
-              <div className="pt-4 border-t border-slate-800 text-center">
-                <button className="text-sm text-slate-400 hover:text-blue-400 flex items-center justify-center w-full space-x-2 transition-colors">
-                  <Building2 className="w-4 h-4" />
-                  <span>Login with Aadhaar / NHA ID</span>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0a0a0a]">
+            <style jsx global>{`
+                .font-space { font-family: var(--font-space-grotesk), sans-serif; }
+            `}</style>
+
+            {/* Premium Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full" />
+            </div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-full max-w-md z-10"
+            >
+                <Card className="rounded-[2.5rem] border border-white/10 bg-black/40 backdrop-blur-3xl shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] blur-3xl rounded-full -mr-16 -mt-16" />
+                    
+                    <CardHeader className="text-center pb-2 pt-10">
+                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-2xl shadow-emerald-500/20 group animate-in zoom-in duration-500">
+                            <HeartPulse className="h-8 w-8 text-white" />
+                        </div>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">
+                            Health Worker <span className="text-emerald-400">Login</span>
+                        </CardTitle>
+                        <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">
+                            Secure Portal Access
+                        </CardDescription>
+                    </CardHeader>
+
+                    <CardContent className="space-y-6 pt-6 px-8">
+                        <form onSubmit={handleEmailLogin} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="doctor@diagnoverse.ai"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="bg-white/5 border-white/10 text-white rounded-2xl h-12 focus:border-emerald-500/50 transition-all"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password" title="Password" className="text-white/60 text-xs font-bold uppercase tracking-widest ml-1">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="bg-white/5 border-white/10 text-white rounded-2xl h-12 focus:border-emerald-500/50 transition-all"
+                                    required
+                                />
+                            </div>
+                            <Button type="submit" className="w-full h-12 rounded-2xl bg-white text-black font-bold hover:bg-emerald-50 transition-all shadow-xl active:scale-[0.98]" disabled={loading}>
+                                {loading ? <Loader2 className="animate-spin" /> : <><Mail className="w-4 h-4 mr-2" /> Login with Email</>}
+                            </Button>
+                        </form>
+
+                        <div className="relative my-8">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-white/5" />
+                            </div>
+                            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
+                                <span className="bg-transparent px-4 text-white/30">OR</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                            <Button
+                                onClick={handleGoogleSignIn}
+                                variant="outline"
+                                className="w-full h-12 rounded-2xl bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all"
+                                disabled={loading}
+                            >
+                                <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
+                                    <path
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                                        fill="#4285F4"
+                                    />
+                                    <path
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                        fill="#34A853"
+                                    />
+                                    <path
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                        fill="#FBBC05"
+                                    />
+                                    <path
+                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                        fill="#EA4335"
+                                    />
+                                </svg>
+                                Continue with Google
+                            </Button>
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col items-center justify-center border-t border-white/5 pt-8 pb-10 mt-4">
+                        <div className="text-center text-sm">
+                            <span className="text-white/40 mr-2">New Here?</span>
+                            <Link href={`/${locale}/signup`} className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
+                                Create Account
+                            </Link>
+                        </div>
+                        <Button 
+                            variant="secondary"
+                            onClick={handleDemoLogin}
+                            disabled={loading}
+                            className="mt-6 w-full h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 font-bold uppercase tracking-widest transition-all shadow-inner border border-emerald-500/20"
+                        >
+                            Guest Demo Login
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </motion.div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

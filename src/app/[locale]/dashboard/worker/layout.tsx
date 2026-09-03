@@ -11,13 +11,15 @@ import {
   Menu, 
   Bell, 
   RefreshCw,
-  LogOut
+  LogOut,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { HeartPulse } from "lucide-react";
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,10 +29,11 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
   const navItems = [
     { icon: Home, label: "Dashboard", href: `/${locale}/dashboard/worker` },
-    { icon: Users, label: "Assigned Families", href: `/${locale}/dashboard/worker/families` },
+    { icon: Users, label: "Assigned Families", href: `/${locale}/dashboard/worker/assigned-families` },
     { icon: ClipboardPlus, label: "New Intake", href: `/${locale}/dashboard/worker/intake`, primary: true },
     { icon: Send, label: "Referrals", href: `/${locale}/dashboard/worker/referrals` },
     { icon: FileText, label: "Reports", href: `/${locale}/dashboard/worker/reports` },
+    { icon: User, label: "My Profile", href: `/${locale}/dashboard/worker/profile` },
   ];
 
   return (
@@ -46,17 +49,17 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed md:static inset-y-0 left-0 z-50 w-[280px] bg-[#1e3a5f] flex flex-col transition-all duration-300 ease-in-out border-r border-slate-800/50 shadow-xl",
+        "fixed md:static inset-y-0 left-0 z-50 w-[280px] bg-[#0B1120] flex flex-col transition-all duration-300 ease-in-out border-r border-slate-800/50 shadow-xl",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         {/* Logo Area */}
         <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <div className="bg-white/10 p-2 rounded-lg">
-            <Shield className="w-8 h-8 text-blue-400" />
+          <div className="bg-white/5 p-2 rounded-lg">
+            <HeartPulse className="w-8 h-8 text-emerald-400" />
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white">DIAGNOVERSE</h1>
-            <p className="text-xs font-medium text-blue-200/70 uppercase tracking-wider">Health Worker Portal</p>
+            <p className="text-xs font-medium text-emerald-200/70 uppercase tracking-wider">Health Worker Portal</p>
           </div>
         </div>
 
@@ -67,10 +70,10 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
               <div className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm font-medium min-h-[44px]",
                 item.primary 
-                  ? "bg-blue-600 hover:bg-blue-500 text-white shadow-sm" 
-                  : "text-blue-100 hover:bg-white/10 hover:text-white"
+                  ? "bg-[#0D9488] hover:bg-[#0F766E] text-white shadow-sm" 
+                  : "text-slate-300 hover:bg-white/10 hover:text-white"
               )}>
-                <item.icon className={cn("w-5 h-5", item.primary ? "text-white" : "text-blue-300")} />
+                <item.icon className={cn("w-5 h-5", item.primary ? "text-white" : "text-emerald-500")} />
                 {item.label}
               </div>
             </Link>
@@ -96,15 +99,15 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
           
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                PS
+              <div className="w-8 h-8 rounded-full bg-[#0D9488] flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                HW
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-white">Priya Sharma</span>
-                <span className="text-[10px] text-blue-300 uppercase tracking-wider">ASHA Worker</span>
+                <span className="text-sm font-semibold text-white">Health Worker</span>
+                <span className="text-[10px] text-emerald-300 uppercase tracking-wider">ASHA Worker</span>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="text-blue-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px]">
+            <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px]">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
@@ -112,36 +115,38 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-950">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#020617]">
         {/* Header */}
-        <header className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
+        <header className="h-16 border-b border-slate-800 bg-[#0B1120]/50 backdrop-blur-sm flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-slate-300 min-h-[44px] min-w-[44px]"
+              className="md:hidden text-slate-300 hover:text-white hover:bg-white/10"
               onClick={() => setSidebarOpen(true)}
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </Button>
-            <h2 className="text-lg font-semibold text-slate-100 hidden sm:block">Worker Dashboard</h2>
+            <h2 className="text-lg font-semibold text-white tracking-tight hidden sm:block">Dashboard</h2>
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Button variant="outline" size="sm" className="hidden sm:flex border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 min-h-[44px]">
-              <RefreshCw className="w-4 h-4 mr-2 text-blue-400" />
-              Sync Now
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" className="hidden sm:flex border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Sync Data
             </Button>
-            <Button variant="ghost" size="icon" className="text-slate-300 relative min-h-[44px] min-w-[44px]">
+            <Button variant="ghost" size="icon" className="relative text-slate-300 hover:text-white hover:bg-white/10">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+              <span className="absolute top-1 right-1.5 w-2 h-2 bg-rose-500 rounded-full border border-slate-900" />
             </Button>
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-auto p-4 lg:p-8">
-          {children}
+          <div className="max-w-6xl mx-auto">
+            {children}
+          </div>
         </div>
       </main>
     </div>

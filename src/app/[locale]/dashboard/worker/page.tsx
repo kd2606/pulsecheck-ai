@@ -154,12 +154,12 @@ export default function WorkerDashboardPage() {
         <h2 className="text-xl font-semibold mb-4 text-slate-100">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card 
-            className="bg-blue-600/10 border-blue-500/30 hover:bg-blue-600/20 transition-colors cursor-pointer shadow-sm group min-h-[100px]" 
+            className="bg-emerald-600/10 border-emerald-500/30 hover:bg-emerald-600/20 transition-colors cursor-pointer shadow-sm group min-h-[100px]" 
             onClick={() => router.push(`/${locale}/dashboard/worker/intake`)}
           >
             <CardContent className="p-6 flex items-center justify-between h-full">
               <div className="flex items-center gap-4">
-                <div className="bg-blue-600 p-3 rounded-xl shadow-inner group-hover:scale-105 transition-transform">
+                <div className="bg-emerald-600 p-3 rounded-xl shadow-inner group-hover:scale-105 transition-transform">
                   <ClipboardPlus className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -202,7 +202,7 @@ export default function WorkerDashboardPage() {
         <Card className="bg-slate-900 border-slate-800">
           {loading ? (
             <div className="p-8 flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : activities.length > 0 ? (
             <div className="divide-y divide-slate-800">
