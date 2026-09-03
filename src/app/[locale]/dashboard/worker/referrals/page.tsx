@@ -1,9 +1,10 @@
 'use client';
 
-import { use, useMemo } from 'react';
+import { use, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getOfflineDb } from '@/lib/db/offline-db';
 import { SyncStatusBar } from '@/components/sync-status-bar';
+import { QRCodeSVG } from 'qrcode.react';
 
 type Urgency = 'ROUTINE' | 'URGENT' | 'EMERGENCY';
 type ReferralStatus = 'CREATED' | 'ACCEPTED' | 'CLOSED';
@@ -66,6 +67,7 @@ interface ReferralsPageProps {
 
 export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
   const { locale } = use(params);
+  const [selectedQr, setSelectedQr] = useState<string | null>(null);
 
   const rows = useLiveQuery<ReferralRow[] | undefined>(async () => {
     const db = getOfflineDb();
@@ -152,6 +154,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                     <Th>Urgency</Th>
                     <Th>Status</Th>
                     <Th className="text-right">Raised</Th>
+                    <Th className="text-right">Action</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -190,6 +193,14 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                       <td className="px-4 py-3 text-right tabular-nums text-slate-400">
                         {formatWhen(row.sortKey, locale)}
                       </td>
+                      <td className="px-4 py-3 text-right">
+                        <button 
+                          onClick={() => setSelectedQr(row.id)}
+                          className="px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md hover:bg-slate-700 transition-colors"
+                        >
+                          Show QR
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -201,6 +212,25 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
         <p className="mt-4 text-xs text-slate-400">
           Sorted newest first. Closed referrals are hidden.
         </p>
+
+        {selectedQr && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+            <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm flex flex-col items-center border border-slate-800 shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-2">Referral QR Code</h3>
+              <p className="text-sm text-slate-400 mb-6 text-center">Show this to the hospital staff upon arrival.</p>
+              <div className="p-4 bg-white rounded-xl mb-6 shadow-sm">
+                <QRCodeSVG value={selectedQr} size={200} />
+              </div>
+              <p className="font-mono text-slate-500 text-xs mb-6 break-all text-center">{selectedQr}</p>
+              <button 
+                onClick={() => setSelectedQr(null)}
+                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-colors border border-slate-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
