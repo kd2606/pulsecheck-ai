@@ -187,7 +187,7 @@ function LoginContent() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden bg-[#0a0a0a]">
+        <div className="min-h-screen flex items-center justify-center bg-[#0B1120] p-4 relative overflow-hidden">
             <style jsx global>{`
                 .font-space { font-family: var(--font-space-grotesk), sans-serif; }
             `}</style>
@@ -211,7 +211,7 @@ function LoginContent() {
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 shadow-2xl shadow-emerald-500/20 group animate-in zoom-in duration-500">
                             <HeartPulse className="h-8 w-8 text-white" />
                         </div>
-                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">Patient <span className="text-emerald-400">Portal</span></CardTitle>
+                        <CardTitle className="text-3xl font-space font-bold tracking-tighter text-white">User <span className="text-emerald-400">Portal</span></CardTitle>
                         <CardDescription className="text-white/40 font-medium tracking-wide text-xs uppercase mt-2">Simple Health Check</CardDescription>
                     </CardHeader>
 

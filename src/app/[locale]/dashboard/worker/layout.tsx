@@ -49,8 +49,8 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed md:static inset-y-0 left-0 z-50 w-[280px] bg-[#0B1120] flex flex-col transition-all duration-300 ease-in-out border-r border-slate-800/50 shadow-xl",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        "fixed md:static inset-y-0 left-0 z-50 w-[280px] bg-[#0B1120] flex flex-col transition-all duration-300 ease-in-out border-r border-slate-800/50 shadow-xl animate-in fade-in duration-500",
+        sidebarOpen ? "translate-x-0 opacity-100" : "-translate-x-full md:translate-x-0 opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto"
       )}>
         {/* Logo Area */}
         <div className="p-6 border-b border-white/10 flex items-center gap-3">

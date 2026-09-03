@@ -89,7 +89,7 @@ export function AppSidebar({ locale }: { locale: string }) {
 
     return (
         <TooltipProvider delayDuration={200}>
-            <Sidebar className="!bg-[#0B1120] dark:!bg-[#0B1120] !border-r !border-slate-200 dark:!border-slate-800">
+            <Sidebar className="!bg-[#0B1120] dark:!bg-[#0B1120] !border-r !border-slate-200 dark:!border-slate-800 animate-in fade-in duration-500 ease-in-out transition-all duration-300 data-[state=closed]:opacity-0 data-[state=open]:opacity-100">
                 <SidebarHeader className="border-b border-slate-200 dark:border-slate-800 p-4">
                     <Link href={`/${locale}/dashboard`}>
                         <DiagnoverseLogo size={40} />

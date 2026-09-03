@@ -61,7 +61,7 @@ export default async function LocalePage({ params }: { params: Promise<{ locale:
                         {/* Primary B2C Patient Button */}
                         <Link href={`/${locale}/auth/patient`} className="w-full sm:w-auto">
                             <Button size="lg" className="w-full sm:w-auto bg-white text-slate-950 hover:bg-slate-200 px-8 h-14 text-lg font-semibold rounded-2xl shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] transition-all hover:scale-105 hover:-translate-y-1">
-                                Patient Portal
+                                User Portal
                                 <ArrowRight className="ml-2 w-5 h-5" />
                             </Button>
                         </Link>
@@ -69,7 +69,7 @@ export default async function LocalePage({ params }: { params: Promise<{ locale:
                         {/* Secondary B2B Worker Button */}
                         <Link href={`/${locale}/auth/worker`} className="w-full sm:w-auto">
                             <Button size="lg" variant="outline" className="w-full sm:w-auto bg-[#0B1120]/50 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 hover:border-emerald-500/50 px-8 h-14 text-lg font-semibold rounded-2xl backdrop-blur-md transition-all hover:scale-105 hover:-translate-y-1">
-                                For Health Workers (ASHA/MO)
+                                For Health Workers
                             </Button>
                         </Link>
                     </div>
