@@ -45,6 +45,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <html lang={locale} suppressHydrationWarning>
             <body
                 className={`${plusJakartaSans.variable} ${dmSans.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+                suppressHydrationWarning
             >
                 <ThemeProvider
                     attribute="class"
