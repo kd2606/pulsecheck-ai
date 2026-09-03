@@ -60,7 +60,7 @@ export default async function proxy(request: NextRequest) {
     (role === 'district' &&
       (path.startsWith('/dashboard/district') || path.startsWith('/dashboard/worker')));
 
-  if (!allowed) {
+  if (path === '/dashboard' || path === '/dashboard/' || !allowed) {
     const url = request.nextUrl.clone();
     url.pathname = localized(locale, HOME_FOR[role]);
     url.search = '';

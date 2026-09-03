@@ -61,6 +61,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       const role = (result.claims.role as Role) ?? 'patient';
       const isDemo = result.claims.email === 'demo@diagnoverseai.in';
 
+      // Always redirect from the root dashboard path to the role-specific dashboard
+      const purePath = pathname.replace(`/${currentLocale}`, '') || '/';
+      if (purePath === '/dashboard' || purePath === '/dashboard/') {
+        setState('redirecting');
+        router.replace(`/${currentLocale}${HOME_FOR[role]}`);
+        return;
+      }
+
       if (!isDemo && !isAllowed(role, pathname)) {
         setState('redirecting');
         router.replace(`/${currentLocale}${HOME_FOR[role]}`);
