@@ -22,7 +22,7 @@ export default function Navbar() {
       </div>
 
       <div className={styles.navRight}>
-        <Link href="/auth" className={styles.btnPrimary}>Access Portal</Link>
+        <Link href="/en/auth" className={styles.btnPrimary}>Access Portal</Link>
       </div>
 
       <button className={styles.mobileMenuBtn} onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
@@ -34,7 +34,7 @@ export default function Navbar() {
           <a href="#features" className={styles.navLink} onClick={() => setIsOpen(false)}>Features</a>
           <a href="#safety" className={styles.navLink} onClick={() => setIsOpen(false)}>Safety</a>
           <a href="#about" className={styles.navLink} onClick={() => setIsOpen(false)}>About</a>
-          <Link href="/auth" className={styles.btnPrimary} style={{ textAlign: 'center' }} onClick={() => setIsOpen(false)}>Access Portal</Link>
+          <Link href="/en/auth" className={styles.btnPrimary} style={{ textAlign: 'center' }} onClick={() => setIsOpen(false)}>Access Portal</Link>
         </div>
       )}
     </nav>
