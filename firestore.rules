@@ -1,47 +1,75 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function isVerifiedAsha() {
-      return request.auth != null
-        && request.auth.token.role == 'asha_worker'
-        && request.auth.token.asha_verified == true;
-    }
-
-    function ownsIncoming() {
-      return request.resource.data.owner_uid == request.auth.uid
-        && request.resource.data.created_by == request.auth.uid;
-    }
-
-    function isDistrictCommand() {
-      // In a real app we'd verify custom claims. For SIH demo, allowing authenticated read.
+    
+    // Core Functions
+    function isAuthenticated() {
       return request.auth != null;
+    }
+    
+    function getRole() {
+      // Expecting role to be set in token: 'patient', 'asha', 'mo', 'district_admin'
+      return request.auth.token.role;
+    }
+    
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+    
+    function isTestDataFiltered() {
+      // Enforce that queries on real data exclude test data unless explicitly queried by tester
+      return !('isTestData' in request.resource.data) || request.resource.data.isTestData == false;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow write: if false; // Only admin SDKs write core user profile/roles
+    }
+    
+    match /user_roles/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow write: if false; 
     }
 
     match /patients/{patientId} {
-      allow read: if isVerifiedAsha() && resource.data.owner_uid == request.auth.uid || isDistrictCommand();
-      allow create: if isVerifiedAsha() && ownsIncoming();
-      // Immutable ownership; append-only in spirit.
-      allow update: if isVerifiedAsha()
-        && resource.data.owner_uid == request.auth.uid
-        && request.resource.data.owner_uid == resource.data.owner_uid;
+      // Patients read their own
+      allow read: if isAuthenticated() && getRole() == 'patient' && isOwner(patientId);
+      // ASHA reads assigned (where owner_uid == asha uid)
+      allow read, create: if isAuthenticated() && getRole() == 'asha' && request.resource.data.owner_uid == request.auth.uid;
+      allow update: if isAuthenticated() && getRole() == 'asha' && resource.data.owner_uid == request.auth.uid && request.resource.data.owner_uid == request.auth.uid;
       allow delete: if false;
     }
 
     match /triage_records/{recordId} {
-      allow read: if isVerifiedAsha() && resource.data.owner_uid == request.auth.uid || isDistrictCommand();
-      allow create: if isVerifiedAsha() && ownsIncoming()
-        && request.resource.data.risk_level in ['RED', 'YELLOW', 'GREEN'];
+      allow read: if isAuthenticated() && (getRole() == 'patient' && resource.data.patient_id == request.auth.uid || getRole() == 'asha' && resource.data.owner_uid == request.auth.uid);
+      allow create: if isAuthenticated() && getRole() == 'asha' && request.resource.data.owner_uid == request.auth.uid;
       allow update, delete: if false; // clinical records are write-once
     }
 
     match /referrals/{referralId} {
-      allow read: if isVerifiedAsha() && resource.data.owner_uid == request.auth.uid || isDistrictCommand();
-      allow create: if isVerifiedAsha() && ownsIncoming()
-        && request.resource.data.status == 'CREATED';
-      // Facility staff advance the status; the ASHA client cannot.
-      allow update: if isDistrictCommand();
+      allow read: if isAuthenticated() && getRole() == 'asha' && resource.data.owner_uid == request.auth.uid;
+      // Medical Officer can read referrals routed to their facility
+      allow read: if isAuthenticated() && getRole() == 'mo' && resource.data.target_facility == request.auth.token.facility_id;
+      // Creation is allowed by ASHA only via proposals to 'CREATED' state
+      allow create: if isAuthenticated() && getRole() == 'asha' && request.resource.data.owner_uid == request.auth.uid && request.resource.data.status == 'CREATED';
+      // Updates strictly handled by server functions
+      allow update: if false;
       allow delete: if false;
+    }
+
+    match /referral_events/{eventId} {
+      allow read: if isAuthenticated() && getRole() in ['asha', 'mo'];
+      allow write: if false; // Server authoritative
+    }
+
+    match /audit_events/{eventId} {
+      allow read: if isAuthenticated() && getRole() == 'compliance_auditor';
+      allow write: if false; // Server written only
+    }
+
+    match /aggregates/{docId} {
+      allow read: if isAuthenticated() && getRole() == 'district_admin';
+      allow write: if false; // Server computed
     }
   }
 }

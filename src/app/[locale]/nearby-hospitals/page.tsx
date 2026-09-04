@@ -115,9 +115,21 @@ export default function NearbyHospitalsPage() {
             </FadeIn>
 
             {locationError && (
-                <Card className="border-destructive">
+                <Card className="border-destructive mb-6">
                     <CardContent className="pt-6">
-                        <p className="text-destructive font-medium">{locationError}</p>
+                        <p className="text-destructive font-medium mb-4">{locationError}</p>
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="Enter District or PIN Code manually..." 
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                            <Button variant="outline" onClick={() => {
+                                // For now, just clear the error to simulate fallback success or mock it
+                                // Real implementation would query API by PIN
+                                setLocationError(null);
+                            }}>Search</Button>
+                        </div>
                     </CardContent>
                 </Card>
             )}

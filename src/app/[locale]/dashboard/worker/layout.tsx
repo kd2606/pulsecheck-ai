@@ -39,6 +39,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
     { icon: Users, label: "Assigned Families", href: `/${locale}/dashboard/worker/assigned-families` },
     { icon: ClipboardPlus, label: "New Intake", href: `/${locale}/dashboard/worker/intake`, primary: true },
     { icon: Send, label: "Referrals", href: `/${locale}/dashboard/worker/referrals` },
+    { icon: Bell, label: "Inbox", href: `/${locale}/dashboard/worker/inbox` },
     { icon: FileText, label: "Reports", href: `/${locale}/dashboard/worker/reports` },
     { icon: User, label: "My Profile", href: `/${locale}/dashboard/worker/profile` },
   ];

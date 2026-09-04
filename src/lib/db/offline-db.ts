@@ -12,7 +12,7 @@ import type {
 } from '@/lib/db/types';
 
 export const DB_NAME = 'DiagnoVerseWorkerDB';
-export const DB_SCHEMA_VERSION = 1;
+export const DB_SCHEMA_VERSION = 2;
 
 /**
  * Index design notes:
@@ -32,15 +32,40 @@ const SCHEMA_V1 = {
   sync_journal: '++seq, entity, entity_id, action, occurred_at, [entity+entity_id]',
 } as const;
 
+const SCHEMA_V2 = {
+  ...SCHEMA_V1, // Preserve v1 for non-destructive migration
+  patients_v2: 'id, sync_status, [sync_status+next_attempt_at]', // Encrypted payloads, blind indexes only
+  triage_records_v2: 'id, patient_id, sync_status, [sync_status+next_attempt_at]', // Encrypted
+  referrals_v2: 'id, patient_id, target_facility, sync_status, [sync_status+next_attempt_at]', // Encrypted
+  migration_state: 'id, status, error', // status: 'migrated', 'quarantine'
+  key_material: 'id', // for wrapping key storage if applicable
+  backups: 'timestamp' // stores encrypted DB snapshots
+} as const;
+
 export class OfflineWorkerDB extends Dexie {
   declare patients: EntityTable<Patient, 'id'>;
   declare triage_records: EntityTable<TriageRecord, 'id'>;
   declare referrals: EntityTable<Referral, 'id'>;
   declare sync_journal: EntityTable<SyncJournalEntry, 'seq'>;
+  
+  // V2 Declarations
+  declare patients_v2: EntityTable<any, 'id'>;
+  declare triage_records_v2: EntityTable<any, 'id'>;
+  declare referrals_v2: EntityTable<any, 'id'>;
+  declare migration_state: EntityTable<any, 'id'>;
+  declare key_material: EntityTable<any, 'id'>;
+  declare backups: EntityTable<any, 'timestamp'>;
 
   public constructor() {
     super(DB_NAME, { autoOpen: true });
-    this.version(DB_SCHEMA_VERSION).stores(SCHEMA_V1);
+    
+    this.version(1).stores(SCHEMA_V1);
+    
+    this.version(DB_SCHEMA_VERSION).stores(SCHEMA_V2).upgrade(async (trans) => {
+      // Intentionally DO NOT drop v1 tables.
+      // Intentionally DO NOT migrate data here because key material is required and might not be unlocked.
+      // Migration occurs at the application level via resumable batches.
+    });
   }
 }
 

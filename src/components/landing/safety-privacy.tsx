@@ -3,6 +3,7 @@ import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ShieldAlert, UserCheck, Lock, ActivitySquare } from 'lucide-react';
 import styles from './landing.module.css';
+import { COMPLIANCE_CLAIMS } from '@/lib/constants/claims';
 
 export default function SafetyPrivacy() {
   const shouldReduceMotion = useReducedMotion();
@@ -47,7 +48,7 @@ export default function SafetyPrivacy() {
             <ActivitySquare size={24} color="#0d9488" style={{ flexShrink: 0 }} />
             <div>
               <strong style={{ display: 'block', color: '#111827' }}>Audit-ready workflow</strong>
-              <span>Audit-ready clinical workflow with traceable triage and referral actions.</span>
+              <span>{COMPLIANCE_CLAIMS.audit}</span>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldAlert, FileSearch, AlertTriangle, BookOpen } from 'lucide-react';
 import styles from './landing.module.css';
+import { COMPLIANCE_CLAIMS } from '@/lib/constants/claims';
 
 export default function TrustBar() {
   return (
@@ -16,7 +17,7 @@ export default function TrustBar() {
           <div className={styles.trustBarIcon}>
             <FileSearch size={32} />
           </div>
-          <div className={styles.trustBarText}>Audit-logged for CDSCO compliance</div>
+          <div className={styles.trustBarText}>{COMPLIANCE_CLAIMS.audit}</div>
         </div>
         <div className={styles.trustBarItem}>
           <div className={styles.trustBarIcon}>

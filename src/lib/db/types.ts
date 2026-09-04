@@ -91,3 +91,28 @@ export const LOCAL_ONLY_FIELDS = [
   'next_attempt_at',
   'last_sync_error',
 ] as const satisfies readonly (keyof SyncMeta)[];
+
+
+export type ServiceCategory = 'CLINICAL' | 'DIAGNOSTIC' | 'MEDICINE' | 'CAPACITY';
+export type ServiceAvailability = 'AVAILABLE' | 'LIMITED' | 'UNAVAILABLE';
+
+export interface FacilityService {
+  serviceId: string;
+  serviceName: string;
+  category: ServiceCategory;
+  availabilityStatus: ServiceAvailability;
+  operatingDays?: string;
+  operatingHours?: string;
+  lastUpdatedAt: EpochMs;
+  updatedByUid?: string;
+}
+
+export interface Facility {
+  id: string;
+  name: string;
+  districtId: string;
+  type: string;
+  status: string;
+  services?: FacilityService[];
+  schemaVersion: number;
+}

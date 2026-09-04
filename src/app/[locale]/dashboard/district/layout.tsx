@@ -25,7 +25,8 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
   const locale = params.locale as string || 'en';
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'SLA Dashboard', href: `/${locale}/dashboard/district`, active: true },
+    { icon: LayoutDashboard, label: 'SLA Dashboard', href: `/${locale}/dashboard/district` },
+    { icon: Activity, label: 'Command Analytics', href: `/${locale}/dashboard/district/analytics` },
     { icon: Map, label: 'Facility Mapping', href: `/${locale}/dashboard/district/facilities` },
     { icon: AlertOctagon, label: 'Critical Incidents', href: `/${locale}/dashboard/district/incidents` },
     { icon: FileText, label: 'Audit Reports', href: `/${locale}/dashboard/district/audit` },

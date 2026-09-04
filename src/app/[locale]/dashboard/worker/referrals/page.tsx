@@ -7,7 +7,7 @@ import { SyncStatusBar } from '@/components/sync-status-bar';
 import { QRCodeSVG } from 'qrcode.react';
 
 type Urgency = 'ROUTINE' | 'URGENT' | 'EMERGENCY';
-type ReferralStatus = 'CREATED' | 'ACCEPTED' | 'CLOSED';
+type ReferralStatus = 'CREATED' | 'ACCEPTED' | 'INFO_REQUESTED' | 'REJECTED' | 'CLOSED';
 
 interface PatientRecord {
   id: string;
@@ -18,6 +18,7 @@ interface ReferralRecord {
   id: string;
   patient_id: string;
   target_facility: string;
+  queue_token?: string;
   urgency: Urgency;
   status: ReferralStatus;
   timestamp: number | string;
@@ -31,6 +32,8 @@ interface ReferralRow extends ReferralRecord {
 const ACTIVE_STATUSES: ReadonlySet<ReferralStatus> = new Set<ReferralStatus>([
   'CREATED',
   'ACCEPTED',
+  'INFO_REQUESTED',
+  'REJECTED'
 ]);
 
 const URGENCY_ORDER: Record<Urgency, number> = {
@@ -109,6 +112,30 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
     [rows],
   );
 
+  const [timelineRef, setTimelineRef] = useState<string | null>(null);
+  const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
+  const [loadingTimeline, setLoadingTimeline] = useState(false);
+
+  const fetchTimeline = async (referralId: string) => {
+    setTimelineRef(referralId);
+    setLoadingTimeline(true);
+    try {
+      const { getDocs, query, collection } = await import('firebase/firestore');
+      const { db } = await import('@/firebase/clientApp');
+      const q = query(collection(db, 'referral_events'));
+      const snapshot = await getDocs(q);
+      const events = snapshot.docs
+        .map(d => d.data())
+        .filter(d => d.referral_id === referralId)
+        .sort((a, b) => b.occurred_at - a.occurred_at);
+      setTimelineEvents(events);
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setLoadingTimeline(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0B1120]">
       <SyncStatusBar/>
@@ -151,6 +178,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                   <tr className="border-b border-slate-800">
                     <Th>Patient</Th>
                     <Th>Target Facility</Th>
+                    <Th>Appt / Token</Th>
                     <Th>Urgency</Th>
                     <Th>Status</Th>
                     <Th className="text-right">Raised</Th>
@@ -164,15 +192,32 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                       className="border-b border-slate-800 last:border-b-0 transition-colors hover:bg-slate-800/40"
                     >
                       <td className="px-4 py-3">
-                        <span className="font-medium text-white">
+                        <span className="font-medium text-white block">
                           {row.patientName}
                         </span>
-                        <span className="mt-0.5 block font-mono text-xs text-slate-400">
+                        <a 
+                          href={`/${locale}/dashboard/worker/patient/${row.patient_id}`}
+                          className="text-[10px] text-emerald-400 hover:underline mt-1 inline-block"
+                        >
+                          View 360 Record
+                        </a>
+                        <span className="mt-1 block font-mono text-xs text-slate-400">
                           #{row.id.slice(0, 8)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-400">
-                        {row.target_facility}
+                        {row.target_facility === 'PENDING_ASSIGNMENT' ? (
+                          <span className="text-orange-400 text-xs italic">Pending Assignment</span>
+                        ) : (
+                          row.target_facility
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {row.queue_token ? (
+                          <span className="font-mono bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs font-bold">{row.queue_token}</span>
+                        ) : (
+                          <span className="text-slate-500 text-xs italic">Unscheduled</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -193,12 +238,18 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                       <td className="px-4 py-3 text-right tabular-nums text-slate-400">
                         {formatWhen(row.sortKey, locale)}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 flex gap-2 justify-end">
                         <button 
                           onClick={() => setSelectedQr(row.id)}
                           className="px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md hover:bg-slate-700 transition-colors"
                         >
                           Show QR
+                        </button>
+                        <button 
+                          onClick={() => fetchTimeline(row.id)}
+                          className="px-3 py-1.5 border border-slate-700 text-white text-xs font-semibold rounded-md hover:bg-slate-800 transition-colors"
+                        >
+                          Timeline
                         </button>
                       </td>
                     </tr>
@@ -228,6 +279,43 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
               >
                 Close
               </button>
+            </div>
+          </div>
+        )}
+
+        {timelineRef && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+            <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-800 shadow-2xl max-h-[80vh] overflow-y-auto">
+              <h3 className="text-xl font-bold text-white mb-2">Referral Timeline</h3>
+              <p className="text-sm text-slate-400 mb-6">Live from server (requires connection).</p>
+              
+              <div className="space-y-4">
+                {loadingTimeline ? (
+                  <div className="text-center py-4 text-slate-400">Loading...</div>
+                ) : timelineEvents.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">No events found or offline.</p>
+                ) : (
+                  <div className="relative border-l border-slate-700 ml-3 space-y-6">
+                    {timelineEvents.map((ev, idx) => (
+                      <div key={idx} className="pl-6 relative">
+                        <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-slate-900" />
+                        <div className="text-sm font-semibold text-white">
+                          {ev.action === 'CONSULTATION_OUTCOME' ? 'CONSULTATION OUTCOME' : ev.action}
+                        </div>
+                        <div className="text-xs text-slate-400 mb-1">{new Date(ev.occurred_at).toLocaleString()}</div>
+                        {ev.disposition && (
+                          <div className="text-xs font-bold text-emerald-400 mt-1 uppercase">Disposition: {ev.disposition.replace(/_/g, ' ')}</div>
+                        )}
+                        {ev.note && <div className="text-sm text-slate-300 bg-slate-800 p-2 rounded-md mt-1">{ev.note}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="pt-4 mt-6 border-t border-slate-800 flex justify-end">
+                  <button onClick={() => setTimelineRef(null)} className="px-4 py-2 bg-slate-800 text-white text-sm font-semibold rounded-md hover:bg-slate-700">Close</button>
+                </div>
+              </div>
             </div>
           </div>
         )}

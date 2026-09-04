@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore, memoryLocalCache } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim(),
@@ -24,7 +24,20 @@ if (isConfigValid) {
 }
 
 const auth = app ? getAuth(app) : null as any;
-const db = app ? getFirestore(app) : null as any;
+
+let db: any;
+if (app) {
+    // Only disable IndexedDB cache for worker/district routes to protect PII
+    // B2C patient routes keep default persistence behavior
+    const isStaffRoute = typeof window !== 'undefined' && 
+        (window.location.pathname.includes('/worker') || window.location.pathname.includes('/district'));
+        
+    db = isStaffRoute 
+        ? initializeFirestore(app, { localCache: memoryLocalCache() })
+        : getFirestore(app);
+} else {
+    db = null as any;
+}
 
 export { app, auth, db };
 

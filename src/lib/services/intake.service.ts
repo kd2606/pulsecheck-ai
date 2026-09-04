@@ -123,7 +123,7 @@ export async function saveIntakeOffline(
     parsedReferral ??
     (triageInput.risk_level === 'RED'
       ? {
-          target_facility: options.defaultFacility ?? 'NEAREST_PHC',
+          target_facility: options.defaultFacility ?? 'PENDING_ASSIGNMENT',
           urgency: 'EMERGENCY',
         }
       : null);
