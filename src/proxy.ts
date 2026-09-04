@@ -1,12 +1,29 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
-import { verifySessionCookie, type Role } from './lib/auth/verify-session';
+import { verifySessionCookie } from './lib/auth/verify-session';
 
 const handleI18n = createMiddleware(routing);
 const SESSION_COOKIE = '__session';
 
-const HOME_FOR: Record<Role, string> = {
+/**
+ * Normalise Firebase custom-claim role strings to the three dashboard
+ * segments the app actually uses.  Firebase claims use values like
+ * 'district_admin', 'mo', 'admin', 'asha', 'worker', 'patient'.
+ * Returns null for unknown / missing roles so we never silently
+ * default to 'patient'.
+ */
+type DashboardRole = 'patient' | 'worker' | 'district';
+
+function normalisedRole(claimRole: string | undefined): DashboardRole | null {
+  if (!claimRole) return null;
+  if (claimRole === 'patient') return 'patient';
+  if (claimRole === 'worker' || claimRole === 'asha') return 'worker';
+  if (claimRole === 'district_admin' || claimRole === 'mo' || claimRole === 'admin' || claimRole === 'district') return 'district';
+  return null;
+}
+
+const HOME_FOR: Record<DashboardRole, string> = {
   patient: '/dashboard/patient',
   worker: '/dashboard/worker',
   district: '/dashboard/district',
@@ -36,23 +53,37 @@ export default async function proxy(request: NextRequest) {
 
   if (!claims) {
     const url = request.nextUrl.clone();
-    // Redirect to role-specific auth page based on what dashboard they tried to access
-    let authPath = '/auth/patient'; // default
-    if (path.startsWith('/dashboard/worker')) {
+    // For generic /dashboard with no session, send to landing page (neutral)
+    // For role-specific dashboard paths, send to the matching auth page
+    let authPath = '/';
+    if (path.startsWith('/dashboard/patient')) {
+      authPath = '/auth/patient';
+    } else if (path.startsWith('/dashboard/worker')) {
       authPath = '/auth/worker';
     } else if (path.startsWith('/dashboard/district')) {
-      authPath = '/auth/district'; 
+      authPath = '/auth/district';
     }
     url.pathname = localized(locale, authPath);
-    url.search = `?next=${encodeURIComponent(request.nextUrl.pathname)}`;
+    url.search = authPath === '/' ? '' : `?next=${encodeURIComponent(request.nextUrl.pathname)}`;
     const res = NextResponse.redirect(url);
     res.cookies.delete(SESSION_COOKIE);
     return res;
   }
 
-  const role: Role = claims.role ?? 'patient';
+  const role = normalisedRole(claims.role as string | undefined);
+
+  // Unknown or missing role — clear session, send to landing
+  if (!role) {
+    const url = request.nextUrl.clone();
+    url.pathname = localized(locale, '/');
+    url.search = '';
+    const res = NextResponse.redirect(url);
+    res.cookies.delete(SESSION_COOKIE);
+    return res;
+  }
+
   const isDemo = claims.email === 'demo@diagnoverseai.in';
-  
+
   const allowed =
     isDemo ||
     (role === 'patient' && path.startsWith('/dashboard/patient')) ||
