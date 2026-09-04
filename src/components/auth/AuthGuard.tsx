@@ -2,29 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { onIdTokenChanged, type User } from 'firebase/auth';
-import { auth } from '@/firebase/clientApp'; // Updated to match actual structure
+import { auth } from '@/firebase/clientApp';
 import { useRouter, usePathname } from 'next/navigation';
 import FullScreenLoader from './FullScreenLoader';
 
-type Role = 'patient' | 'worker' | 'district';
-
-const HOME_FOR: Record<Role, string> = {
-  patient: '/dashboard/patient',
-  worker: '/dashboard/worker',
-  district: '/dashboard/district',
-};
-
-function isAllowed(role: Role, path: string) {
-  // Check if the path contains the required route, ignoring the /[locale] prefix
-  if (role === 'patient') return path.includes('/dashboard/patient');
-  if (role === 'worker') return path.includes('/dashboard/worker');
-  return path.includes('/dashboard/district') || path.includes('/dashboard/worker');
-}
-
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname(); 
-  const [state, setState] = useState<'checking' | 'authorized' | 'redirecting'>('checking');
+  const pathname = usePathname();
+  const [state, setState] = useState<'checking' | 'authorized' | 'redirecting' | 'unauthorized'>('checking');
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -33,19 +19,20 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
 
       const currentLocale = pathname.split('/')[1] || 'en';
+      const purePath = pathname.replace(new RegExp('^/' + currentLocale), '') || '/';
 
       if (!user) {
         setState('redirecting');
         await fetch('/api/auth/session', { method: 'DELETE' });
-        
+
         let authPath = '/auth/patient';
-        if (pathname.includes('/dashboard/worker')) {
+        if (purePath.startsWith('/dashboard/worker')) {
           authPath = '/auth/worker';
-        } else if (pathname.includes('/dashboard/district')) {
+        } else if (purePath.startsWith('/dashboard/district')) {
           authPath = '/auth/district';
         }
-        
-        router.replace(`/${currentLocale}${authPath}?next=${encodeURIComponent(pathname)}`);
+
+        router.replace('/' + currentLocale + authPath + '?next=' + encodeURIComponent(pathname));
         return;
       }
 
@@ -58,20 +45,51 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ idToken: result.token }),
       });
 
-      const role = (result.claims.role as Role) ?? 'patient';
+      const role = result.claims.role as string | undefined;
       const isDemo = result.claims.email === 'demo@diagnoverseai.in';
 
-      // Always redirect from the root dashboard path to the role-specific dashboard
-      const purePath = pathname.replace(`/${currentLocale}`, '') || '/';
-      if (purePath === '/dashboard' || purePath === '/dashboard/') {
-        setState('redirecting');
-        router.replace(`/${currentLocale}${HOME_FOR[role]}`);
+      // 1. Determine normalized home path based on actual claims
+      let homePath = '';
+      if (role === 'patient') {
+        homePath = '/dashboard/patient';
+      } else if (role === 'worker' || role === 'asha') {
+        homePath = '/dashboard/worker';
+      } else if (role === 'district_admin' || role === 'mo' || role === 'admin') {
+        homePath = '/dashboard/district';
+      }
+
+      // 2. Block missing/unknown roles completely
+      if (!homePath) {
+        if (!role) {
+           setErrorMsg('No role assigned to this account. Please contact your administrator or wait for approval.');
+        } else {
+           setErrorMsg('Unknown role "' + role + '". Access denied.');
+        }
+        setState('unauthorized');
+        await auth.signOut();
         return;
       }
 
-      if (!isDemo && !isAllowed(role, pathname)) {
+      // 3. Root dashboard redirect
+      if (purePath === '/dashboard' || purePath === '/dashboard/') {
         setState('redirecting');
-        router.replace(`/${currentLocale}${HOME_FOR[role]}`);
+        router.replace('/' + currentLocale + homePath);
+        return;
+      }
+
+      // 4. Strict path isolation
+      let isAllowed = false;
+      if (role === 'patient') {
+        isAllowed = purePath.startsWith('/dashboard/patient');
+      } else if (role === 'worker' || role === 'asha') {
+        isAllowed = purePath.startsWith('/dashboard/worker');
+      } else if (role === 'district_admin' || role === 'mo' || role === 'admin') {
+        isAllowed = purePath.startsWith('/dashboard/district');
+      }
+
+      if (!isAllowed) {
+        setState('redirecting');
+        router.replace('/' + currentLocale + homePath);
         return;
       }
 
@@ -83,6 +101,23 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       unsubscribe();
     };
   }, [pathname, router]);
+
+  if (state === 'unauthorized') {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+         <div className="bg-white rounded-xl shadow p-6 max-w-md w-full text-center border border-red-100">
+           <h2 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h2>
+           <p className="text-slate-600 mb-6">{errorMsg}</p>
+           <button
+             onClick={() => router.push('/')}
+             className="w-full bg-slate-900 text-white rounded-lg py-2 font-medium hover:bg-slate-800"
+           >
+             Return Home
+           </button>
+         </div>
+       </div>
+     );
+  }
 
   if (state !== 'authorized') return <FullScreenLoader />;
   return <>{children}</>;

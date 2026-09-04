@@ -10,6 +10,7 @@ import {
 
 import { describeUnknown } from '@/lib/core/result';
 import { getDeviceId } from '@/lib/core/ids';
+import { pushOfflineAssignments } from './facility-sync';
 import {
   appendJournal,
   getOfflineDb,
@@ -193,7 +194,10 @@ class SyncEngine {
         totals.failed += result.failed;
         totals.quarantined += result.quarantined;
         totals.skippedBackoff += result.skippedBackoff;
-      }
+        }
+
+        // Drain offline assignments
+        await pushOfflineAssignments();
 
       this.emit({
         phase: totals.failed > 0 ? 'error' : 'idle',

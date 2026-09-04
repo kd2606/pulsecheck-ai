@@ -5,6 +5,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getOfflineDb } from '@/lib/db/offline-db';
 import { SyncStatusBar } from '@/components/sync-status-bar';
 import { QRCodeSVG } from 'qrcode.react';
+import { getOfflineFacilities, syncFacilityCatalog, queueOfflineAssignment } from '@/lib/sync/facility-sync';
+import { getFirebaseAuth } from '@/lib/firebase/client';
+
 
 type Urgency = 'ROUTINE' | 'URGENT' | 'EMERGENCY';
 type ReferralStatus = 'CREATED' | 'ACCEPTED' | 'INFO_REQUESTED' | 'REJECTED' | 'CLOSED';
@@ -71,6 +74,56 @@ interface ReferralsPageProps {
 export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
   const { locale } = use(params);
   const [selectedQr, setSelectedQr] = useState<string | null>(null);
+
+  const isOnline = true; // Mocked for simplicity since useOfflineSync isn't here
+  const [showCatalogModal, setShowCatalogModal] = useState(false);
+  const [facilities, setFacilities] = useState<any[]>([]);
+  const [catalogSyncing, setCatalogSyncing] = useState(false);
+  const [assignTarget, setAssignTarget] = useState<string | null>(null);
+
+  const loadFacilities = async () => {
+    try {
+      const user = getFirebaseAuth().currentUser;
+      if (!user) return;
+      const token = await user.getIdTokenResult();
+      const districtId = token.claims.district_id as string;
+      const facs = await getOfflineFacilities(districtId);
+      setFacilities(facs);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSyncCatalog = async () => {
+    setCatalogSyncing(true);
+    try {
+      await syncFacilityCatalog();
+      await loadFacilities();
+    } catch (e: any) {
+      alert(e.message || 'Sync failed');
+    } finally {
+      setCatalogSyncing(false);
+    }
+  };
+
+  const handleAssignClick = (refId: string) => {
+    setAssignTarget(refId);
+    loadFacilities();
+    setShowCatalogModal(true);
+  };
+
+  const handleConfirmAssign = async (facilityId: string) => {
+    if (!assignTarget) return;
+    try {
+      await queueOfflineAssignment(assignTarget, facilityId);
+      setShowCatalogModal(false);
+      setAssignTarget(null);
+      alert('Assignment queued offline. It will sync automatically when online.');
+    } catch (e: any) {
+      alert(e.message || 'Failed to queue assignment');
+    }
+  };
+
 
   const rows = useLiveQuery<ReferralRow[] | undefined>(async () => {
     const db = getOfflineDb();
@@ -207,7 +260,10 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                       </td>
                       <td className="px-4 py-3 text-slate-400">
                         {row.target_facility === 'PENDING_ASSIGNMENT' ? (
-                          <span className="text-orange-400 text-xs italic">Pending Assignment</span>
+                          <div className="flex flex-col gap-1">
+                              <span className="text-orange-400 text-xs italic">Pending Assignment</span>
+                              <button onClick={() => handleAssignClick(row.id)} className="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 w-fit">Assign Facility</button>
+                            </div>
                         ) : (
                           row.target_facility
                         )}
