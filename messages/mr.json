@@ -300,7 +300,12 @@
       "syncSuccess": "सिंक पूर्ण झाले.",
       "syncError": "सिंक अयशस्वी. पुन्हा प्रयत्न करा.",
       "offlineWarning": "तुम्ही सध्या ऑफलाइन आहात. डेटा स्थानिक पातळीवर सेव्ह केला आहे.",
-      "staleWarning": "कॅटलॉग डेटा जुना असू शकतो. शेवटचे सिंक: {time}"
+      "staleWarning": "कॅटलॉग डेटा जुना असू शकतो. शेवटचे सिंक: {time}",
+      "online": "ऑनलाइन",
+      "offline": "ऑफलाइन",
+      "queue": "रांग",
+      "syncIssue": "सिंक समस्या",
+      "syncNow": "आता सिंक करा"
     },
     "inbox": {
       "title": "फॉलो-अप इनबॉक्स (Follow-up Inbox)",
@@ -310,7 +315,11 @@
       "title": "रेफरल्स (Referrals)",
       "statusPending": "प्रलंबित (PENDING)",
       "statusAssigned": "असाइन केलेले (ASSIGNED)",
-      "statusClosed": "बंद (CLOSED)"
+      "statusClosed": "बंद (CLOSED)",
+      "assignModalTitle": "सुविधा नियुक्त करा",
+      "selectFacility": "सुविधा निवडा",
+      "cancel": "रद्द करा",
+      "confirm": "निश्चित करा"
     },
     "queue": {
       "title": "रांग आणि अपॉइंटमेंट (Queue & Appointments)"

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useTranslations } from 'next-intl';
 
 interface SyncStatusBarProps {
   /** Optional label shown on the left (e.g. facility or worker name). */
@@ -10,8 +11,8 @@ interface SyncStatusBarProps {
 }
 
 export function SyncStatusBar({ label, className = '' }: SyncStatusBarProps) {
-  const { isOnline, isSyncing, pendingCount, lastError, syncPendingData } =
-    useOfflineSync();
+  const { isOnline, isSyncing, pendingCount, lastError, syncPendingData } = useOfflineSync();
+  const t = useTranslations('worker.dashboard');
 
   const [isErrorOpen, setIsErrorOpen] = useState<boolean>(false);
 
@@ -51,7 +52,7 @@ export function SyncStatusBar({ label, className = '' }: SyncStatusBarProps) {
             role="status"
             aria-live="polite"
           >
-            {isOnline ? 'Online' : 'Offline'}
+            {isOnline ? t('online') : t('offline')}
           </span>
         </div>
 
@@ -59,7 +60,7 @@ export function SyncStatusBar({ label, className = '' }: SyncStatusBarProps) {
 
         {/* Pending queue */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">Queue</span>
+          <span className="text-xs text-slate-400">{t('queue')}</span>
           <span
             className={`inline-flex min-w-6 items-center justify-center rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
               pendingCount > 0
@@ -89,7 +90,7 @@ export function SyncStatusBar({ label, className = '' }: SyncStatusBarProps) {
               className="rounded-md bg-red-500/10 px-2 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40"
               aria-expanded={isErrorOpen}
             >
-              Sync issue
+              {t('syncIssue')}
             </button>
           ) : null}
 
@@ -113,7 +114,7 @@ export function SyncStatusBar({ label, className = '' }: SyncStatusBarProps) {
               <path d="M21 12a9 9 0 1 1-3.2-6.9" />
               <path d="M21 4v5h-5" />
             </svg>
-            {isSyncing ? 'Syncing' : 'Sync Now'}
+            {isSyncing ? t('syncing') : t('syncNow')}
           </button>
         </div>
       </div>

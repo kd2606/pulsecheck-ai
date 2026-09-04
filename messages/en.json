@@ -300,7 +300,12 @@
       "syncSuccess": "Sync complete.",
       "syncError": "Sync failed. Try again.",
       "offlineWarning": "You are currently offline. Data is saved locally and will sync later.",
-      "staleWarning": "Catalog data may be stale. Last synced: {time}"
+      "staleWarning": "Catalog data may be stale. Last synced: {time}",
+      "online": "Online",
+      "offline": "Offline",
+      "queue": "Queue",
+      "syncIssue": "Sync issue",
+      "syncNow": "Sync Now"
     },
     "inbox": {
       "title": "Follow-up Inbox",
@@ -310,7 +315,11 @@
       "title": "Referrals",
       "statusPending": "PENDING",
       "statusAssigned": "ASSIGNED",
-      "statusClosed": "CLOSED"
+      "statusClosed": "CLOSED",
+      "assignModalTitle": "Assign Target Facility",
+      "selectFacility": "Select Facility",
+      "cancel": "Cancel",
+      "confirm": "Confirm Assignment"
     },
     "queue": {
       "title": "Queue & Appointments"

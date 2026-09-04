@@ -17,7 +17,7 @@ interface PatientPayload {
   name: string;
   abha_id?: string;
   gender: Gender;
-  dob: string; 
+  dob: string;
   phone?: string;
 }
 
@@ -636,6 +636,40 @@ export default function NewIntakePage() {
                 </Field>
               </div>
             </div>
+          </section>
+
+                    {/* ------------------------- Card 3: Consent ------------------------- */}
+          <section className={CARD_CLASS} aria-labelledby="consent-heading">
+            <div className="mb-5 border-b border-slate-800 pb-4">
+              <h2 id="consent-heading" className="text-base font-semibold text-white">
+                {t('consent')}
+              </h2>
+              <p className="mt-1 text-sm text-slate-400">Read to the patient and obtain consent.</p>
+            </div>
+
+            <div className="rounded-lg bg-slate-950 p-4 border border-slate-800 mb-4">
+              <p className="text-sm text-slate-300 italic mb-3">
+                "I agree to share my health information with the medical facility for treatment and follow-up.
+                I understand this information will be stored securely."
+              </p>
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <div className="flex items-center h-5">
+                <input
+                  type="checkbox"
+                  name="consent"
+                  className="w-4 h-4 bg-slate-900 border-slate-700 rounded text-emerald-600 focus:ring-emerald-600 focus:ring-offset-slate-900"
+                  checked={form.consent_granted}
+                  onChange={(e) => setField('consent_granted', e.target.checked)}
+                  disabled={isSaving}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-white">Patient has provided verbal consent</span>
+                {errors.consent_granted && <span className="text-xs text-red-400 mt-1">{errors.consent_granted}</span>}
+              </div>
+            </label>
           </section>
 
           {/* ------------------------------ Actions ---------------------------- */}

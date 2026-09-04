@@ -30,14 +30,14 @@ export async function GET(request: Request) {
     }
     const patientData = patientSnap.data();
 
-    // 2. Fetch Consent (Service Boundary Implementation)
-    // If explicit consent infrastructure is not yet present, we treat offline capture as PENDING_VERIFICATION.
-    const consentSnap = await adminDb.collection('patient_consents').doc(patientId).get();
-    let consentData = consentSnap.exists ? consentSnap.data() : {
-       status: 'PENDING_VERIFICATION',
-       noticeVersion: 'v1.0',
-       grantee: 'NONE'
-    };
+    // 2. Fetch Consent from standardized 'consents' collection
+    const consentQueryTop = await adminDb.collection('consents')
+       .where('patient_id', '==', patientId)
+       .orderBy('timestamp', 'desc')
+       .limit(1)
+       .get();
+    const consentData: any = consentQueryTop.empty ? null : consentQueryTop.docs[0].data();
+    const hasActiveConsent = consentData?.status === 'ACTIVE' && consentData?.validity_until >= Date.now();
 
     // 3. Authorization & Purpose Scope Verification
     let authorized = false;
@@ -61,39 +61,28 @@ export async function GET(request: Request) {
           .get();
 
        if (!refSnap.empty) {
-          // Verify Consent for cross-facility disclosure
-          if (consentData?.status === 'PENDING_VERIFICATION' && patientData?.created_by !== uid) {
-             return NextResponse.json({ error: 'Forbidden: Pending offline consent does not authorize cross-facility disclosure.' }, { status: 403 });
-          }
+           // MO authorized via active referral to their facility
           authorized = true;
           accessPurpose = 'FACILITY_REFERRAL_TREATMENT';
        }
     } else if (role === 'district_admin' || role === 'admin') {
 
          // District Admin Authorization via Consent Infrastructure
-         const consentQuery = await adminDb.collection('consents')
-            .where('patient_id', '==', patientId)
-            .where('status', '==', 'ACTIVE')
-            .get();
-
-         let hasValidConsent = false;
-         for (const doc of consentQuery.docs) {
-            const consent = doc.data();
-            if (consent.validity_until < Date.now()) continue; // Expired
-
-            // Allow if patient granted DISTRICT_LEVEL scope to CARE_DELIVERY or BREAK_GLASS
-            if ((consent.scope === 'DISTRICT_LEVEL') || consent.purpose === 'BREAK_GLASS') {
-               hasValidConsent = true;
-               accessPurpose = consent.purpose;
-               break;
-            }
+         if (!hasActiveConsent) {
+            return NextResponse.json({ error: 'Forbidden: District Admin requires active consent.' }, { status: 403 });
          }
 
-         if (!hasValidConsent) {
-            return NextResponse.json({ error: 'Forbidden: District Admin requires verified district-level consent or break-glass grant to view line-level patient records.' }, { status: 403 });
+         // District boundary check
+         if (role === 'district_admin' && decodedToken.district_id && patientData?.districtId && patientData.districtId !== decodedToken.district_id) {
+            return NextResponse.json({ error: 'Forbidden: Cross-district access denied.' }, { status: 403 });
          }
 
-         authorized = true;
+         if (consentData.scope === 'DISTRICT_LEVEL' || consentData.purpose === 'BREAK_GLASS') {
+            authorized = true;
+            accessPurpose = consentData.purpose;
+         } else {
+            return NextResponse.json({ error: 'Forbidden: Consent scope insufficient.' }, { status: 403 });
+         }
 
     }
 

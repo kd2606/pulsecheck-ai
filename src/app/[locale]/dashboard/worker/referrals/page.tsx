@@ -251,7 +251,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         <span className="font-medium text-white block">
                           {row.patientName}
                         </span>
-                        <a 
+                        <a
                           href={`/${locale}/dashboard/worker/patient/${row.patient_id}`}
                           className="text-[10px] text-emerald-400 hover:underline mt-1 inline-block"
                         >
@@ -298,13 +298,13 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         {formatWhen(row.sortKey, locale)}
                       </td>
                       <td className="px-4 py-3 flex gap-2 justify-end">
-                        <button 
+                        <button
                           onClick={() => setSelectedQr(row.id)}
                           className="px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md hover:bg-slate-700 transition-colors"
                         >
                           Show QR
                         </button>
-                        <button 
+                        <button
                           onClick={() => fetchTimeline(row.id)}
                           className="px-3 py-1.5 border border-slate-700 text-white text-xs font-semibold rounded-md hover:bg-slate-800 transition-colors"
                         >
@@ -332,7 +332,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                 <QRCodeSVG value={selectedQr} size={200} />
               </div>
               <p className="font-mono text-slate-500 text-xs mb-6 break-all text-center">{selectedQr}</p>
-              <button 
+              <button
                 onClick={() => setSelectedQr(null)}
                 className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-colors border border-slate-700"
               >
@@ -347,7 +347,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
             <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-800 shadow-2xl max-h-[80vh] overflow-y-auto">
               <h3 className="text-xl font-bold text-white mb-2">Referral Timeline</h3>
               <p className="text-sm text-slate-400 mb-6">Live from server (requires connection).</p>
-              
+
               <div className="space-y-4">
                 {loadingTimeline ? (
                   <div className="text-center py-4 text-slate-400">Loading...</div>
@@ -370,7 +370,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                     ))}
                   </div>
                 )}
-                
+
                 <div className="pt-4 mt-6 border-t border-slate-800 flex justify-end">
                   <button onClick={() => setTimelineRef(null)} className="px-4 py-2 bg-slate-800 text-white text-sm font-semibold rounded-md hover:bg-slate-700">Close</button>
                 </div>
@@ -379,6 +379,54 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
           </div>
         )}
       </main>
+
+      {showCatalogModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-slate-900 p-6 shadow-xl border border-slate-700">
+            <h2 className="text-xl font-bold text-white mb-4">{tr('assignModalTitle')}</h2>
+
+            <div className="mb-6 space-y-2 max-h-[60vh] overflow-y-auto">
+              {facilities.length === 0 && !catalogSyncing && (
+                <p className="text-sm text-slate-400">No offline facilities found. Please sync catalog.</p>
+              )}
+              {catalogSyncing && (
+                <p className="text-sm text-slate-400">Syncing...</p>
+              )}
+              {facilities.map(fac => (
+                <div key={fac.id} className="flex items-center justify-between p-3 border border-slate-800 rounded-lg bg-slate-800/40">
+                  <div>
+                    <h3 className="font-semibold text-white">{fac.name}</h3>
+                    <p className="text-xs text-slate-400">{fac.type}</p>
+                  </div>
+                  <button
+                    onClick={() => handleConfirmAssign(fac.id)}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-md text-sm font-medium"
+                  >
+                    {tr('confirm')}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-800">
+              <button
+                onClick={handleSyncCatalog}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+                disabled={catalogSyncing}
+              >
+                Sync Catalog Now
+              </button>
+              <button
+                onClick={() => { setShowCatalogModal(false); setAssignTarget(null); }}
+                className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md font-medium"
+              >
+                {tr('cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
