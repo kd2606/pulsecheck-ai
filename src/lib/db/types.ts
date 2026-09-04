@@ -133,6 +133,10 @@ export interface Facility {
   districtId: string;
   type: string;
   status: string;
+  operatingDays?: string;
+  operatingHours?: string;
+  address?: string;
+  contact?: string;
   services?: FacilityService[];
   schemaVersion: number;
 }

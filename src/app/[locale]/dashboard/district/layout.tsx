@@ -28,6 +28,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
     { icon: LayoutDashboard, label: 'SLA Dashboard', href: `/${locale}/dashboard/district` },
     { icon: Activity, label: 'Command Analytics', href: `/${locale}/dashboard/district/analytics` },
     { icon: Map, label: 'Facility Mapping', href: `/${locale}/dashboard/district/facilities` },
+    { icon: Building, label: 'Service Catalog', href: `/${locale}/dashboard/district/catalog` },
     { icon: AlertOctagon, label: 'Critical Incidents', href: `/${locale}/dashboard/district/incidents` },
     { icon: FileText, label: 'Audit Reports', href: `/${locale}/dashboard/district/audit` },
     { icon: Settings, label: 'System Config', href: `/${locale}/dashboard/district/config` },
