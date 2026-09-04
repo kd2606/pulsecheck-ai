@@ -1,5 +1,5 @@
 export const publicNavigationConfig = {
-  showPatientEntry: true,
+  showPatientEntry: false,
   showWorkerEntry: true,
   showDistrictEntry: true,
   primaryAudience: "public-health"
