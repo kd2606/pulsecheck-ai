@@ -174,7 +174,7 @@ export default function TrendsPage() {
                     <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
                         <TrendingUp className="h-10 w-10 text-muted-foreground" />
                         <p className="text-muted-foreground">Please log in to view your health trends.</p>
-                        <Button onClick={() => (window.location.href = "/en/login")}>Log In</Button>
+                        <Button onClick={() => (window.location.href = "/en/auth/patient")}>Log In</Button>
                     </CardContent>
                 </Card>
             );

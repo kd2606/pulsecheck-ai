@@ -47,7 +47,7 @@ export default function OnboardingPage() {
     // Initial load checks
     useEffect(() => {
         if (!authLoading && !user) {
-            router.replace(`/${locale}/login`);
+            router.replace(`/${locale}/auth/patient`);
         } else if (user) {
             // Already filled out?
             getDoc(doc(db, "users", user.uid, "profile", "data")).then((docSnap) => {

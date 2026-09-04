@@ -1,5 +1,26 @@
 'use client';
 
+
+function arrayBufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+}
+
+function base64ToArrayBuffer(base64: string): any {
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes as any;
+}
+
 export interface EncryptedEnvelope {
     v: number;
     alg: string;
@@ -89,9 +110,9 @@ export class OfflineCrypto {
         // Return material to save to DB
         return {
             keyId,
-            wrappedKey: Buffer.from(new Uint8Array(wrappedKeyBuffer)).toString('base64'),
-            salt: Buffer.from(salt).toString('base64'),
-            iv: Buffer.from(iv).toString('base64')
+            wrappedKey: arrayBufferToBase64(wrappedKeyBuffer),
+            salt: arrayBufferToBase64(salt),
+            iv: arrayBufferToBase64(iv)
         };
     }
 
@@ -99,9 +120,9 @@ export class OfflineCrypto {
      * Unlock a previously wrapped key using the PIN.
      */
     static async unlockKeyWithPIN(pin: string, material: WrappedKeyMaterial): Promise<void> {
-        const salt = new Uint8Array(Buffer.from(material.salt, 'base64'));
-        const iv = new Uint8Array(Buffer.from(material.iv, 'base64'));
-        const wrappedKeyBuffer = new Uint8Array(Buffer.from(material.wrappedKey, 'base64'));
+        const salt = base64ToArrayBuffer(material.salt);
+        const iv = base64ToArrayBuffer(material.iv);
+        const wrappedKeyBuffer = base64ToArrayBuffer(material.wrappedKey);
 
         const kek = await this.deriveKEK(pin, salt);
 
@@ -151,9 +172,9 @@ export class OfflineCrypto {
             v: 1,
             alg: "A256GCM",
             keyId: activeKeyId,
-            iv: Buffer.from(iv).toString('base64'),
-            ct: Buffer.from(new Uint8Array(ciphertext)).toString('base64'),
-            aad: Buffer.from(aad).toString('base64')
+            iv: arrayBufferToBase64(iv),
+            ct: arrayBufferToBase64(ciphertext),
+            aad: arrayBufferToBase64(aad)
         };
     }
 
@@ -161,14 +182,14 @@ export class OfflineCrypto {
         if (!activeDek) throw new Error("Decryption key not loaded");
         if (envelope.keyId !== activeKeyId) throw new Error("Key ID mismatch");
 
-        const iv = new Uint8Array(Buffer.from(envelope.iv, 'base64'));
-        const ct = new Uint8Array(Buffer.from(envelope.ct, 'base64'));
+        const iv = base64ToArrayBuffer(envelope.iv);
+        const ct = base64ToArrayBuffer(envelope.ct);
         
         const aadData = JSON.stringify({ recordId, ownerUid, schemaVersion });
         const aad = new TextEncoder().encode(aadData);
         
         // Verify AAD matches what is in the envelope
-        if (envelope.aad !== Buffer.from(aad).toString('base64')) {
+        if (envelope.aad !== arrayBufferToBase64(aad)) {
             throw new Error("AAD mismatch or tampered envelope metadata");
         }
 

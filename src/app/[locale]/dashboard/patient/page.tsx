@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (!loading && !user) {
-            router.push(`/${locale}/login`);
+            router.push(`/${locale}/auth/patient`);
         }
     }, [user, loading, router, locale]);
 
@@ -77,7 +77,7 @@ export default function DashboardPage() {
 
     const handleLogout = async () => {
         await signOut(auth);
-        router.push(`/${locale}/login`);
+        router.push(`/${locale}/auth/patient`);
     };
 
     if (loading || !user) {

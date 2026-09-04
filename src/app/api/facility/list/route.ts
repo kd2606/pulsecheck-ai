@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     let allowedDistrict = null;
     let allowedFacility = null;
     
-    if (role === 'district_admin' || role === 'asha') {
+    if (role === 'district_admin' || role === 'asha' || role === 'admin') {
        allowedDistrict = decodedToken.district_id;
     } else if (role === 'mo') {
        allowedDistrict = decodedToken.district_id;
@@ -31,16 +31,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User token missing district_id.' }, { status: 403 });
     }
 
-    let queryRef = adminDb.collection('facilities').where('districtId', '==', allowedDistrict);
-    if (allowedFacility) {
-      queryRef = queryRef.where('id', '==', allowedFacility);
-    }
-
-    const snap = await queryRef.get();
     const facilities: any[] = [];
     
-    for (const doc of snap.docs) {
-       const facData = doc.data();
+    let docs = [];
+    if (allowedFacility) {
+       const docSnap = await adminDb.collection('facilities').doc(allowedFacility).get();
+       if (docSnap.exists && docSnap.data()?.districtId === allowedDistrict) {
+          docs.push(docSnap);
+       }
+    } else {
+       const snap = await adminDb.collection('facilities').where('districtId', '==', allowedDistrict).get();
+       docs = snap.docs;
+    }
+
+    for (const doc of docs) {
+       const facData = doc.data()!;
        facData.id = doc.id;
        
        // Load services subcollection

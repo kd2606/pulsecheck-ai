@@ -147,7 +147,7 @@ export default function PeoplePage() {
                     <CardContent className="flex flex-col items-center gap-4 p-12 text-center">
                         <Users className="h-12 w-12 text-muted-foreground" />
                         <p className="text-muted-foreground">Please log in to view your family members.</p>
-                        <Button onClick={() => (window.location.href = "/en/login")}>Log In</Button>
+                        <Button onClick={() => (window.location.href = "/en/auth/patient")}>Log In</Button>
                     </CardContent>
                 </Card>
             );

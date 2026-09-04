@@ -27,7 +27,7 @@ const MAX_ROWS_PER_CYCLE = 2_000;
 const MAX_ATTEMPTS = 8;
 const BASE_BACKOFF_MS = 15_000;
 const MAX_BACKOFF_MS = 6 * 60 * 60 * 1000;
-const REQUIRED_ROLE = 'asha_worker';
+
 
 const REMOTE_COLLECTIONS: Readonly<Record<SyncableEntity, string>> = {
   patients: 'patients',
@@ -179,8 +179,8 @@ class SyncEngine {
     }
 
     // Zero-Trust gate #2: role asserted by custom claims, not by client state.
-    if (claims['role'] !== REQUIRED_ROLE) {
-      this.emit({ phase: 'error', lastError: 'Account lacks the asha_worker role.' });
+    if (claims['role'] !== 'worker' && claims['role'] !== 'asha') {
+      this.emit({ phase: 'error', lastError: 'Account lacks the worker role.' });
       return empty;
     }
 

@@ -29,12 +29,16 @@ export default function FacilityCatalogPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadFacilities();
+    const { onIdTokenChanged } = require('firebase/auth');
+    const unsubscribe = onIdTokenChanged(getFirebaseAuth(), (user: any) => {
+      if (user) loadFacilities(user);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const loadFacilities = async () => {
+  const loadFacilities = async (u?: any) => {
     try {
-      const user = getFirebaseAuth().currentUser;
+      const user = u || getFirebaseAuth().currentUser;
       if (!user) throw new Error(t('permissionDenied'));
       const token = await user.getIdToken();
       const res = await fetch('/api/facility/list', {
@@ -46,7 +50,6 @@ export default function FacilityCatalogPage() {
       if (data.facilities?.length === 1) {
         setSelectedFacility(data.facilities[0]);
       } else if (data.facilities?.length > 1) {
-        // Just select the first one for simplicity, or we could add a dropdown
         setSelectedFacility(data.facilities[0]);
       }
     } catch (err: any) {

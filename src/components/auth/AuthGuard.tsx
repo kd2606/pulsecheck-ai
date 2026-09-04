@@ -27,14 +27,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         setState('redirecting');
         await fetch('/api/auth/session', { method: 'DELETE' });
 
-        let authPath = '/auth/patient';
+        let authPath = '/';
         if (purePath.startsWith('/dashboard/worker')) {
           authPath = '/auth/worker';
         } else if (purePath.startsWith('/dashboard/district')) {
           authPath = '/auth/district';
         }
 
-        router.replace('/' + currentLocale + authPath + '?next=' + encodeURIComponent(pathname));
+        router.replace('/' + currentLocale + (authPath === '/' ? '' : authPath + '?next=' + encodeURIComponent(pathname)));
         return;
       }
 
@@ -56,7 +56,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         homePath = '/dashboard/patient';
       } else if (role === 'worker' || role === 'asha') {
         homePath = '/dashboard/worker';
-      } else if (role === 'district_admin' || role === 'mo' || role === 'admin') {
+      } else if (role === 'district_admin' || role === 'mo' || role === 'admin' || role === 'district') {
         homePath = '/dashboard/district';
       }
 
@@ -85,8 +85,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         isAllowed = purePath.startsWith('/dashboard/patient');
       } else if (role === 'worker' || role === 'asha') {
         isAllowed = purePath.startsWith('/dashboard/worker');
-      } else if (role === 'district_admin' || role === 'mo' || role === 'admin') {
-        isAllowed = purePath.startsWith('/dashboard/district');
+      } else if (role === 'district_admin' || role === 'mo' || role === 'admin' || role === 'district') {
+        isAllowed = purePath.startsWith('/dashboard/district') || purePath.startsWith('/dashboard/worker');
       }
 
       if (!isAllowed) {

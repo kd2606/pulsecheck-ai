@@ -82,10 +82,10 @@ export default async function proxy(request: NextRequest) {
     return res;
   }
 
-  const isDemo = claims.email === 'demo@diagnoverseai.in';
+  
 
   const allowed =
-    isDemo ||
+    
     (role === 'patient' && path.startsWith('/dashboard/patient')) ||
     (role === 'worker' && path.startsWith('/dashboard/worker')) ||
     (role === 'district' &&

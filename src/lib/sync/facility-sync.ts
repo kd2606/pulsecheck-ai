@@ -1,5 +1,5 @@
 import { getOfflineDb, isIndexedDbAvailable } from '@/lib/db/offline-db';
-import { OfflineCrypto } from '@/lib/crypto/offline-crypto';
+
 import { getFirebaseAuth } from '@/lib/firebase/client';
 
 export async function syncFacilityCatalog(): Promise<void> {
@@ -9,10 +9,7 @@ export async function syncFacilityCatalog(): Promise<void> {
     const user = getFirebaseAuth().currentUser;
     if (!user) throw new Error("Authentication required to sync facility catalog");
 
-    // 1. Enforce Encryption Boundary
-    if (!OfflineCrypto.isKeyLoaded()) {
-        throw new Error("ENCRYPTION_LOCKED: The offline storage key is not unlocked. Worker must enter PIN to decrypt/encrypt staff-sensitive data.");
-    }
+
 
     const token = await user.getIdToken();
     const res = await fetch('/api/facility/list', {
@@ -42,20 +39,13 @@ export async function syncFacilityCatalog(): Promise<void> {
                 localSyncedAt: now
             };
 
-            // Encrypt using OfflineCrypto
-            const envelope = await OfflineCrypto.encryptRecord(
-                payload, 
-                fac.id, 
-                user.uid, 
-                1 // schemaVersion
-            );
 
-            // Blind index fields for Dexie
             await db.facility_catalog_v2.put({
+
                 id: fac.id,
                 districtId: fac.districtId,
                 localSyncedAt: now,
-                payload: envelope
+                payload: payload
             });
         }
     });
@@ -67,11 +57,7 @@ export async function getOfflineFacilities(districtId: string): Promise<any[]> {
     const user = getFirebaseAuth().currentUser;
     if (!user) return [];
 
-    if (!OfflineCrypto.isKeyLoaded()) {
-        // Limitation: Key is not loaded, meaning we cannot decrypt the offline catalog.
-        console.warn("ENCRYPTION_LOCKED: Cannot decrypt offline facility catalog. Return empty array.");
-        return [];
-    }
+
 
     const db = getOfflineDb();
     const records = await db.facility_catalog_v2.where('districtId').equals(districtId).toArray();
@@ -79,7 +65,7 @@ export async function getOfflineFacilities(districtId: string): Promise<any[]> {
     const decrypted = [];
     for (const record of records) {
         try {
-            const fac = await OfflineCrypto.decryptRecord(record.payload, record.id, user.uid, 1);
+            const fac = record.payload;
             decrypted.push(fac);
         } catch (e) {
             console.error("Failed to decrypt facility", record.id, e);

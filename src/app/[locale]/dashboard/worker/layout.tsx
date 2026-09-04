@@ -31,7 +31,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
   const handleLogout = async () => {
     await signOut(auth);
-    router.push(`/${locale}/login`);
+    router.push(`/${locale}/auth/worker`);
   };
 
   const navItems = [

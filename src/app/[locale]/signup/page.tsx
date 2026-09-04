@@ -123,7 +123,7 @@ export default function SignupPage() {
                     <CardFooter className="flex flex-col items-center justify-center border-t border-white/5 pt-8 pb-10 mt-4">
                         <div className="text-center text-sm">
                             <span className="text-white/40 mr-2">Already Registered?</span>
-                            <Link href={`/${locale}/login`} className="text-indigo-400 hover:text-indigo-300 font-bold transition-colors">
+                            <Link href={`/${locale}/auth/patient`} className="text-indigo-400 hover:text-indigo-300 font-bold transition-colors">
                                 Authenticate Here
                             </Link>
                         </div>

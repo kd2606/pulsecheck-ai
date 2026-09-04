@@ -49,6 +49,11 @@ const SCHEMA_V3 = {
   offline_assignments: 'id, referralId, facilityId, status, [status+timestamp]'
 } as const;
 
+const SCHEMA_V4 = {
+  ...SCHEMA_V3,
+  consents: 'id, patient_id, sync_status, [sync_status+next_attempt_at]'
+} as const;
+
 export class OfflineWorkerDB extends Dexie {
   declare patients: EntityTable<Patient, 'id'>;
   declare triage_records: EntityTable<TriageRecord, 'id'>;
@@ -78,6 +83,10 @@ export class OfflineWorkerDB extends Dexie {
     });
 
     this.version(3).stores(SCHEMA_V3).upgrade(async (trans) => {
+      // Intentionally DO NOT drop v1 tables.
+    });
+
+    this.version(4).stores(SCHEMA_V4).upgrade(async (trans) => {
       // Intentionally DO NOT drop v1 tables.
       // Intentionally DO NOT migrate data here because key material is required and might not be unlocked.
       // Migration occurs at the application level via resumable batches.
@@ -118,6 +127,8 @@ export const SYNCABLE_TABLES: readonly SyncableEntity[] = [
   'patients',
   'triage_records',
   'referrals',
+
+  'consents',
 ] as const;
 
 /** Count of rows awaiting upload, across every syncable table. */

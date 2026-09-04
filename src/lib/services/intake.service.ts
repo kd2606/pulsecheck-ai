@@ -218,32 +218,59 @@ export async function saveIntakeOffline(
           note: `risk=${triageInput.risk_level}`,
         });
 
-        let referralId: ReferralId | null = null;
-        if (effectiveReferral !== null) {
-          referralId = newReferralId();
-          const referral: Referral = {
-            id: referralId,
-            patient_id: patientId,
-            target_facility: effectiveReferral.target_facility,
-            urgency: effectiveReferral.urgency,
-            status: 'CREATED',
-            timestamp: now,
-            triage_record_id: triageId,
-            ...freshSyncMeta(uid, now),
-          };
-          await db.referrals.add(referral);
-          await appendJournal(db, {
-            entity: 'referrals',
-            entity_id: referralId,
-            action: 'CREATE',
-            occurred_at: now,
-            actor_uid: uid,
-            device_id: getDeviceId(),
-            note: `urgency=${effectiveReferral.urgency}`,
-          });
-        }
+        
+          let referralId: ReferralId | null = null;
+          if (effectiveReferral !== null) {
+            referralId = newReferralId();
+            const referral: Referral = {
+              id: referralId,
+              patient_id: patientId,
+              target_facility: effectiveReferral.target_facility,
+              urgency: effectiveReferral.urgency,
+              status: 'CREATED',
+              timestamp: now,
+              triage_record_id: triageId,
+              ...freshSyncMeta(uid, now),
+            };
+            await db.referrals.add(referral);
+            await appendJournal(db, {
+              entity: 'referrals',
+              entity_id: referralId,
+              action: 'CREATE',
+              occurred_at: now,
+              actor_uid: uid,
+              device_id: getDeviceId(),
+              note: `target=${effectiveReferral.target_facility}`,
+            });
+          }
+  
+          if (options.consent) {
+            const consentId = 'con_' + crypto.randomUUID().replace(/-/g, '').substring(0, 16);
+            const consentRec = {
+              id: consentId,
+              patient_id: patientId,
+              purpose: options.consent.purpose,
+              scope: options.consent.scope,
+              grantee: options.consent.grantee,
+              validity_until: now + 365 * 24 * 60 * 60 * 1000,
+              status: 'ACTIVE',
+              notice_version: options.consent.notice_version,
+              timestamp: now,
+              ...freshSyncMeta(uid, now)
+            };
+            await db.consents.add(consentRec);
+            await appendJournal(db, {
+              entity: 'consents',
+              entity_id: consentId,
+              action: 'CREATE',
+              occurred_at: now,
+              actor_uid: uid,
+              device_id: getDeviceId(),
+              note: null,
+            });
+          }
 
-        return {
+          return {
           patient_id: patientId,
           triage_record_id: triageId,
           referral_id: referralId,
