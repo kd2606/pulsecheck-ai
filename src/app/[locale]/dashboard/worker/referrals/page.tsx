@@ -7,6 +7,7 @@ import { SyncStatusBar } from '@/components/sync-status-bar';
 import { QRCodeSVG } from 'qrcode.react';
 import { getOfflineFacilities, syncFacilityCatalog, queueOfflineAssignment } from '@/lib/sync/facility-sync';
 import { getFirebaseAuth } from '@/lib/firebase/client';
+import { useTranslations } from 'next-intl';
 
 
 type Urgency = 'ROUTINE' | 'URGENT' | 'EMERGENCY';
@@ -72,6 +73,8 @@ interface ReferralsPageProps {
 }
 
 export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
+  const tc = useTranslations('worker.catalog');
+  const tr = useTranslations('worker.referrals');
   const { locale } = use(params);
   const [selectedQr, setSelectedQr] = useState<string | null>(null);
 
@@ -261,8 +264,8 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                       <td className="px-4 py-3 text-slate-400">
                         {row.target_facility === 'PENDING_ASSIGNMENT' ? (
                           <div className="flex flex-col gap-1">
-                              <span className="text-orange-400 text-xs italic">Pending Assignment</span>
-                              <button onClick={() => handleAssignClick(row.id)} className="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 w-fit">Assign Facility</button>
+                              <span className="text-orange-400 text-xs italic">{tc('pending')}</span>
+                              <button onClick={() => handleAssignClick(row.id)} className="bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700 w-fit">{tc('assign')}</button>
                             </div>
                         ) : (
                           row.target_facility

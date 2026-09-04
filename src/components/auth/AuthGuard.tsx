@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { onIdTokenChanged, type User } from 'firebase/auth';
 import { auth } from '@/firebase/clientApp';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import FullScreenLoader from './FullScreenLoader';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('worker.errors');
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState<'checking' | 'authorized' | 'redirecting' | 'unauthorized'>('checking');
@@ -61,9 +63,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       // 2. Block missing/unknown roles completely
       if (!homePath) {
         if (!role) {
-           setErrorMsg('No role assigned to this account. Please contact your administrator or wait for approval.');
+           setErrorMsg(t('missingRole'));
         } else {
-           setErrorMsg('Unknown role "' + role + '". Access denied.');
+           setErrorMsg(t('unknownRole'));
         }
         setState('unauthorized');
         await auth.signOut();
@@ -106,13 +108,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
      return (
        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
          <div className="bg-white rounded-xl shadow p-6 max-w-md w-full text-center border border-red-100">
-           <h2 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h2>
+           <h2 className="text-xl font-bold text-slate-800 mb-2">{t('accessDenied')}</h2>
            <p className="text-slate-600 mb-6">{errorMsg}</p>
            <button
              onClick={() => router.push('/')}
              className="w-full bg-slate-900 text-white rounded-lg py-2 font-medium hover:bg-slate-800"
            >
-             Return Home
+             {t('returnHome')}
            </button>
          </div>
        </div>

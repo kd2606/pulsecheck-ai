@@ -33,7 +33,8 @@ const REMOTE_COLLECTIONS: Readonly<Record<SyncableEntity, string>> = {
   patients: 'patients',
   triage_records: 'triage_records',
   referrals: 'referrals',
-};
+    consents: 'consents',
+  };
 
 export type SyncPhase = 'idle' | 'syncing' | 'error';
 

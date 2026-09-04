@@ -48,6 +48,14 @@ export interface SaveIntakeOptions {
   readonly defaultFacility?: string | undefined;
   /** Set false to queue without attempting an immediate push. */
   readonly triggerSync?: boolean | undefined;
+  /** Captured consent block */
+  readonly consent?: {
+    purpose: 'CARE_DELIVERY' | 'BREAK_GLASS' | 'RESEARCH';
+    scope: 'DISTRICT_LEVEL' | 'FACILITY_LEVEL' | 'WORKER_ONLY';
+    grantee: string;
+    notice_version: string;
+  };
+
 }
 
 function freshSyncMeta(uid: string, at: number): SyncMeta {
@@ -131,7 +139,7 @@ export async function saveIntakeOffline(
   try {
     const receipt = await db.transaction(
       'rw',
-      [db.patients, db.triage_records, db.referrals, db.sync_journal],
+      [db.patients, db.triage_records, db.referrals, db.consents, db.sync_journal],
       async (): Promise<Omit<IntakeReceipt, 'sync_requested'>> => {
         // Reuse an existing local patient when ABHA matches — repeat visits in
         // one village must not fan out into duplicate records.

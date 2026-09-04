@@ -80,7 +80,27 @@ export interface SyncJournalEntry {
   note: string | null;
 }
 
-export type SyncableEntity = 'patients' | 'triage_records' | 'referrals';
+
+export type ConsentPurpose = 'CARE_DELIVERY' | 'BREAK_GLASS' | 'RESEARCH';
+export type ConsentScope = 'DISTRICT_LEVEL' | 'FACILITY_LEVEL' | 'WORKER_ONLY';
+export type ConsentStatus = 'ACTIVE' | 'REVOKED' | 'EXPIRED';
+
+export interface ConsentRecord extends SyncMeta {
+  id: string;
+  patient_id: PatientId;
+  purpose: ConsentPurpose;
+  scope: ConsentScope;
+  grantee: string; // ID of the facility, district, or worker
+  validity_until: EpochMs;
+  status: ConsentStatus;
+  notice_version: string;
+  timestamp: EpochMs;
+  revoked_at?: EpochMs;
+  revoked_by?: string;
+}
+
+export type SyncableEntity = 'patients' | 'triage_records' | 'referrals' | 'consents';
+
 
 export type SyncableRecord = Patient | TriageRecord | Referral;
 

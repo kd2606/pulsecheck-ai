@@ -250,76 +250,76 @@
     },
     "worker": {
         "intake": {
-            "patientDetails": "1. Patient Details",
-            "patientDetailsHint": "Identity and contact information for this beneficiary.",
-            "fullName": "Full Name",
-            "abhaId": "ABHA ID",
-            "abhaIdHint": "14-digit ABHA number, if the patient has one.",
-            "gender": "Gender",
-            "dob": "Date of Birth",
-            "phone": "Phone Number",
-            "triage": "2. Triage & Symptoms",
-            "triageHint": "Capture vital signs and presenting complaints.",
-            "temperature": "Temperature (°C)",
-            "systolic": "Systolic BP",
-            "diastolic": "Diastolic BP",
-            "symptoms": "Symptoms (comma separated)",
-            "riskLevel": "Risk Level",
-            "riskGreen": "GREEN (Routine)",
-            "riskYellow": "YELLOW (Urgent)",
-            "riskRed": "RED (Emergency)",
-            "action": "3. Recommended Action",
-            "actionHint": "What is the immediate next step for this patient?",
-            "actionPlaceholder": "e.g. Prescribed ORS, referred to PHC...",
-            "consentCard": "4. Data Sharing Consent",
-            "consentHint": "Acknowledge the patient agrees to share this data with the district health network.",
-            "consentLabel": "Patient explicitly consents to CARE_DELIVERY data sharing (v1.0)",
-            "consentText": "By checking this, you confirm the patient has been informed and agrees to securely share their health records with authorized District Facilities and Medical Officers for care continuity.",
-            "submitRecord": "Submit Intake Record",
-            "submitting": "Saving...",
+            "patientDetails": "1. रुग्णाचा तपशील (Patient Details)",
+            "patientDetailsHint": "या लाभार्थीची ओळख आणि संपर्क माहिती.",
+            "fullName": "पूर्ण नाव (Full Name)",
+            "abhaId": "आभा आयडी (ABHA ID)",
+            "abhaIdHint": "14 अंकी आभा क्रमांक, असल्यास.",
+            "gender": "लिंग (Gender)",
+            "dob": "जन्मतारीख (Date of Birth)",
+            "phone": "फोन नंबर (Phone Number)",
+            "triage": "2. ट्रायज आणि लक्षणे (Triage & Symptoms)",
+            "triageHint": "महत्त्वाची चिन्हे आणि तक्रारी नोंदवा.",
+            "temperature": "तापमान (°C)",
+            "systolic": "सिस्टोलिक बीपी",
+            "diastolic": "डायस्टोलिक बीपी",
+            "symptoms": "लक्षणे (Symptoms)",
+            "riskLevel": "धोका पातळी (Risk Level)",
+            "riskGreen": "हिरवा (नियमित) - GREEN",
+            "riskYellow": "पिवळा (तातडीचे) - YELLOW",
+            "riskRed": "लाल (आणीबाणी) - RED",
+            "action": "3. शिफारस केलेली कृती (Recommended Action)",
+            "actionHint": "या रुग्णासाठी पुढील पाऊल काय आहे?",
+            "actionPlaceholder": "उदा. ORS दिले, PHC कडे पाठवले...",
+            "consentCard": "4. डेटा शेअरिंग संमती (Data Sharing Consent)",
+            "consentHint": "रुग्ण जिल्हा आरोग्य नेटवर्कसह हा डेटा शेअर करण्यास सहमत आहे हे मान्य करा.",
+            "consentLabel": "रुग्ण केअर डिलिव्हरी डेटा शेअरिंग (v1.0) ला स्पष्टपणे संमती देतो",
+            "consentText": "हे चेक करून, तुम्ही पुष्टी करता की रुग्णाला माहिती दिली गेली आहे आणि तो केअर कंटिन्यूटीसाठी अधिकृत जिल्हा सुविधा आणि वैद्यकीय अधिकार्‍यांसह त्याचे आरोग्य रेकॉर्ड सुरक्षितपणे शेअर करण्यास सहमत आहे.",
+            "submitRecord": "रेकॉर्ड सबमिट करा (Submit)",
+            "submitting": "सेव्ह करत आहे... (Saving...)",
             "validation": {
-                "consentRequired": "Patient consent is legally required before recording data.",
-                "symptomsRequired": "At least one symptom or complaint is required.",
-                "invalidAbha": "ABHA ID is invalid.",
-                "fixErrors": "Please correct the highlighted fields before saving."
+                "consentRequired": "डेटा नोंदवण्यापूर्वी रुग्णाची संमती कायदेशीररित्या आवश्यक आहे. (Consent is legally required)",
+                "symptomsRequired": "किमान एक लक्षण किंवा तक्रार आवश्यक आहे.",
+                "invalidAbha": "आभा आयडी अवैध आहे.",
+                "fixErrors": "कृपया सेव्ह करण्यापूर्वी हायलाइट केलेली फील्ड दुरुस्त करा."
             },
-            "success": "Intake for {name} saved on this device. It will upload automatically once a connection is available."
+            "success": "{name} चा रेकॉर्ड या डिव्हाइसवर सेव्ह झाला. कनेक्शन उपलब्ध झाल्यावर तो आपोआप अपलोड होईल."
         },
         "catalog": {
-            "title": "Facility Catalog",
-            "selectFacility": "Select a Facility",
-            "available": "AVAILABLE",
-            "limited": "LIMITED",
-            "unavailable": "UNAVAILABLE",
-            "assign": "Assign",
-            "pending": "Pending Assignment"
+            "title": "सुविधा कॅटलॉग (Facility Catalog)",
+            "selectFacility": "सुविधा निवडा",
+            "available": "उपलब्ध (AVAILABLE)",
+            "limited": "मर्यादित (LIMITED)",
+            "unavailable": "अनुपलब्ध (UNAVAILABLE)",
+            "assign": "असाइन करा (Assign)",
+            "pending": "असाइनमेंट प्रलंबित (Pending Assignment)"
         },
         "dashboard": {
-            "sync": "Sync Offline Data",
-            "syncing": "Syncing...",
-            "syncSuccess": "Sync complete.",
-            "syncError": "Sync failed. Try again.",
-            "offlineWarning": "You are currently offline. Data is saved locally and will sync later.",
-            "staleWarning": "Catalog data may be stale. Last synced: {time}"
+            "sync": "ऑफलाइन डेटा सिंक करा (Sync Data)",
+            "syncing": "सिंक होत आहे... (Syncing...)",
+            "syncSuccess": "सिंक पूर्ण झाले.",
+            "syncError": "सिंक अयशस्वी. पुन्हा प्रयत्न करा.",
+            "offlineWarning": "तुम्ही सध्या ऑफलाइन आहात. डेटा स्थानिक पातळीवर सेव्ह केला आहे.",
+            "staleWarning": "कॅटलॉग डेटा जुना असू शकतो. शेवटचे सिंक: {time}"
         },
         "inbox": {
-            "title": "Follow-up Inbox",
-            "noTasks": "No pending follow-ups."
+            "title": "फॉलो-अप इनबॉक्स (Follow-up Inbox)",
+            "noTasks": "कोणतेही प्रलंबित फॉलो-अप नाहीत."
         },
         "referrals": {
-            "title": "Referrals",
-            "statusPending": "PENDING",
-            "statusAssigned": "ASSIGNED",
-            "statusClosed": "CLOSED"
+            "title": "रेफरल्स (Referrals)",
+            "statusPending": "प्रलंबित (PENDING)",
+            "statusAssigned": "असाइन केलेले (ASSIGNED)",
+            "statusClosed": "बंद (CLOSED)"
         },
         "queue": {
-            "title": "Queue & Appointments"
+            "title": "रांग आणि अपॉइंटमेंट (Queue & Appointments)"
         },
         "errors": {
-            "accessDenied": "Access Denied",
-            "missingRole": "No role assigned to this account. Please contact your administrator or wait for approval.",
-            "unknownRole": "Unknown role. Access denied.",
-            "returnHome": "Return Home"
+            "accessDenied": "प्रवेश नाकारला (Access Denied)",
+            "missingRole": "या खात्याला कोणतीही भूमिका दिलेली नाही.",
+            "unknownRole": "अज्ञात भूमिका. प्रवेश नाकारला.",
+            "returnHome": "होम वर परत जा (Return Home)"
         }
     }
 }

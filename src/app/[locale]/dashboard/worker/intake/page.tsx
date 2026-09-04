@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 
+import { useTranslations } from 'next-intl';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { saveIntakeOffline } from '@/lib/services/intake.service';
 
@@ -43,6 +44,7 @@ interface IntakeFormState {
   diastolic_bp: string;
   risk_level: RiskLevel | '';
   recommended_action: string;
+  consent_granted: boolean;
 }
 
 type FieldErrors = Partial<Record<keyof IntakeFormState, string>>;
@@ -89,6 +91,7 @@ function createInitialState(): IntakeFormState {
     diastolic_bp: '',
     risk_level: '',
     recommended_action: '',
+    consent_granted: false,
   };
 }
 
@@ -241,6 +244,7 @@ function Spinner() {
 /* -------------------------------------------------------------------------- */
 
 export default function NewIntakePage() {
+  const t = useTranslations('worker.intake');
   const { syncPendingData } = useOfflineSync();
 
   const [form, setForm] = useState<IntakeFormState>(createInitialState);
@@ -303,7 +307,7 @@ export default function NewIntakePage() {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setStatus('error');
-      setMessage('Please correct the highlighted fields before saving.');
+      setMessage(t('validation.fixErrors'));
       return;
     }
 
@@ -336,13 +340,21 @@ export default function NewIntakePage() {
     };
 
     try {
-      await saveIntakeOffline(patientData, triageData, { triggerSync: true });
+      await saveIntakeOffline(patientData, triageData, {
+        triggerSync: true,
+        consent: {
+          purpose: 'CARE_DELIVERY',
+          scope: 'DISTRICT_LEVEL',
+          grantee: 'diagnoverse-network',
+          notice_version: 'v1.0'
+        }
+      });
 
       setForm(createInitialState());
       setActionTouched(false);
       setStatus('saved');
       setMessage(
-        `Intake for ${patientData.name} saved on this device. It will upload automatically once a connection is available.`,
+        t('success', { name: patientData.name }),
       );
 
       try {
@@ -390,13 +402,13 @@ export default function NewIntakePage() {
           <section className={CARD_CLASS} aria-labelledby="patient-details-heading">
             <div className="mb-5 border-b border-slate-800 pb-4">
               <h2 id="patient-details-heading" className="text-base font-semibold text-white">
-                1. Patient Details
+                {t('patientDetails')}
               </h2>
-              <p className="mt-1 text-sm text-slate-400">Identity and contact information for this beneficiary.</p>
+              <p className="mt-1 text-sm text-slate-400">{t('patientDetailsHint')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Field className="sm:col-span-2" error={errors.name} id="name" label="Full Name" required>
+              <Field className="sm:col-span-2" error={errors.name} id="name" label={t('fullName')} required>
                 <input
                   id="name"
                   name="name"
@@ -412,7 +424,7 @@ export default function NewIntakePage() {
                 />
               </Field>
 
-              <Field error={errors.abha_id} hint="14-digit ABHA number, if the patient has one." id="abha_id" label="ABHA ID">
+              <Field error={errors.abha_id} hint={t('abhaIdHint')} id="abha_id" label={t('abhaId')}>
                 <input
                   id="abha_id"
                   name="abha_id"
@@ -428,7 +440,7 @@ export default function NewIntakePage() {
                 />
               </Field>
 
-              <Field error={errors.gender} id="gender" label="Gender" required>
+              <Field error={errors.gender} id="gender" label={t('gender')} required>
                 <select
                   id="gender"
                   name="gender"
@@ -450,7 +462,7 @@ export default function NewIntakePage() {
                 </select>
               </Field>
 
-              <Field error={errors.dob} hint={age !== null ? `Approximate age: ${age} year${age === 1 ? '' : 's'}.` : undefined} id="dob" label="Date of Birth" required>
+              <Field error={errors.dob} hint={age !== null ? `Approximate age: ${age} year${age === 1 ? '' : 's'}.` : undefined} id="dob" label={t('dob')} required>
                 <input
                   id="dob"
                   name="dob"
@@ -465,7 +477,7 @@ export default function NewIntakePage() {
                 />
               </Field>
 
-              <Field error={errors.phone} id="phone" label="Phone">
+              <Field error={errors.phone} id="phone" label={t('phone')}>
                 <input
                   id="phone"
                   name="phone"
@@ -496,7 +508,7 @@ export default function NewIntakePage() {
             </div>
 
             <div className="space-y-5">
-              <Field hint={symptomCount > 0 ? `${symptomCount} symptom${symptomCount === 1 ? '' : 's'} recorded.` : 'Separate each symptom with a comma.'} error={errors.symptoms} id="symptoms" label="Symptoms" required>
+              <Field hint={symptomCount > 0 ? `${symptomCount} symptom${symptomCount === 1 ? '' : 's'} recorded.` : 'Separate each symptom with a comma.'} error={errors.symptoms} id="symptoms" label={t('symptoms')} required>
                 <textarea
                   id="symptoms"
                   name="symptoms"
@@ -512,7 +524,7 @@ export default function NewIntakePage() {
               </Field>
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                <Field error={errors.temperature_c} id="temperature_c" label="Temperature (°C)" required>
+                <Field error={errors.temperature_c} id="temperature_c" label={t('temperature')} required>
                   <input
                     id="temperature_c"
                     name="temperature_c"
@@ -571,7 +583,7 @@ export default function NewIntakePage() {
               </div>
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <Field error={errors.risk_level} id="risk_level" label="Risk Level" required>
+                <Field error={errors.risk_level} id="risk_level" label={t('riskLevel')} required>
                   <div className="relative">
                     <select
                       id="risk_level"

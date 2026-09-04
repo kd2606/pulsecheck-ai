@@ -210,5 +210,79 @@
         "otcMedicines": "ओटीसी दवाई सुझाव",
         "findOnline": "ऑनलाइन खोजें",
         "findDoctor": "नजदीक डॉक्टर खोजें"
+    },
+    "worker": {
+        "intake": {
+            "patientDetails": "1. मरीज का विवरण (Patient Details)",
+            "patientDetailsHint": "लाभार्थी की पहचान और संपर्क जानकारी।",
+            "fullName": "पूरा नाम (Full Name)",
+            "abhaId": "आभा आईडी (ABHA ID)",
+            "abhaIdHint": "14 अंकों का आभा नंबर, यदि मरीज के पास है।",
+            "gender": "लिंग (Gender)",
+            "dob": "जन्म तिथि (Date of Birth)",
+            "phone": "फोन नंबर (Phone Number)",
+            "triage": "2. ट्राइएज और लक्षण (Triage & Symptoms)",
+            "triageHint": "महत्वपूर्ण संकेत और शिकायतें दर्ज करें।",
+            "temperature": "तापमान (°C)",
+            "systolic": "सिस्टोलिक बीपी",
+            "diastolic": "डायस्टोलिक बीपी",
+            "symptoms": "लक्षण (Symptoms)",
+            "riskLevel": "जोखिम स्तर (Risk Level)",
+            "riskGreen": "हरा (सामान्य) - GREEN",
+            "riskYellow": "पीला (जरूरी) - YELLOW",
+            "riskRed": "लाल (आपातकालीन) - RED",
+            "action": "3. अनुशंसित कार्रवाई (Recommended Action)",
+            "actionHint": "इस मरीज के लिए अगला कदम क्या है?",
+            "actionPlaceholder": "जैसे ओआरएस दिया, पीएचसी भेजा...",
+            "consentCard": "4. डेटा साझा करने की सहमति (Data Sharing Consent)",
+            "consentHint": "स्वीकार करें कि मरीज जिला स्वास्थ्य नेटवर्क के साथ इस डेटा को साझा करने के लिए सहमत है।",
+            "consentLabel": "मरीज स्पष्ट रूप से देखभाल वितरण डेटा साझा करने (v1.0) के लिए सहमति देता है",
+            "consentText": "इसे चेक करके, आप पुष्टि करते हैं कि मरीज को सूचित किया गया है और वह देखभाल निरंतरता के लिए अधिकृत जिला सुविधाओं और चिकित्सा अधिकारियों के साथ अपने स्वास्थ्य रिकॉर्ड को सुरक्षित रूप से साझा करने के लिए सहमत है।",
+            "submitRecord": "रिकॉर्ड सबमिट करें (Submit)",
+            "submitting": "सहेज रहा है... (Saving...)",
+            "validation": {
+                "consentRequired": "डेटा दर्ज करने से पहले मरीज की सहमति कानूनी रूप से आवश्यक है। (Consent is legally required)",
+                "symptomsRequired": "कम से कम एक लक्षण या शिकायत आवश्यक है।",
+                "invalidAbha": "आभा आईडी अमान्य है।",
+                "fixErrors": "कृपया सहेजने से पहले हाइलाइट किए गए फ़ील्ड को सही करें।"
+            },
+            "success": "{name} का रिकॉर्ड इस डिवाइस पर सहेजा गया। कनेक्शन मिलने पर यह अपने आप अपलोड हो जाएगा।"
+        },
+        "catalog": {
+            "title": "सुविधा कैटलॉग (Facility Catalog)",
+            "selectFacility": "सुविधा चुनें",
+            "available": "उपलब्ध (AVAILABLE)",
+            "limited": "सीमित (LIMITED)",
+            "unavailable": "अनुपलब्ध (UNAVAILABLE)",
+            "assign": "असाइन करें (Assign)",
+            "pending": "असाइनमेंट लंबित (Pending Assignment)"
+        },
+        "dashboard": {
+            "sync": "ऑफ़लाइन डेटा सिंक करें (Sync Data)",
+            "syncing": "सिंक हो रहा है... (Syncing...)",
+            "syncSuccess": "सिंक पूरा हुआ।",
+            "syncError": "सिंक विफल। पुनः प्रयास करें।",
+            "offlineWarning": "आप अभी ऑफ़लाइन हैं। डेटा स्थानीय रूप से सहेजा गया है।",
+            "staleWarning": "कैटलॉग डेटा पुराना हो सकता है। अंतिम सिंक: {time}"
+        },
+        "inbox": {
+            "title": "फ़ॉलो-अप इनबॉक्स (Follow-up Inbox)",
+            "noTasks": "कोई लंबित फ़ॉलो-अप नहीं।"
+        },
+        "referrals": {
+            "title": "रेफरल (Referrals)",
+            "statusPending": "लंबित (PENDING)",
+            "statusAssigned": "असाइन किया गया (ASSIGNED)",
+            "statusClosed": "बंद (CLOSED)"
+        },
+        "queue": {
+            "title": "कतार और अपॉइंटमेंट (Queue & Appointments)"
+        },
+        "errors": {
+            "accessDenied": "पहुंच अस्वीकृत (Access Denied)",
+            "missingRole": "इस खाते को कोई भूमिका नहीं दी गई है।",
+            "unknownRole": "अज्ञात भूमिका। पहुंच अस्वीकृत।",
+            "returnHome": "होम पर वापस जाएं (Return Home)"
+        }
     }
 }

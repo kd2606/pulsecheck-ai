@@ -12,7 +12,7 @@ import type {
 } from '@/lib/db/types';
 
 export const DB_NAME = 'DiagnoVerseWorkerDB';
-export const DB_SCHEMA_VERSION = 3;
+export const DB_SCHEMA_VERSION = 4;
 
 /**
  * Index design notes:
@@ -54,6 +54,7 @@ export class OfflineWorkerDB extends Dexie {
   declare triage_records: EntityTable<TriageRecord, 'id'>;
   declare referrals: EntityTable<Referral, 'id'>;
   declare sync_journal: EntityTable<SyncJournalEntry, 'seq'>;
+  declare consents: EntityTable<any, 'id'>;
 
   // V2 Declarations
   declare patients_v2: EntityTable<any, 'id'>;

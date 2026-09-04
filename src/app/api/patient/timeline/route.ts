@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     if (!authHeader?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const token = authHeader.split('Bearer ')[1];
     const decodedToken = await adminAuth.verifyIdToken(token);
     const role = decodedToken.role;
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
           .where('target_facility', '==', decodedToken.facility_id)
           .limit(1)
           .get();
-       
+
        if (!refSnap.empty) {
           // Verify Consent for cross-facility disclosure
           if (consentData?.status === 'PENDING_VERIFICATION' && patientData?.created_by !== uid) {
@@ -69,10 +69,32 @@ export async function GET(request: Request) {
           accessPurpose = 'FACILITY_REFERRAL_TREATMENT';
        }
     } else if (role === 'district_admin' || role === 'admin') {
-       // District Admin: Should NOT view unrestricted patient list. 
-       // Break-glass access must require a server-validated, time-limited, justified grant.
-       // Since the consent infrastructure is not yet fully present, we reject this completely for now.
-       return NextResponse.json({ error: 'Forbidden: District Admin requires verified break-glass grant to view line-level patient records.' }, { status: 403 });
+
+         // District Admin Authorization via Consent Infrastructure
+         const consentQuery = await adminDb.collection('consents')
+            .where('patient_id', '==', patientId)
+            .where('status', '==', 'ACTIVE')
+            .get();
+
+         let hasValidConsent = false;
+         for (const doc of consentQuery.docs) {
+            const consent = doc.data();
+            if (consent.validity_until < Date.now()) continue; // Expired
+
+            // Allow if patient granted DISTRICT_LEVEL scope to CARE_DELIVERY or BREAK_GLASS
+            if ((consent.scope === 'DISTRICT_LEVEL') || consent.purpose === 'BREAK_GLASS') {
+               hasValidConsent = true;
+               accessPurpose = consent.purpose;
+               break;
+            }
+         }
+
+         if (!hasValidConsent) {
+            return NextResponse.json({ error: 'Forbidden: District Admin requires verified district-level consent or break-glass grant to view line-level patient records.' }, { status: 403 });
+         }
+
+         authorized = true;
+
     }
 
     if (!authorized) {
@@ -80,7 +102,7 @@ export async function GET(request: Request) {
     }
 
     // 4. Fetch Timeline Events (Chronological Data Collection)
-    
+
     // A. Referrals
     const referralsSnap = await adminDb.collection('referrals').where('patient_id', '==', patientId).get();
     const referrals = referralsSnap.docs.map(d => ({ id: d.id, _type: 'REFERRAL', ...d.data() }));
@@ -120,7 +142,7 @@ export async function GET(request: Request) {
 
     // 5. Unify, Sort, and Redact Timeline
     const rawTimeline = [...referrals, ...referralEvents, ...triageRecords, ...appointments, ...followups];
-    
+
     const sortedTimeline = rawTimeline.sort((a, b) => {
        const timeA = a.created_at?.toMillis?.() || a.timestamp || a.occurred_at?.toMillis?.() || 0;
        const timeB = b.created_at?.toMillis?.() || b.timestamp || b.occurred_at?.toMillis?.() || 0;
