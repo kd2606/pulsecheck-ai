@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Shield, 
   Home, 
@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { HeartPulse } from "lucide-react";
+import PinGuard from "@/components/auth/PinGuard";
+import { OfflineCrypto } from "@/lib/crypto/offline-crypto";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
 
@@ -29,7 +31,18 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
   const params = useParams();
   const locale = params.locale as string || "en";
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user: any) => {
+      if (!user) {
+        OfflineCrypto.clearKey();
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+
   const handleLogout = async () => {
+    OfflineCrypto.clearKey();
     await signOut(auth);
     router.push(`/${locale}/auth/worker`);
   };
@@ -153,7 +166,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
         {/* Scrollable Content */}
         <div className="flex-1 overflow-auto p-4 lg:p-8">
           <div className="max-w-6xl mx-auto">
-            {children}
+            <PinGuard>{children}</PinGuard>
           </div>
         </div>
       </main>
