@@ -20,7 +20,7 @@ export default function HowItWorks() {
         <div className={styles.stepCard}>
           <div className={styles.stepNumber}>1</div>
           <h3 className={styles.stepTitle}>Register and Screen</h3>
-          <p className={styles.stepDesc}>An ASHA worker or patient records symptoms, vitals and relevant health information in a guided, multilingual workflow.</p>
+          <p className={styles.stepDesc}>An ASHA worker records symptoms, vitals and relevant health information in a guided, multilingual workflow.</p>
         </div>
         <div className={styles.stepCard}>
           <div className={styles.stepNumber}>2</div>
@@ -40,7 +40,7 @@ export default function HowItWorks() {
         <div className={styles.stepCard}>
           <div className={styles.stepNumber}>5</div>
           <h3 className={styles.stepTitle}>Complete and Follow Up</h3>
-          <p className={styles.stepDesc}>Workers and facilities update the referral status, attach consultation documents and receive reminders until care is completed.</p>
+          <p className={styles.stepDesc}>Workers and facilities update referral status and consultation outcomes while follow-up tasks continue until care is completed.</p>
         </div>
       </div>
     </motion.section>

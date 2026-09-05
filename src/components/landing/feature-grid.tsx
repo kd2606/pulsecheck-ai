@@ -19,23 +19,23 @@ export default function FeatureGrid() {
     },
     {
       icon: <MessageCircleHeart size={32} />,
-      title: "Teleconsultation and Queue Support",
-      desc: "Connect patients to the appropriate public-health facility through appointment requests, queue visibility and assisted low-bandwidth consultations."
+      title: "Appointment and Queue Coordination",
+      desc: "Coordinate appointment requests, queue tokens and facility handoffs so patients and frontline workers have clearer next steps before travelling."
     },
     {
       icon: <FileHeart size={32} />,
       title: "Longitudinal Health Records",
-      desc: "Maintain consent-based patient records containing visits, vitals, prescriptions, reports, referrals and follow-up tasks in one continuous care history."
+      desc: "Maintain consent-aware longitudinal records for visits, vitals, referrals, consultation outcomes and follow-up tasks across the care journey."
     },
     {
       icon: <MapPin size={32} />,
-      title: "Medicine and Diagnostics Visibility",
-      desc: "Help workers and patients discover medicine availability, diagnostic services, timings and suitable alternative facilities before travelling."
+      title: "Facility and Service Visibility",
+      desc: "Help workers identify available facility services, referral destinations and suitable care locations before travelling."
     },
     {
       icon: <Users size={32} />,
       title: "Follow-up for High-Risk Families",
-      desc: "Support ASHA workers with reminders and follow-up tasks for maternal, child and chronic-care patients."
+      desc: "Support ASHA workers with follow-up tasks and referral-closure tracking for high-risk maternal, child and chronic-care cases."
     },
     {
       icon: <WifiOff size={32} />,
@@ -44,8 +44,8 @@ export default function FeatureGrid() {
     },
     {
       icon: <LayoutDashboard size={32} />,
-      title: "Facility Quality Dashboard",
-      desc: "Give public-health administrators visibility into waiting time, referral completion, missed follow-ups, high-risk cases and service availability."
+      title: "District Coordination Dashboard",
+      desc: "Give district teams visibility into referral completion, follow-up status, high-risk cases, facility services and coordination trends."
     }
   ];
 

@@ -23,13 +23,13 @@ export default function TrustBar() {
           <div className={styles.trustBarIcon}>
             <AlertTriangle size={32} />
           </div>
-          <div className={styles.trustBarText}>Hardcoded emergency overrides for red-flag symptoms</div>
+          <div className={styles.trustBarText}>Red-flag escalation guidance</div>
         </div>
         <div className={styles.trustBarItem}>
           <div className={styles.trustBarIcon}>
             <BookOpen size={32} />
           </div>
-          <div className={styles.trustBarText}>Open-source emergency protocols</div>
+          <div className={styles.trustBarText}>Human-in-the-loop safety pathways</div>
         </div>
       </div>
     </section>

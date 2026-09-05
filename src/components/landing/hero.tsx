@@ -17,10 +17,7 @@ export default function Hero() {
           {isPublicHealth ? "Connect frontline workers, public facilities and district health teams." : "Connect every rural patient to the care they need."}
         </h1>
         <p className={styles.heroSubtitle}>
-          {isPublicHealth
-            ? "DiagnoVerse coordinates rural care by empowering frontline health workers with assisted digital triage, low-connectivity offline-first field tools, and longitudinal health records. It bridges patients and facilities through smart referral tracking, follow-up queues, teleconsultation support, and seamless public-health coordination."
-            : "DiagnoVerse helps ASHA workers, patients and public-health facilities work together through digital triage, smart referrals, teleconsultation support, longitudinal health records and follow-up tracking—even in low-connectivity areas."
-          }
+          DiagnoVerse strengthens rural care coordination by helping frontline health workers capture consent-aware intake, assess risk, coordinate referrals, find appropriate facilities, support queue management and close follow-up loops—even in low-connectivity settings.
         </p>
         <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           {publicNavigationConfig.showPatientEntry && (
@@ -46,11 +43,11 @@ export default function Hero() {
           </div>
           <div className={styles.trustItem}>
             <Lock size={18} color="#0d9488" />
-            <span>Consent-Based Records</span>
+            <span>Consent-Aware Records</span>
           </div>
           <div className={styles.trustItem}>
             <Activity size={18} color="#0d9488" />
-            <span>Faster Referrals</span>
+            <span>Trackable Referrals</span>
           </div>
           <div className={styles.trustItem}>
             <Users size={18} color="#0d9488" />

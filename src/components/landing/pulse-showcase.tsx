@@ -4,46 +4,36 @@ import styles from './landing.module.css';
 
 export default function PulseShowcase() {
   return (
-    <section className={styles.pulseShowcaseSection}>
-      <div className={styles.pulseShowcaseLeft}>
-        <div className={styles.chatInterface}>
-          <div className={styles.chatBubbleUser}>
-            I want to see my referral status
-          </div>
-          <div className={styles.chatBubbleBot}>
-            Your referral to the District Hospital is active. Please visit before Friday.
-          </div>
-        </div>
-      </div>
-      <div className={styles.pulseShowcaseRight}>
-        <h2 className={styles.pulseShowcaseTitle}>Your care journey, connected.</h2>
-        <p style={{ color: '#cbd5e1', marginBottom: '2rem', lineHeight: 1.6 }}>
-          Check symptoms, access public-health services, view your care history, receive reminders and stay connected with your healthcare worker—without losing continuity between facilities.
+    <section className={styles.pulseShowcaseSection} style={{ flexDirection: 'column', textAlign: 'center' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <h2 className={styles.pulseShowcaseTitle}>From referral creation to care completion</h2>
+        <p style={{ color: '#4b5563', marginBottom: '2.5rem', lineHeight: 1.6, fontSize: '1.25rem' }}>
+          District teams and facilities can track referral status, service availability, queue coordination and follow-up progress—helping frontline workers close the loop on care.
         </p>
-        <ul className={styles.pulseBullets}>
+        <ul className={styles.pulseBullets} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
           <li className={styles.pulseBullet}>
-            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Check symptoms safely</span>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} style={{ flexShrink: 0 }} />
+            <span>View active referrals</span>
           </li>
           <li className={styles.pulseBullet}>
-            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Find nearby public facilities</span>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} style={{ flexShrink: 0 }} />
+            <span>Check facility services</span>
           </li>
           <li className={styles.pulseBullet}>
-            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Request appointments and teleconsultations (Coming in pilot)</span>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} style={{ flexShrink: 0 }} />
+            <span>Coordinate queue tokens</span>
           </li>
           <li className={styles.pulseBullet}>
-            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>View prescriptions and reports (Coming in pilot)</span>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} style={{ flexShrink: 0 }} />
+            <span>Track follow-up status</span>
           </li>
           <li className={styles.pulseBullet}>
-            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Track referrals and follow-ups</span>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} style={{ flexShrink: 0 }} />
+            <span>Review high-risk cases</span>
           </li>
           <li className={styles.pulseBullet}>
-            <CheckCircle2 size={24} className={styles.pulseBulletIcon} />
-            <span>Manage family health needs</span>
+            <CheckCircle2 size={24} className={styles.pulseBulletIcon} style={{ flexShrink: 0 }} />
+            <span>Monitor district-level trends</span>
           </li>
         </ul>
       </div>
