@@ -64,9 +64,23 @@ function LoginContent() {
         
         let redirected = false;
         
-        // Set the session cookie BEFORE redirecting, otherwise middleware will bounce us back
+        // Ensure the user has a 'worker' role claim (needed by middleware/AuthGuard)
         try {
-            const token = await authenticatedUser.getIdToken();
+            let token = await authenticatedUser.getIdToken();
+            const payloadBase64 = token.split('.')[1];
+            const payload = JSON.parse(atob(payloadBase64));
+            
+            if (!payload.role) {
+                // Assign 'worker' role since they logged in from the worker auth page
+                await fetch('/api/auth/assign-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken: token, role: 'worker' }),
+                });
+                // Refresh token to pick up the new claim
+                token = await authenticatedUser.getIdToken(true);
+            }
+
             await fetch('/api/auth/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -84,7 +98,7 @@ function LoginContent() {
                 setLoading(false);
                 router.push(getSafeRedirect(`/${locale}/dashboard/worker`));
             }
-        }, 1000); // Reduced to 1000ms for blazing fast UX
+        }, 1000);
 
         try {
             const userDocPath = `users/${authenticatedUser.uid}/profile/data`;
@@ -140,39 +154,42 @@ function LoginContent() {
         const DEMO_EMAIL = "demo@diagnoverseai.in";
         const DEMO_PASSWORD = "demo123456";
         try {
-            const userCred = await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
-            // Wait for cookie setting
+            let userCred;
+            try {
+                userCred = await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+            } catch (signInError: any) {
+                // Auto-create demo account if it doesn't exist yet
+                if (
+                    signInError.code === "auth/user-not-found" ||
+                    signInError.code === "auth/invalid-credential" ||
+                    signInError.code === "auth/invalid-login-credentials"
+                ) {
+                    userCred = await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+                } else {
+                    throw signInError;
+                }
+            }
+
+            // Assign 'worker' role via Admin SDK so middleware/AuthGuard don't bounce
             const token = await userCred.user.getIdToken();
+            await fetch('/api/auth/assign-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: token, role: 'worker' }),
+            });
+
+            // Force token refresh to pick up the new custom claim
+            const freshToken = await userCred.user.getIdToken(true);
             await fetch('/api/auth/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idToken: token }),
+                body: JSON.stringify({ idToken: freshToken }),
             });
+
             toast.success("Demo login successful! 👋");
             router.push(getSafeRedirect(`/${locale}/dashboard/worker`));
         } catch (error: any) {
-            // Auto-create demo account if it doesn't exist yet
-            if (
-                error.code === "auth/user-not-found" ||
-                error.code === "auth/invalid-credential" ||
-                error.code === "auth/invalid-login-credentials"
-            ) {
-                try {
-                    const createCred = await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
-                    const token = await createCred.user.getIdToken();
-                    await fetch('/api/auth/session', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ idToken: token }),
-                    });
-                    toast.success("Demo account ready! 👋");
-                    router.push(getSafeRedirect(`/${locale}/dashboard/worker`));
-                } catch (createError: any) {
-                    toast.error("Demo setup failed: " + createError.message);
-                }
-            } else {
-                toast.error("Demo login failed: " + error.message);
-            }
+            toast.error("Demo login failed: " + error.message);
         } finally {
             setLoading(false);
         }

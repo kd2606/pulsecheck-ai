@@ -49,7 +49,21 @@ function LoginContent() {
     const handleAuthSuccess = async (authenticatedUser: any) => {
         if (!authenticatedUser) return;
         try {
-            const token = await authenticatedUser.getIdToken();
+            let token = await authenticatedUser.getIdToken();
+            const payloadBase64 = token.split('.')[1];
+            const payload = JSON.parse(atob(payloadBase64));
+            
+            if (!payload.role) {
+                // Assign 'district_admin' role since they logged in from the district auth page
+                await fetch('/api/auth/assign-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken: token, role: 'district_admin' }),
+                });
+                // Refresh token to pick up the new claim
+                token = await authenticatedUser.getIdToken(true);
+            }
+
             await fetch('/api/auth/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

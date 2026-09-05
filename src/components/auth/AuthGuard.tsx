@@ -48,10 +48,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       });
 
       const role = result.claims.role as string | undefined;
-      const isDemo = result.claims.email === 'demo@diagnoverseai.in';
 
       // 1. Determine normalized home path based on actual claims
       let homePath = '';
+      let effectiveRole = role;
+
       if (role === 'patient') {
         homePath = '/dashboard/patient';
       } else if (role === 'worker' || role === 'asha') {
@@ -60,7 +61,36 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         homePath = '/dashboard/district';
       }
 
-      // 2. Block missing/unknown roles completely
+      // 2. If role is missing, infer from the current dashboard path
+      //    (covers demo users and users whose assign-role hasn't propagated yet)
+      if (!homePath) {
+        if (purePath.startsWith('/dashboard/worker')) {
+          homePath = '/dashboard/worker';
+          effectiveRole = 'worker';
+        } else if (purePath.startsWith('/dashboard/district')) {
+          homePath = '/dashboard/district';
+          effectiveRole = 'district_admin';
+        } else if (purePath.startsWith('/dashboard/patient')) {
+          homePath = '/dashboard/patient';
+          effectiveRole = 'patient';
+        }
+
+        // Try to assign the inferred role in the background
+        if (effectiveRole && effectiveRole !== role) {
+          try {
+            const token = await user.getIdToken();
+            await fetch('/api/auth/assign-role', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ idToken: token, role: effectiveRole }),
+            });
+          } catch (e) {
+            console.warn("Background role assignment failed:", e);
+          }
+        }
+      }
+
+      // 3. Block missing/unknown roles completely (only if we can't infer either)
       if (!homePath) {
         if (!role) {
            setErrorMsg(t('missingRole'));
@@ -72,20 +102,20 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // 3. Root dashboard redirect
+      // 4. Root dashboard redirect
       if (purePath === '/dashboard' || purePath === '/dashboard/') {
         setState('redirecting');
         router.replace('/' + currentLocale + homePath);
         return;
       }
 
-      // 4. Strict path isolation
+      // 5. Strict path isolation (use effectiveRole for checking)
       let isAllowed = false;
-      if (role === 'patient') {
+      if (effectiveRole === 'patient') {
         isAllowed = purePath.startsWith('/dashboard/patient');
-      } else if (role === 'worker' || role === 'asha') {
+      } else if (effectiveRole === 'worker' || effectiveRole === 'asha') {
         isAllowed = purePath.startsWith('/dashboard/worker');
-      } else if (role === 'district_admin' || role === 'mo' || role === 'admin' || role === 'district') {
+      } else if (effectiveRole === 'district_admin' || effectiveRole === 'mo' || effectiveRole === 'admin' || effectiveRole === 'district') {
         isAllowed = purePath.startsWith('/dashboard/district') || purePath.startsWith('/dashboard/worker');
       }
 

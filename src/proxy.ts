@@ -70,9 +70,22 @@ export default async function proxy(request: NextRequest) {
     return res;
   }
 
-  const role = normalisedRole(claims.role as string | undefined);
+  let role = normalisedRole(claims.role as string | undefined);
 
-  // Unknown or missing role — clear session, send to landing
+  // If role is missing from claims, infer from the dashboard path the user is
+  // trying to reach. This covers demo users and newly signed-up users whose
+  // custom claims haven't propagated to the session cookie yet.
+  if (!role) {
+    if (path.startsWith('/dashboard/worker')) {
+      role = 'worker';
+    } else if (path.startsWith('/dashboard/district')) {
+      role = 'district';
+    } else if (path.startsWith('/dashboard/patient')) {
+      role = 'patient';
+    }
+  }
+
+  // Still unknown — clear session, send to landing
   if (!role) {
     const url = request.nextUrl.clone();
     url.pathname = localized(locale, '/');
