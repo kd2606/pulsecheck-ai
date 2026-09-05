@@ -17,7 +17,7 @@ export default function Hero() {
           {isPublicHealth ? "Connect frontline workers, public facilities and district health teams." : "Connect every rural patient to the care they need."}
         </h1>
         <p className={styles.heroSubtitle}>
-          {isPublicHealth 
+          {isPublicHealth
             ? "DiagnoVerse coordinates rural care by empowering frontline health workers with assisted digital triage, low-connectivity offline-first field tools, and longitudinal health records. It bridges patients and facilities through smart referral tracking, follow-up queues, teleconsultation support, and seamless public-health coordination."
             : "DiagnoVerse helps ASHA workers, patients and public-health facilities work together through digital triage, smart referrals, teleconsultation support, longitudinal health records and follow-up tracking—even in low-connectivity areas."
           }
@@ -61,15 +61,58 @@ export default function Hero() {
       <div className={styles.heroRight}>
         <div className={styles.phoneMockup}>
           <div className={styles.phoneNotch}></div>
-          <div className={styles.chatInterface}>
-            <div className={styles.chatBubbleBot}>
-              नमस्ते! मैं आपकी कैसे मदद कर सकता हूँ?
+          <div className={styles.workflowApp}>
+            <div className={styles.workflowHeader}>
+              <div className={styles.workflowBrand}>DiagnoVerse Field</div>
+              <div className={styles.offlineIndicator}>
+                <span className={styles.offlineDot}></span>
+                Offline Mode
+              </div>
             </div>
-            <div className={styles.chatBubbleUser}>
-              मुझे बुखार है
+            <div className={styles.workflowContent}>
+
+              <div className={styles.workflowCard}>
+                <div className={styles.cardHeader}>
+                  <span className={styles.caseId}>Case P-042</span>
+                  <span className={styles.badgeYellow}>MO Review</span>
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.cardRow}>
+                    <ShieldCheck size={14} color="#0d9488" />
+                    <span>Consent Recorded</span>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <Activity size={14} color="#0d9488" />
+                    <span>Offline Intake Saved</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.workflowCard}>
+                <div className={styles.cardHeader}>
+                  <span className={styles.caseId}>Referral Assigned</span>
+                  <span className={styles.badgeGreen}>Active</span>
+                </div>
+                <div className={styles.cardBody}>
+                  <div className={styles.cardRow}>
+                    <strong>Facility:</strong> PHC Rural Center
+                  </div>
+                  <div className={styles.cardRow}>
+                    <strong>Token:</strong> A-042
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.workflowCard}>
+                <div className={styles.cardHeader}>
+                  <span className={styles.caseId}>Follow-up Due</span>
+                  <span className={styles.badgeGray}>In 3 Days</span>
+                </div>
+              </div>
+
             </div>
-            <div className={styles.chatBubbleBot}>
-              क्या आपको ठंड भी लग रही है या सिरदर्द है?
+            <div className={styles.workflowFooter}>
+              Syncs when online...
             </div>
           </div>
         </div>
