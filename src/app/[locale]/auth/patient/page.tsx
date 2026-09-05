@@ -35,6 +35,15 @@ function LoginContent() {
     const params = useParams();
     const searchParams = useSearchParams();
     const locale = params.locale as string;
+
+    const getSafeRedirect = (defaultPath: string) => {
+        const next = searchParams.get("next");
+        if (next && next.startsWith("/") && !next.startsWith("//")) {
+            return next;
+        }
+        return defaultPath;
+    };
+
     const isAutoDemo = searchParams.get("demo") === "1";
 
     const [email, setEmail] = useState("");
@@ -73,7 +82,7 @@ function LoginContent() {
                 console.warn("Auth check timed out, forcing dashboard redirect for speed");
                 redirected = true;
                 setLoading(false);
-                router.push(`/${locale}/dashboard/patient`);
+                router.push(getSafeRedirect(`/${locale}/dashboard/patient`));
             }
         }, 1000); // Reduced to 1000ms for blazing fast UX
 
@@ -87,9 +96,9 @@ function LoginContent() {
                 setLoading(false);
                 
                 if (userDoc.exists() && userDoc.data().onboardingDone) {
-                    router.push(`/${locale}/dashboard/patient`);
+                    router.push(getSafeRedirect(`/${locale}/dashboard/patient`));
                 } else {
-                    router.push(`/${locale}/onboarding`);
+                    router.push(getSafeRedirect(`/${locale}/onboarding`));
                 }
             }
         } catch (firestoreError) {
@@ -98,7 +107,7 @@ function LoginContent() {
                 clearTimeout(timeoutId);
                 redirected = true;
                 setLoading(false);
-                router.push(`/${locale}/dashboard/patient`);
+                router.push(getSafeRedirect(`/${locale}/dashboard/patient`));
             }
         }
     };
@@ -139,7 +148,7 @@ function LoginContent() {
                 body: JSON.stringify({ idToken: token }),
             });
             toast.success("Demo login successful! 👋");
-            router.push(`/${locale}/dashboard/patient`);
+            router.push(getSafeRedirect(`/${locale}/dashboard/patient`));
         } catch (error: any) {
             // Auto-create demo account if it doesn't exist yet
             if (
@@ -156,7 +165,7 @@ function LoginContent() {
                         body: JSON.stringify({ idToken: token }),
                     });
                     toast.success("Demo account ready! 👋");
-                    router.push(`/${locale}/dashboard/patient`);
+                    router.push(getSafeRedirect(`/${locale}/dashboard/patient`));
                 } catch (createError: any) {
                     toast.error("Demo setup failed: " + createError.message);
                 }

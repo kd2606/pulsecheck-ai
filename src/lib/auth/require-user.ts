@@ -10,8 +10,8 @@ export async function requireUser(allowed: Role[]) {
 
   try {
     const claims = await adminAuth.verifySessionCookie(cookie, true);
-    const role = (claims.role as Role) ?? 'patient';
-    if (!allowed.includes(role)) redirect('/dashboard/patient'); // Safe fallback
+    const role = (claims.role as Role);
+    if (!role || !allowed.includes(role)) redirect('/');
     return { uid: claims.sub, role, claims };
   } catch {
     redirect('/auth');

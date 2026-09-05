@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useUser } from "@/firebase/auth/useUser";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
@@ -26,6 +26,15 @@ function LoginContent() {
     const router = useRouter();
     const params = useParams();
     const locale = params.locale as string;
+    const searchParams = useSearchParams();
+    const getSafeRedirect = (defaultPath: string) => {
+        const next = searchParams.get("next");
+        if (next && next.startsWith("/") && !next.startsWith("//")) {
+            return next;
+        }
+        return defaultPath;
+    };
+
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -50,7 +59,7 @@ function LoginContent() {
             console.error("Failed to set session cookie:", e);
         }
         
-        router.push(`/${locale}/dashboard/district`);
+        router.push(getSafeRedirect(`/${locale}/dashboard/district`));
     };
 
     const handleEmailLogin = async (e: React.FormEvent) => {

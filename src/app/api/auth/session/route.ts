@@ -10,12 +10,24 @@ export async function POST(request: Request) {
     const idToken = body?.idToken;
     if (!idToken) return NextResponse.json({ error: 'missing idToken' }, { status: 400 });
 
+    let maxAge = 3600; // fallback to 1 hour
+    try {
+      const payloadBase64 = idToken.split('.')[1];
+      const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf8'));
+      if (payload.exp) {
+        const now = Math.floor(Date.now() / 1000);
+        maxAge = Math.max(0, payload.exp - now);
+      }
+    } catch (e) {
+      console.warn("Failed to decode token exp for cookie maxAge", e);
+    }
+
     (await cookies()).set(SESSION_COOKIE, idToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: EXPIRES_IN_MS / 1000,
+      maxAge: maxAge,
     });
 
     return NextResponse.json({ ok: true });
