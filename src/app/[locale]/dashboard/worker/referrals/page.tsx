@@ -121,9 +121,9 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
       await queueOfflineAssignment(assignTarget, facilityId);
       setShowCatalogModal(false);
       setAssignTarget(null);
-      alert('Assignment queued offline. It will sync automatically when online.');
+      alert(tr('assignQueued'));
     } catch (e: any) {
-      alert(e.message || 'Failed to queue assignment');
+      alert(e.message || tr('assignFailed'));
     }
   };
 
@@ -200,23 +200,23 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-white">
-              Active Referrals
+              {tr('activeReferrals')}
             </h1>
             <p className="mt-1 text-sm text-slate-400">
-              Live from local storage. Works fully offline.
+              {tr('subtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="rounded-md border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-400">
-              Active
+              {tr('activeBadge')}
               <span className="ml-2 font-semibold tabular-nums text-white">
                 {rows?.length ?? 0}
               </span>
             </span>
             {emergencyCount > 0 ? (
               <span className="rounded-md bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-400">
-                {emergencyCount} emergency
+                {tr('emergencyCount', { count: emergencyCount })}
               </span>
             ) : null}
           </div>
@@ -226,19 +226,19 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
           {rows === undefined ? (
             <TableSkeleton/>
           ) : rows.length === 0 ? (
-            <EmptyState/>
+            <EmptyState tr={tr}/>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-800">
-                    <Th>Patient</Th>
-                    <Th>Target Facility</Th>
-                    <Th>Appt / Token</Th>
-                    <Th>Urgency</Th>
-                    <Th>Status</Th>
-                    <Th className="text-right">Raised</Th>
-                    <Th className="text-right">Action</Th>
+                    <Th>{tr('thPatient')}</Th>
+                    <Th>{tr('thFacility')}</Th>
+                    <Th>{tr('thToken')}</Th>
+                    <Th>{tr('thUrgency')}</Th>
+                    <Th>{tr('thStatus')}</Th>
+                    <Th className="text-right">{tr('thRaised')}</Th>
+                    <Th className="text-right">{tr('thAction')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -275,7 +275,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         {row.queue_token ? (
                           <span className="font-mono bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs font-bold">{row.queue_token}</span>
                         ) : (
-                          <span className="text-slate-500 text-xs italic">Unscheduled</span>
+                          <span className="text-slate-500 text-xs italic">{tr('unscheduled')}</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -320,14 +320,14 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
         </section>
 
         <p className="mt-4 text-xs text-slate-400">
-          Sorted newest first. Closed referrals are hidden.
+          {tr('sortNote')}
         </p>
 
         {selectedQr && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
             <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm flex flex-col items-center border border-slate-800 shadow-2xl">
-              <h3 className="text-xl font-bold text-white mb-2">Referral QR Code</h3>
-              <p className="text-sm text-slate-400 mb-6 text-center">Show this to the hospital staff upon arrival.</p>
+              <h3 className="text-xl font-bold text-white mb-2">{tr('qrTitle')}</h3>
+              <p className="text-sm text-slate-400 mb-6 text-center">{tr('qrHint')}</p>
               <div className="p-4 bg-white rounded-xl mb-6 shadow-sm">
                 <QRCodeSVG value={selectedQr} size={200} />
               </div>
@@ -345,14 +345,14 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
         {timelineRef && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
             <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-800 shadow-2xl max-h-[80vh] overflow-y-auto">
-              <h3 className="text-xl font-bold text-white mb-2">Referral Timeline</h3>
-              <p className="text-sm text-slate-400 mb-6">Live from server (requires connection).</p>
+              <h3 className="text-xl font-bold text-white mb-2">{tr('timelineTitle')}</h3>
+              <p className="text-sm text-slate-400 mb-6">{tr('timelineHint')}</p>
 
               <div className="space-y-4">
                 {loadingTimeline ? (
-                  <div className="text-center py-4 text-slate-400">Loading...</div>
+                  <div className="text-center py-4 text-slate-400">{tr('loading')}</div>
                 ) : timelineEvents.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">No events found or offline.</p>
+                  <p className="text-sm text-slate-500 text-center py-4">{tr('noEvents')}</p>
                 ) : (
                   <div className="relative border-l border-slate-700 ml-3 space-y-6">
                     {timelineEvents.map((ev, idx) => (
@@ -363,7 +363,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         </div>
                         <div className="text-xs text-slate-400 mb-1">{new Date(ev.occurred_at).toLocaleString()}</div>
                         {ev.disposition && (
-                          <div className="text-xs font-bold text-emerald-400 mt-1 uppercase">Disposition: {ev.disposition.replace(/_/g, ' ')}</div>
+                          <div className="text-xs font-bold text-emerald-400 mt-1 uppercase">{tr('disposition')}: {ev.disposition.replace(/_/g, ' ')}</div>
                         )}
                         {ev.note && <div className="text-sm text-slate-300 bg-slate-800 p-2 rounded-md mt-1">{ev.note}</div>}
                       </div>
@@ -372,7 +372,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                 )}
 
                 <div className="pt-4 mt-6 border-t border-slate-800 flex justify-end">
-                  <button onClick={() => setTimelineRef(null)} className="px-4 py-2 bg-slate-800 text-white text-sm font-semibold rounded-md hover:bg-slate-700">Close</button>
+                  <button onClick={() => setTimelineRef(null)} className="px-4 py-2 bg-slate-800 text-white text-sm font-semibold rounded-md hover:bg-slate-700">{tr('close')}</button>
                 </div>
               </div>
             </div>
@@ -387,10 +387,10 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
 
             <div className="mb-6 space-y-2 max-h-[60vh] overflow-y-auto">
               {facilities.length === 0 && !catalogSyncing && (
-                <p className="text-sm text-slate-400">No offline facilities found. Please sync catalog.</p>
+                <p className="text-sm text-slate-400">{tr('noFacilities')}</p>
               )}
               {catalogSyncing && (
-                <p className="text-sm text-slate-400">Syncing...</p>
+                <p className="text-sm text-slate-400">{tr('syncing')}</p>
               )}
               {facilities.map(fac => (
                 <div key={fac.id} className="flex items-center justify-between p-3 border border-slate-800 rounded-lg bg-slate-800/40">
@@ -414,7 +414,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                 className="text-xs text-indigo-400 hover:text-indigo-300"
                 disabled={catalogSyncing}
               >
-                Sync Catalog Now
+                {tr('syncCatalogNow')}
               </button>
               <button
                 onClick={() => { setShowCatalogModal(false); setAssignTarget(null); }}
@@ -462,7 +462,7 @@ function TableSkeleton() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ tr }: { tr: (key: string) => string }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-800/40">
@@ -480,10 +480,9 @@ function EmptyState() {
           <path d="M20 12a8 8 0 1 1-8-8 8 8 0 0 1 8 8Z" />
         </svg>
       </div>
-      <h2 className="text-base font-semibold text-white">No active referrals</h2>
+      <h2 className="text-base font-semibold text-white">{tr('emptyTitle')}</h2>
       <p className="mt-1 max-w-sm text-sm text-slate-400">
-        Every referral has been closed. New ones you create offline will appear
-        here instantly, before they sync.
+        {tr('emptyDesc')}
       </p>
     </div>
   );
