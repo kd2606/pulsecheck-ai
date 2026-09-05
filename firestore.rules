@@ -22,8 +22,11 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isAuthenticated() && isOwner(userId);
-      allow write: if false; // Only admin SDKs write core user profile/roles
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
     }
     
     match /user_roles/{userId} {
