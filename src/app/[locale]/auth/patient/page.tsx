@@ -64,23 +64,9 @@ function LoginContent() {
         
         let redirected = false;
         
-        // Ensure the user has a 'patient' role claim (needed by middleware/AuthGuard)
+        // Set the session cookie BEFORE redirecting, otherwise middleware will bounce us back
         try {
-            let token = await authenticatedUser.getIdToken();
-            const payloadBase64 = token.split('.')[1];
-            const payload = JSON.parse(atob(payloadBase64));
-            
-            if (!payload.role) {
-                // Assign 'patient' role since they logged in from the patient auth page
-                await fetch('/api/auth/assign-role', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idToken: token, role: 'patient' }),
-                });
-                // Refresh token to pick up the new claim
-                token = await authenticatedUser.getIdToken(true);
-            }
-
+            const token = await authenticatedUser.getIdToken();
             await fetch('/api/auth/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -98,7 +84,7 @@ function LoginContent() {
                 setLoading(false);
                 router.push(getSafeRedirect(`/${locale}/dashboard/patient`));
             }
-        }, 1000);
+        }, 1000); // Reduced to 1000ms for blazing fast UX
 
         try {
             const userDocPath = `users/${authenticatedUser.uid}/profile/data`;
