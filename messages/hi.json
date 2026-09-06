@@ -276,6 +276,9 @@
     },
     "referrals": {
       "title": "रेफरल (Referrals)",
+      "activeReferrals": "सक्रिय रेफरल",
+      "subtitle": "मरीज के रेफरल और फॉलो-अप प्रबंधित करें",
+      "sortNote": "तात्कालिकता के आधार पर क्रमबद्ध",
       "statusPending": "लंबित (PENDING)",
       "statusAssigned": "असाइन किया गया (ASSIGNED)",
       "statusClosed": "बंद (CLOSED)",

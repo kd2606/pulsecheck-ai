@@ -313,6 +313,9 @@
     },
     "referrals": {
       "title": "Referrals",
+      "activeReferrals": "Active Referrals",
+      "subtitle": "Manage patient referrals and follow-ups",
+      "sortNote": "Sorted by urgency",
       "statusPending": "PENDING",
       "statusAssigned": "ASSIGNED",
       "statusClosed": "CLOSED",

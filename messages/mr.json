@@ -314,7 +314,7 @@
     "referrals": {
       "title": "रेफरल्स (Referrals)",
       "activeReferrals": "सक्रिय रेफरल्स (Active Referrals)",
-      "subtitle": "स्थानिक स्टोरेजमधून लाइव. पूर्णपणे ऑफलाइन काम करते.",
+      "subtitle": "रुग्णांचे रेफरल्स आणि फॉलो-अप व्यवस्थापित करा",
       "activeBadge": "सक्रिय",
       "emergencyCount": "{count} आणीबाणी",
       "thPatient": "रुग्ण",
@@ -329,7 +329,7 @@
       "unscheduled": "अनिर्धारित",
       "showQr": "QR दाखवा",
       "timeline": "टाइमलाइन",
-      "sortNote": "नवीनतम प्रथम क्रमवारी लावलेले. बंद केलेले रेफरल लपवलेले आहेत.",
+      "sortNote": "तातडीनुसार क्रमवारी",
       "qrTitle": "रेफरल QR कोड",
       "qrHint": "आगमनावर रुग्णालयाच्या कर्मचाऱ्यांना हे दाखवा.",
       "timelineTitle": "रेफरल टाइमलाइन",

@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { HeartPulse } from "lucide-react";
 import PinGuard from "@/components/auth/PinGuard";
@@ -29,6 +29,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const locale = params.locale as string || "en";
 
   useEffect(() => {
@@ -86,19 +87,25 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-          {navItems.map((item, i) => (
-            <Link key={i} href={item.href} onClick={() => setSidebarOpen(false)}>
-              <div className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm font-medium min-h-[44px]",
-                item.primary 
-                  ? "bg-[#0D9488] hover:bg-[#0F766E] text-white shadow-sm" 
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
-              )}>
-                <item.icon className={cn("w-5 h-5", item.primary ? "text-white" : "text-emerald-500")} />
-                {item.label}
-              </div>
-            </Link>
-          ))}
+          {navItems.map((item, i) => {
+            const isActive = item.href === `/${locale}/dashboard/worker` 
+              ? pathname === item.href 
+              : pathname.startsWith(item.href);
+
+            return (
+              <Link key={i} href={item.href} onClick={() => setSidebarOpen(false)}>
+                <div className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm font-medium min-h-[44px]",
+                  isActive 
+                    ? "bg-[#0D9488] hover:bg-[#0F766E] text-white shadow-sm" 
+                    : "text-slate-300 hover:bg-white/10 hover:text-white"
+                )}>
+                  <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-emerald-500")} />
+                  {item.label}
+                </div>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Bottom Section */}
@@ -148,7 +155,16 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
             >
               <Menu className="w-6 h-6" />
             </Button>
-            <h2 className="text-lg font-semibold text-white tracking-tight hidden sm:block">Dashboard</h2>
+            <h2 className="text-lg font-semibold text-white tracking-tight hidden sm:block">
+              {(() => {
+                const activeItem = navItems.slice().reverse().find(item => 
+                  item.href === `/${locale}/dashboard/worker` 
+                    ? pathname === item.href 
+                    : pathname.startsWith(item.href)
+                );
+                return activeItem ? activeItem.label : "Dashboard";
+              })()}
+            </h2>
           </div>
           
           <div className="flex items-center gap-3">
