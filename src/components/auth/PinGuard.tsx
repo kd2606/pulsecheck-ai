@@ -47,11 +47,11 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length < 4) {
-      toast.error(t('pinRequired'));
+      toast.error(t('pinRequired') || 'PIN must be at least 4 digits');
       return;
     }
     if (pin !== confirmPin) {
-      toast.error(t('incorrectPin'));
+      toast.error(t('incorrectPin') || 'PINs do not match');
       return;
     }
 
@@ -60,9 +60,10 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
       const material = await OfflineCrypto.setupKeyWithPIN(pin);
       await db.key_material.add(material);
       setUnlocked(true);
-      toast.success(t('unlockRecords')); // Success message conceptually similar
+      toast.success(t('setupSuccess') || 'Device PIN created successfully');
     } catch (error: any) {
-      toast.error(t('unlockFailed'));
+      console.error(error);
+      toast.error(t('setupFailed') || 'Failed to create Device PIN');
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length < 4) {
-      toast.error(t('pinRequired'));
+      toast.error(t('pinRequired') || 'PIN must be at least 4 digits');
       return;
     }
 
@@ -81,7 +82,8 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
       await OfflineCrypto.unlockKeyWithPIN(pin, material);
       setUnlocked(true);
     } catch (error: any) {
-      toast.error(t('incorrectPin'));
+      console.error(error);
+      toast.error(t('incorrectPin') || 'Incorrect device PIN');
     } finally {
       setLoading(false);
       setPin(''); // clear PIN on failure/success
@@ -110,10 +112,12 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
             )}
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">
-            {isSetup ? t('setDevicePin') : t('deviceLocked')}
+            {isSetup ? (t('createDevicePin') || 'Create Device PIN') : (t('unlockDevice') || 'Unlock Device')}
           </h2>
           <p className="text-sm text-slate-400">
-            {t('secureOfflineExplanation')}
+            {isSetup 
+              ? 'Create a PIN to secure patient records on this device.'
+              : t('secureOfflineExplanation')}
           </p>
         </div>
 
@@ -124,7 +128,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
                 type="password"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                placeholder={t('pinRequired')}
+                placeholder={t('pinRequired') || 'PIN (4-8 digits)'}
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 className="bg-slate-900 border-slate-700 text-center text-2xl tracking-[0.5em] h-14"
@@ -140,7 +144,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
                   type="password"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder={t('confirmPin')}
+                  placeholder={t('confirmPin') || 'Confirm PIN'}
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value)}
                   className="bg-slate-900 border-slate-700 text-center text-2xl tracking-[0.5em] h-14"
@@ -155,7 +159,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
             <div className="flex items-start gap-3 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
               <AlertTriangle className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" />
               <p className="text-xs text-orange-300 leading-relaxed">
-                {t('recoveryLimitation')}
+                {t('recoveryLimitation') || 'If you forget this PIN, offline data on this device cannot be recovered.'}
               </p>
             </div>
           )}
@@ -166,7 +170,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
               disabled={loading || pin.length < 4 || (isSetup && confirmPin.length < 4)}
               className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-bold"
             >
-              {loading ? '...' : (isSetup ? t('setDevicePin') : t('unlockRecords'))}
+              {loading ? '...' : (isSetup ? (t('createDevicePin') || 'Create Device PIN') : (t('unlockDevice') || 'Unlock Device'))}
             </Button>
             
             <Button

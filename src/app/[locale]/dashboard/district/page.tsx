@@ -4,14 +4,17 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  AlertOctagon, Activity, Users, ArrowUpRight, Clock, CheckCircle2, 
-  Search, Filter, Download, ScanLine
+import {
+  AlertOctagon, Activity, Users, ArrowUpRight, Clock, CheckCircle2,
+  Search, Filter, Download, ScanLine, Camera, Keyboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { collection, onSnapshot, query, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, getDocs, doc, updateDoc, getDoc, where } from 'firebase/firestore';
 import { db, auth } from '@/firebase/clientApp';
 import { toast } from 'sonner';
+import dynamic from 'next/dynamic';
+
+const QrScanner = dynamic(() => import('@/components/qr/QrScanner'), { ssr: false });
 
 // ─── Helpers ─────────────────────────────────────────────────
 
@@ -40,6 +43,9 @@ export default function DistrictDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [scanInput, setScanInput] = useState('');
+  const [scanTab, setScanTab] = useState<'camera' | 'manual'>('camera');
+  const [qrLookupResult, setQrLookupResult] = useState<any>(null);
+  const [qrLookupLoading, setQrLookupLoading] = useState(false);
   
   const [assignRef, setAssignRef] = useState<string | null>(null);
   const [selectedFacility, setSelectedFacility] = useState<string>('');
@@ -78,51 +84,84 @@ export default function DistrictDashboardPage() {
     };
     fetchFacilities();
 
-    // We listen to all referrals for the district demo.
-    // In production, we'd filter by target_facility matching the logged in DMO's facility.
-    const q = query(collection(db, 'referrals'));
-    
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
+    const fetchLiveReferrals = async () => {
       try {
-        const referralDocs = snapshot.docs.map(d => ({ fbId: d.id, ...(d.data() as any) }));
-        
-        // Fetch corresponding patients and triage records
-        const enriched = await Promise.all(referralDocs.map(async (ref: any) => {
-          // Patient
-          let patientName = 'Unknown Patient';
-          if (ref.patient_id) {
-            const pDoc = await getDoc(doc(db, 'patients', ref.patient_id));
-            if (pDoc.exists()) patientName = (pDoc.data() as any).name;
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await user.getIdTokenResult();
+        const role = token.claims.role as string;
+        const facilityId = token.claims.facility_id as string;
+
+        if (role !== 'mo' && role !== 'admin') {
+           // District Admins do not have PII access to live individual referrals by design.
+           setLiveReferrals([]);
+           setLoading(false);
+           return;
+        }
+
+        let q;
+        if (role === 'admin') {
+           q = query(collection(db, 'referrals'));
+        } else {
+           if (!facilityId) {
+              setLiveReferrals([]);
+              setLoading(false);
+              return;
+           }
+           q = query(collection(db, 'referrals'), where('target_facility', '==', facilityId));
+        }
+
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+          try {
+            const referralDocs = snapshot.docs.map(d => ({ fbId: d.id, ...(d.data() as any) }));
+            
+            const enriched = await Promise.all(referralDocs.map(async (ref: any) => {
+              let patientName = 'Unknown Patient';
+              if (ref.patient_id) {
+                // Notice: For MO, they might not have direct patient doc access either, 
+                // but if they do, we fetch it. We wrap in try-catch.
+                try {
+                   const pDoc = await getDoc(doc(db, 'patients', ref.patient_id));
+                   if (pDoc.exists()) patientName = (pDoc.data() as any).name;
+                } catch(e) {}
+              }
+
+              let tier = 'YELLOW';
+              if (ref.triage_record_id) {
+                try {
+                   const tDoc = await getDoc(doc(db, 'triage_records', ref.triage_record_id));
+                   if (tDoc.exists()) tier = (tDoc.data() as any).risk_level;
+                } catch(e) {}
+              }
+
+              const ageMs = Date.now() - (ref.timestamp || Date.now());
+              const isBreached = (tier === 'RED' && ageMs > 3600000) || (tier === 'YELLOW' && ageMs > 86400000);
+
+              return { ...ref, patientName, tier, isBreached };
+            }));
+
+            setLiveReferrals(enriched.sort((a: any, b: any) => b.timestamp - a.timestamp));
+          } catch (err) {
+            console.error("Error enriching live data", err);
+          } finally {
+            setLoading(false);
           }
+        }, (err) => {
+          console.error("Referral listener error:", err);
+          setLoading(false);
+        });
 
-          // Triage for risk level
-          let tier = 'YELLOW'; // Default
-          if (ref.triage_record_id) {
-            const tDoc = await getDoc(doc(db, 'triage_records', ref.triage_record_id));
-            if (tDoc.exists()) tier = (tDoc.data() as any).risk_level;
-          }
-
-          // Compute SLA Breach (mock logic for demo: RED breached if > 1 hour old)
-          const ageMs = Date.now() - (ref.timestamp || Date.now());
-          const isBreached = (tier === 'RED' && ageMs > 3600000) || (tier === 'YELLOW' && ageMs > 86400000);
-
-          return {
-            ...ref,
-            patientName,
-            tier,
-            isBreached
-          };
-        }));
-
-        setLiveReferrals(enriched.sort((a: any, b: any) => b.timestamp - a.timestamp));
+        return () => unsubscribe();
       } catch (err) {
-        console.error("Error fetching live data", err);
-      } finally {
+        console.error("Error setting up live data", err);
         setLoading(false);
       }
-    });
-
-    return () => unsubscribe();
+    };
+    
+    let unsubPromise = fetchLiveReferrals();
+    return () => {
+       unsubPromise.then(unsub => { if (unsub) unsub(); });
+    };
   }, []);
 
   const activeReferrals = liveReferrals.filter(r => r.status !== 'CLOSED').length;
@@ -132,44 +171,53 @@ export default function DistrictDashboardPage() {
   const [timelineEvents, setTimelineEvents] = useState<any[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
 
-  const handleManualScan = async () => {
-    if (!scanInput) return;
-    
-    // Find referral in our live list by referral ID
-    const referral = liveReferrals.find(r => r.id === scanInput || r.fbId === scanInput);
-    
-    if (!referral) {
-      toast.error('Invalid QR Code or Referral Not Found');
-      return;
-    }
+  const handleQrLookup = async (referralIdOrPayload: string) => {
+    if (!referralIdOrPayload.trim()) return;
+    setQrLookupLoading(true);
+    setQrLookupResult(null);
 
     try {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : '';
-      
-      const res = await fetch('/api/referral/transition', {
+
+      const res = await fetch('/api/referral/qr-lookup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          referralId: referral.fbId,
-          status: 'ACCEPTED'
-        })
+        body: JSON.stringify({ qrPayload: referralIdOrPayload }),
       });
-      
-      if (!res.ok) {
-         const err = await res.json();
-         throw new Error(err.error || 'Failed to update');
+
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Server returned a non-JSON response');
       }
 
-      toast.success('Patient Arrived! Status updated to ACCEPTED.');
-      setScanInput('');
-      setShowScanner(false);
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || 'Lookup failed');
+        setQrLookupResult({ error: true, code: data.code, message: data.error });
+        return;
+      }
+
+      setQrLookupResult(data.referral);
+      toast.success('Referral found — resolved securely from server');
     } catch (error: any) {
-      toast.error('Failed to update status: ' + error.message);
+      toast.error('Lookup error: ' + error.message);
+      setQrLookupResult({ error: true, message: error.message });
+    } finally {
+      setQrLookupLoading(false);
     }
+  };
+
+  const handleQrScan = (referralId: string) => {
+    handleQrLookup(`dv:ref:${referralId}`);
+  };
+
+  const handleManualScan = () => {
+    handleQrLookup(scanInput);
   };
 
   const handleViewTimeline = async (fbId: string) => {
@@ -337,24 +385,177 @@ export default function DistrictDashboardPage() {
       
       {/* ─── Scanner Modal ─── */}
       {showScanner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4 text-slate-900">Scan Patient QR</h3>
-            <p className="text-sm text-slate-500 mb-6">In a real environment, this activates the webcam. For this demo, enter the Referral ID.</p>
-            
-            <div className="space-y-4">
-              <input 
-                type="text" 
-                placeholder="Enter Referral ID (e.g. ref-1234)"
-                className="w-full h-12 px-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none"
-                value={scanInput}
-                onChange={(e) => setScanInput(e.target.value)}
-              />
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1 h-12" onClick={() => setShowScanner(false)}>Cancel</Button>
-                <Button className="flex-1 h-12 bg-blue-600 hover:bg-blue-700" onClick={handleManualScan}>Simulate Scan</Button>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-2 text-slate-900">Scan Referral QR</h3>
+            <p className="text-sm text-slate-500 mb-4">Scan the ASHA worker&apos;s referral QR code or manually enter the Referral ID.</p>
+
+            {/* Tabs */}
+            <div className="flex gap-1 bg-slate-100 rounded-lg p-1 mb-4">
+              <button
+                onClick={() => { setScanTab('camera'); setQrLookupResult(null); }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors",
+                  scanTab === 'camera' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                )}
+              >
+                <Camera className="size-4" /> Camera
+              </button>
+              <button
+                onClick={() => { setScanTab('manual'); setQrLookupResult(null); }}
+                className={cn(
+                  "flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors",
+                  scanTab === 'manual' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                )}
+              >
+                <Keyboard className="size-4" /> Manual Lookup
+              </button>
             </div>
+
+            {/* Camera Tab */}
+            {scanTab === 'camera' && !qrLookupResult && (
+              <QrScanner
+                onScan={handleQrScan}
+                onClose={() => { setShowScanner(false); setQrLookupResult(null); }}
+              />
+            )}
+
+            {/* Manual Tab */}
+            {scanTab === 'manual' && !qrLookupResult && (
+              <div className="space-y-4">
+                <p className="text-xs text-slate-400">Enter the Referral ID printed on the referral slip or displayed on the ASHA worker&apos;s device.</p>
+                <input
+                  type="text"
+                  placeholder="Enter Referral ID"
+                  className="w-full h-12 px-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={scanInput}
+                  onChange={(e) => setScanInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleManualScan(); }}
+                />
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1 h-12" onClick={() => { setShowScanner(false); setQrLookupResult(null); }}>Cancel</Button>
+                  <Button
+                    className="flex-1 h-12 bg-blue-600 hover:bg-blue-700"
+                    onClick={handleManualScan}
+                    disabled={qrLookupLoading || !scanInput.trim()}
+                  >
+                    {qrLookupLoading ? 'Looking up…' : 'Lookup'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {qrLookupLoading && (
+              <div className="flex flex-col items-center py-8">
+                <Activity className="size-8 animate-spin text-blue-500 mb-4" />
+                <p className="text-sm text-slate-500">Resolving referral securely from server…</p>
+              </div>
+            )}
+
+            {/* Result Display */}
+            {qrLookupResult && !qrLookupResult.error && !qrLookupLoading && (
+              <div className="space-y-4">
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle2 className="size-5 text-emerald-600" />
+                    <h4 className="font-bold text-emerald-800">Referral Found</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-slate-500 text-xs">Referral ID</p>
+                      <p className="font-mono font-bold text-slate-800">{qrLookupResult.id?.slice(0, 12)}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 text-xs">Status</p>
+                      <p className="font-semibold text-slate-800">{qrLookupResult.status}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 text-xs">Urgency</p>
+                      <Badge variant="outline" className={cn("text-xs", qrLookupResult.urgency === 'EMERGENCY' ? 'text-red-600 border-red-200' : qrLookupResult.urgency === 'URGENT' ? 'text-orange-600 border-orange-200' : 'text-emerald-600 border-emerald-200')}>
+                        {qrLookupResult.urgency}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 text-xs">Facility</p>
+                      <p className="font-medium text-slate-800 text-xs">{qrLookupResult.target_facility === 'PENDING_ASSIGNMENT' ? 'Unassigned' : qrLookupResult.target_facility || '—'}</p>
+                    </div>
+                    {qrLookupResult.patientName && (
+                      <div className="col-span-2">
+                        <p className="text-slate-500 text-xs">Patient</p>
+                        <p className="font-medium text-slate-800">{qrLookupResult.patientName}</p>
+                      </div>
+                    )}
+                    {qrLookupResult.queue_token && (
+                      <div className="col-span-2">
+                        <p className="text-slate-500 text-xs">Queue Token</p>
+                        <p className="font-mono font-bold text-blue-700 text-lg">{qrLookupResult.queue_token}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={async () => {
+                      try {
+                        const user = auth.currentUser;
+                        const token = user ? await user.getIdToken() : '';
+                        const res = await fetch('/api/referral/transition', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ referralId: qrLookupResult.id, status: 'ACCEPTED' }),
+                        });
+                        if (!res.ok) {
+                          const err = await res.json();
+                          throw new Error(err.error || 'Transition failed');
+                        }
+                        toast.success('Patient accepted — status updated');
+                        setShowScanner(false);
+                        setQrLookupResult(null);
+                        setScanInput('');
+                      } catch (err: any) {
+                        toast.error(err.message);
+                      }
+                    }}
+                  >
+                    Accept Patient
+                  </Button>
+                  <Button variant="outline" onClick={() => { setQrLookupResult(null); }}>
+                    Scan Another
+                  </Button>
+                </div>
+
+                <p className="text-[10px] text-slate-400 text-center">
+                  Referral resolved server-side. No patient PII was read from the QR payload.
+                </p>
+              </div>
+            )}
+
+            {/* Error Result */}
+            {qrLookupResult?.error && !qrLookupLoading && (
+              <div className="space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertOctagon className="size-5 text-red-600" />
+                    <h4 className="font-bold text-red-800">
+                      {qrLookupResult.code === 'REFERRAL_NOT_FOUND' ? 'Referral Not Found'
+                        : qrLookupResult.code === 'REFERRAL_CLOSED' ? 'Referral Already Closed'
+                        : qrLookupResult.code === 'SCOPE_FACILITY_MISMATCH' ? 'Unauthorized — Different Facility'
+                        : qrLookupResult.code === 'ROLE_UNAUTHORIZED' ? 'Access Denied'
+                        : qrLookupResult.code === 'PAYLOAD_TAMPERED' ? 'Invalid / Tampered QR'
+                        : 'Lookup Failed'}
+                    </h4>
+                  </div>
+                  <p className="text-sm text-red-700">{qrLookupResult.message}</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => { setQrLookupResult(null); }}>Try Again</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => { setShowScanner(false); setQrLookupResult(null); }}>Close</Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -605,16 +806,16 @@ export default function DistrictDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-blue-600 border-blue-700 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors" onClick={() => setShowScanner(true)}>
+        <Card className="bg-blue-600 border-blue-700 shadow-lg cursor-pointer hover:bg-blue-700 transition-colors" onClick={() => { setShowScanner(true); setQrLookupResult(null); setScanTab('camera'); }}>
           <CardContent className="p-6 flex items-center justify-between h-full">
             <div>
               <p className="text-blue-100 font-medium mb-1">Incoming Patient?</p>
               <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                <ScanLine className="size-6" /> Scan QR Code
+                <ScanLine className="size-6" /> Scan Referral QR
               </h3>
             </div>
             <div className="p-3 bg-white/10 rounded-full">
-              <ArrowUpRight className="size-6 text-white" />
+              <Camera className="size-6 text-white" />
             </div>
           </CardContent>
         </Card>
@@ -672,15 +873,7 @@ export default function DistrictDashboardPage() {
                       <td className="px-6 py-4">
                         <div className="font-medium text-slate-900">{ref.patientName}</div>
                         {ref.patient_id && (
-                          <a 
-                            href={`/${locale}/dashboard/district/patient/${ref.patient_id}`}
-                            className="text-[10px] text-blue-600 hover:underline inline-flex items-center mt-1"
-                          >
-                            View 360 Record
-                          </a>
-                        )}
-                        {ref.patient_id && (
-                          <a 
+                          <a
                             href={`/${locale}/dashboard/district/patient/${ref.patient_id}`}
                             className="text-[10px] text-blue-600 hover:underline inline-flex items-center mt-1"
                           >

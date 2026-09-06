@@ -29,7 +29,15 @@ export async function POST(request: Request) {
     // Set the custom claim (preserve any existing claims)
     const existingUser = await adminAuth.getUser(uid);
     const existingClaims = existingUser.customClaims || {};
-    await adminAuth.setCustomUserClaims(uid, { ...existingClaims, role });
+    
+    const newClaims: any = { ...existingClaims, role };
+    
+    // For demo purposes, inject a demo district scope so backend lists work
+    if (!newClaims.district_id) {
+      newClaims.district_id = 'demo_khordha_01'; // Default demo scope
+    }
+    
+    await adminAuth.setCustomUserClaims(uid, newClaims);
 
     return NextResponse.json({ ok: true, role });
   } catch (error: any) {

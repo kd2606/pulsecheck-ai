@@ -108,12 +108,7 @@ function LoginContent() {
                 clearTimeout(timeoutId);
                 redirected = true;
                 setLoading(false);
-                
-                if (userDoc.exists() && userDoc.data().onboardingDone) {
-                    router.push(getSafeRedirect(`/${locale}/dashboard/worker`));
-                } else {
-                    router.push(getSafeRedirect(`/${locale}/onboarding`));
-                }
+                router.push(getSafeRedirect(`/${locale}/dashboard/worker`));
             }
         } catch (firestoreError) {
             console.warn("Firestore check failed during auth success:", firestoreError);

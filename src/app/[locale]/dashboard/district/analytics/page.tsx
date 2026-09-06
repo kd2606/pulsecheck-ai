@@ -46,8 +46,15 @@ export default function AnalyticsPage() {
       });
       
       if (!res.ok) {
-         const err = await res.json();
-         throw new Error(err.error || 'Failed to fetch analytics');
+         let errMessage = 'Failed to fetch analytics';
+         const contentType = res.headers.get('content-type');
+         if (contentType && contentType.includes('application/json')) {
+            const err = await res.json();
+            errMessage = err.error || errMessage;
+         } else {
+            errMessage = `Server Error (${res.status})`;
+         }
+         throw new Error(errMessage);
       }
 
       const json = await res.json();

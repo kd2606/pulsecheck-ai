@@ -38,20 +38,12 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const result = await user.getIdTokenResult();
+      let result = await user.getIdTokenResult();
       if (cancelled) return;
 
-      await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: result.token }),
-      });
-
-      const role = result.claims.role as string | undefined;
-
-      // 1. Determine normalized home path based on actual claims
-      let homePath = '';
+      let role = result.claims.role as string | undefined;
       let effectiveRole = role;
+      let homePath = '';
 
       if (role === 'patient') {
         homePath = '/dashboard/patient';
@@ -61,8 +53,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         homePath = '/dashboard/district';
       }
 
-      // 2. If role is missing, infer from the current dashboard path
-      //    (covers demo users and users whose assign-role hasn't propagated yet)
+      // If role is missing, infer from the current dashboard path and ASSIGN BEFORE setting session
       if (!homePath) {
         if (purePath.startsWith('/dashboard/worker')) {
           homePath = '/dashboard/worker';
@@ -75,7 +66,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           effectiveRole = 'patient';
         }
 
-        // Try to assign the inferred role in the background
         if (effectiveRole && effectiveRole !== role) {
           try {
             const token = await user.getIdToken();
@@ -84,11 +74,21 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ idToken: token, role: effectiveRole }),
             });
+            // Force refresh token to get the newly assigned custom claims
+            await user.getIdToken(true);
+            result = await user.getIdTokenResult();
+            role = result.claims.role as string | undefined;
           } catch (e) {
-            console.warn("Background role assignment failed:", e);
+            console.warn("Role assignment failed:", e);
           }
         }
       }
+
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: result.token }),
+      });
 
       // 3. Block missing/unknown roles completely (only if we can't infer either)
       if (!homePath) {

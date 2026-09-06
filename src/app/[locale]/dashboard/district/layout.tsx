@@ -68,22 +68,26 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = item.href === '#' ? false : (typeof window !== 'undefined' ? window.location.pathname.includes(item.href) : false);
+            const isRoadmap = ['Facility Mapping', 'Critical Incidents', 'Audit Reports', 'System Config'].includes(item.label);
             return (
               <button
                 key={item.label}
                 onClick={() => {
-                  if (item.href !== '#') router.push(item.href);
+                  if (item.href !== '#' && !isRoadmap) router.push(item.href);
                   setSidebarOpen(false);
                 }}
+                disabled={isRoadmap}
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                   isActive 
                     ? "bg-slate-100 text-slate-900" 
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                  isRoadmap && "opacity-50 cursor-not-allowed"
                 )}
               >
                 <Icon className={cn("size-5", isActive ? "text-slate-900" : "text-slate-400")} />
                 {item.label}
+                {isRoadmap && <Badge variant="outline" className="ml-auto text-[10px] leading-tight px-1.5 h-4">Roadmap</Badge>}
               </button>
             );
           })}
@@ -92,14 +96,13 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
         <div className="p-4 border-t border-slate-200">
           <div 
             className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors"
-            onClick={() => router.push(`/${locale}/dashboard/district/profile`)}
           >
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700">
-              CM
+            <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-amber-700">
+              DU
             </div>
             <div className="text-left flex-1">
-              <p className="text-sm font-semibold text-slate-900">Dr. C. Mishra</p>
-              <p className="text-xs text-slate-500">Chief Medical Officer</p>
+              <p className="text-sm font-semibold text-slate-900">Demo User</p>
+              <p className="text-xs text-amber-600 font-medium">Synthetic Account</p>
             </div>
           </div>
           <Button 
@@ -138,7 +141,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-md">
               <Activity className="size-4 text-amber-600" />
               <span className="text-xs font-medium text-amber-800">
-                12 ASHA devices haven't synced in 72+ hrs
+                12 ASHA devices haven't synced in 72+ hrs (Demo/Synthetic data)
               </span>
             </div>
 
@@ -154,7 +157,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           <div className="lg:hidden flex items-center gap-3 p-3 mb-6 bg-amber-50 border border-amber-200 rounded-lg">
             <Activity className="size-5 text-amber-600 shrink-0" />
             <p className="text-sm font-medium text-amber-800">
-              Warning: 12 ASHA devices haven't synced in 72+ hours. Local offline queues may be full.
+              Warning (Demo/Synthetic data): 12 ASHA devices haven't synced in 72+ hours. Local offline queues may be full.
             </p>
           </div>
 

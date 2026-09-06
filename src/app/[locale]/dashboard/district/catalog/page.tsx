@@ -83,8 +83,12 @@ export default function FacilityCatalogPage() {
       });
       
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || t('error'));
+         const contentType = res.headers.get('content-type');
+         if (contentType && contentType.includes('application/json')) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || t('error'));
+         }
+         throw new Error(`Server Error (${res.status})`);
       }
       
       alert(t('success'));

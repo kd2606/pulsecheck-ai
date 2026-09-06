@@ -319,7 +319,10 @@
       "assignModalTitle": "Assign Target Facility",
       "selectFacility": "Select Facility",
       "cancel": "Cancel",
-      "confirm": "Confirm Assignment"
+      "confirm": "Confirm Assignment",
+      "showQr": "Show QR",
+      "qrTitle": "Referral QR Code",
+      "qrHint": "Show this to facility staff upon arrival."
     },
     "queue": {
       "title": "Queue & Appointments"

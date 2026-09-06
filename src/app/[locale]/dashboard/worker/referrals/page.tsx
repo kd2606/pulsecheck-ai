@@ -4,10 +4,12 @@ import { use, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getOfflineDb } from '@/lib/db/offline-db';
 import { SyncStatusBar } from '@/components/sync-status-bar';
-import { QRCodeSVG } from 'qrcode.react';
 import { getOfflineFacilities, syncFacilityCatalog, queueOfflineAssignment } from '@/lib/sync/facility-sync';
 import { getFirebaseAuth } from '@/lib/firebase/client';
 import { useTranslations } from 'next-intl';
+import dynamic from 'next/dynamic';
+
+const ReferralQrCode = dynamic(() => import('@/components/qr/ReferralQrCode'), { ssr: false });
 
 
 type Urgency = 'ROUTINE' | 'URGENT' | 'EMERGENCY';
@@ -324,22 +326,11 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
         </p>
 
         {selectedQr && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-            <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm flex flex-col items-center border border-slate-800 shadow-2xl">
-              <h3 className="text-xl font-bold text-white mb-2">{tr('qrTitle')}</h3>
-              <p className="text-sm text-slate-400 mb-6 text-center">{tr('qrHint')}</p>
-              <div className="p-4 bg-white rounded-xl mb-6 shadow-sm">
-                <QRCodeSVG value={selectedQr} size={200} />
-              </div>
-              <p className="font-mono text-slate-500 text-xs mb-6 break-all text-center">{selectedQr}</p>
-              <button
-                onClick={() => setSelectedQr(null)}
-                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-colors border border-slate-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+          <ReferralQrCode
+            referralId={selectedQr}
+            isSynthetic={true}
+            onClose={() => setSelectedQr(null)}
+          />
         )}
 
         {timelineRef && (
