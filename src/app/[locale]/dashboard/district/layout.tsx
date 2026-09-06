@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
   AlertOctagon, 
@@ -12,16 +12,19 @@ import {
   Bell, 
   LogOut,
   Building,
-  Activity
+  Activity,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function DistrictLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
+  const pathname = usePathname();
   const locale = params.locale as string || 'en';
 
   const navItems = [
@@ -32,6 +35,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
     { icon: AlertOctagon, label: 'Critical Incidents', href: `/${locale}/dashboard/district/incidents` },
     { icon: FileText, label: 'Audit Reports', href: `/${locale}/dashboard/district/audit` },
     { icon: Settings, label: 'System Config', href: `/${locale}/dashboard/district/config` },
+    { icon: User, label: 'My Profile', href: `/${locale}/dashboard/district/profile` },
   ];
 
   return (
@@ -67,7 +71,9 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = item.href === '#' ? false : (typeof window !== 'undefined' ? window.location.pathname.includes(item.href) : false);
+            const isActive = item.href === `/${locale}/dashboard/district` 
+              ? pathname === item.href 
+              : pathname.startsWith(item.href);
             const isRoadmap = ['Facility Mapping', 'Critical Incidents', 'Audit Reports', 'System Config'].includes(item.label);
             return (
               <button
@@ -94,17 +100,19 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
         </div>
 
         <div className="p-4 border-t border-slate-200">
-          <div 
-            className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors"
-          >
-            <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-amber-700">
-              DU
+          <Link href={`/${locale}/dashboard/district/profile`}>
+            <div 
+              className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-amber-700">
+                CM
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-semibold text-slate-900">Dr. C. Mishra</p>
+                <p className="text-xs text-amber-600 font-medium">Chief Medical Officer</p>
+              </div>
             </div>
-            <div className="text-left flex-1">
-              <p className="text-sm font-semibold text-slate-900">Demo User</p>
-              <p className="text-xs text-amber-600 font-medium">Synthetic Account</p>
-            </div>
-          </div>
+          </Link>
           <Button 
             variant="ghost" 
             className="w-full justify-start text-slate-600 hover:text-red-600 hover:bg-red-50 mt-2"
@@ -133,7 +141,16 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
             >
               <Menu className="size-5" />
             </Button>
-            <h2 className="text-lg font-semibold text-slate-900 hidden sm:block">Referral SLAs & Operations</h2>
+            <h2 className="text-lg font-semibold text-slate-900 hidden sm:block">
+              {(() => {
+                const activeItem = navItems.slice().reverse().find(item => 
+                  item.href === `/${locale}/dashboard/district` 
+                    ? pathname === item.href 
+                    : pathname.startsWith(item.href)
+                );
+                return activeItem ? activeItem.label : "SLA Dashboard";
+              })()}
+            </h2>
           </div>
           
           <div className="flex items-center gap-4">
