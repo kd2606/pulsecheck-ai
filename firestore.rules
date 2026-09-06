@@ -21,6 +21,10 @@ service cloud.firestore {
       return !('isTestData' in request.resource.data) || request.resource.data.isTestData == false;
     }
 
+    function isWorker() {
+      return getRole() == 'asha' || getRole() == 'worker';
+    }
+
     match /users/{userId} {
       allow read, write: if isAuthenticated() && isOwner(userId);
       
@@ -37,31 +41,38 @@ service cloud.firestore {
     match /patients/{patientId} {
       // Patients read their own
       allow read: if isAuthenticated() && getRole() == 'patient' && isOwner(patientId);
-      // ASHA reads assigned (where owner_uid == asha uid)
-      allow read, create: if isAuthenticated() && getRole() == 'asha' && request.resource.data.owner_uid == request.auth.uid;
-      allow update: if isAuthenticated() && getRole() == 'asha' && resource.data.owner_uid == request.auth.uid && request.resource.data.owner_uid == request.auth.uid;
+      // Worker reads assigned (where owner_uid == worker uid)
+      allow read, create: if isAuthenticated() && isWorker() && request.resource.data.owner_uid == request.auth.uid;
+      allow update: if isAuthenticated() && isWorker() && resource.data.owner_uid == request.auth.uid && request.resource.data.owner_uid == request.auth.uid;
       allow delete: if false;
     }
 
     match /triage_records/{recordId} {
-      allow read: if isAuthenticated() && (getRole() == 'patient' && resource.data.patient_id == request.auth.uid || getRole() == 'asha' && resource.data.owner_uid == request.auth.uid);
-      allow create: if isAuthenticated() && getRole() == 'asha' && request.resource.data.owner_uid == request.auth.uid;
+      allow read: if isAuthenticated() && ((getRole() == 'patient' && resource.data.patient_id == request.auth.uid) || (isWorker() && resource.data.owner_uid == request.auth.uid));
+      allow create: if isAuthenticated() && isWorker() && request.resource.data.owner_uid == request.auth.uid;
       allow update, delete: if false; // clinical records are write-once
     }
 
     match /referrals/{referralId} {
-      allow read: if isAuthenticated() && getRole() == 'asha' && resource.data.owner_uid == request.auth.uid;
+      allow read: if isAuthenticated() && isWorker() && resource.data.owner_uid == request.auth.uid;
       // Medical Officer can read referrals routed to their facility
       allow read: if isAuthenticated() && getRole() == 'mo' && resource.data.target_facility == request.auth.token.facility_id;
-      // Creation is allowed by ASHA only via proposals to 'CREATED' state
-      allow create: if isAuthenticated() && getRole() == 'asha' && request.resource.data.owner_uid == request.auth.uid && request.resource.data.status == 'CREATED';
+      // Creation is allowed by Worker only via proposals to 'CREATED' state
+      allow create: if isAuthenticated() && isWorker() && request.resource.data.owner_uid == request.auth.uid && request.resource.data.status == 'CREATED';
       // Updates strictly handled by server functions
       allow update: if false;
       allow delete: if false;
     }
 
+    match /worker_tasks/{taskId} {
+      allow read: if isAuthenticated() && isWorker() && resource.data.worker_uid == request.auth.uid;
+      allow create: if isAuthenticated() && isWorker() && request.resource.data.worker_uid == request.auth.uid;
+      allow update: if isAuthenticated() && isWorker() && resource.data.worker_uid == request.auth.uid;
+      allow delete: if false;
+    }
+
     match /referral_events/{eventId} {
-      allow read: if isAuthenticated() && getRole() in ['asha', 'mo'];
+      allow read: if isAuthenticated() && (isWorker() || getRole() == 'mo');
       allow write: if false; // Server authoritative
     }
 
