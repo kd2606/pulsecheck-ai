@@ -24,6 +24,7 @@ import PinGuard from "@/components/auth/PinGuard";
 import { OfflineCrypto } from "@/lib/crypto/offline-crypto";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -168,6 +169,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
           </div>
           
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Button variant="outline" size="sm" className="hidden sm:flex border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200">
               <RefreshCw className="w-4 h-4 mr-2" />
               Sync Data

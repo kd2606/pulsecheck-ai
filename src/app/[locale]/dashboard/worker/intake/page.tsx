@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState, type FormEvent, type ReactNode } from '
 import { useTranslations } from 'next-intl';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { saveIntakeOffline } from '@/lib/services/intake.service';
+import { runWorkerTriage } from '@/ai/flows/worker-triage';
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
@@ -12,6 +13,16 @@ import { saveIntakeOffline } from '@/lib/services/intake.service';
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 type RiskLevel = 'RED' | 'YELLOW' | 'GREEN';
+
+interface AiTriageResult {
+  risk_level: RiskLevel;
+  risk_score: string;
+  explanation: string;
+  health_concerns: string[];
+  recommended_action: string;
+  missing_info: string[];
+  referral_urgency: string;
+}
 
 interface PatientPayload {
   name: string;
@@ -42,6 +53,9 @@ interface IntakeFormState {
   temperature_c: string;
   systolic_bp: string;
   diastolic_bp: string;
+  o2_saturation: string;
+  duration: string;
+  pregnancy_context: boolean;
   risk_level: RiskLevel | '';
   recommended_action: string;
   consent_granted: boolean;
@@ -77,6 +91,9 @@ function createInitialState(): IntakeFormState {
     temperature_c: '',
     systolic_bp: '',
     diastolic_bp: '',
+    o2_saturation: '',
+    duration: '',
+    pregnancy_context: false,
     risk_level: '',
     recommended_action: '',
     consent_granted: false,
@@ -173,6 +190,10 @@ export default function NewIntakePage() {
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [message, setMessage] = useState<string | null>(null);
   const [actionTouched, setActionTouched] = useState<boolean>(false);
+  
+  const [aiResult, setAiResult] = useState<AiTriageResult | null>(null);
+  const [isAiRunning, setIsAiRunning] = useState(false);
+  const [aiPendingOffline, setAiPendingOffline] = useState(false);
 
   const isSaving = status === 'saving';
 
@@ -296,6 +317,8 @@ export default function NewIntakePage() {
     setActionTouched(false);
     setStatus('idle');
     setMessage(null);
+    setAiResult(null);
+    setAiPendingOffline(false);
   }, []);
 
   const age = useMemo<number | null>(() => {
@@ -313,6 +336,77 @@ export default function NewIntakePage() {
   }, [form.dob]);
 
   const symptomCount = useMemo<number>(() => parseSymptoms(form.symptoms).length, [form.symptoms]);
+
+  const handleRunAiTriage = async () => {
+    // Validate required inputs for AI
+    const validationErrors = validate(form);
+    const requiredForAi = ['symptoms', 'temperature_c', 'systolic_bp', 'diastolic_bp', 'gender'];
+    const aiErrors = Object.keys(validationErrors).filter(k => requiredForAi.includes(k));
+    if (aiErrors.length > 0) {
+      setErrors(validationErrors);
+      setMessage(t('validation.fixErrors'));
+      return;
+    }
+
+    // Deterministic rules
+    const temp = Number(form.temperature_c);
+    const sys = Number(form.systolic_bp);
+    const dia = Number(form.diastolic_bp);
+    const symps = form.symptoms.toLowerCase();
+    
+    let isDeterministicRed = false;
+    if (temp > 40 || sys > 180 || dia > 120 || sys < 90 || dia < 60 || symps.includes('bleed') || symps.includes('breath')) {
+      isDeterministicRed = true;
+      setField('risk_level', 'RED');
+    }
+
+    if (!navigator.onLine) {
+      setAiPendingOffline(true);
+      if (!isDeterministicRed) {
+        // Fallback for offline if not red
+        if (temp > 38 || sys > 140 || dia > 90) {
+          setField('risk_level', 'YELLOW');
+        } else {
+          setField('risk_level', 'GREEN');
+        }
+      }
+      return;
+    }
+
+    setIsAiRunning(true);
+    setAiPendingOffline(false);
+    setMessage(null);
+
+    try {
+      const result = await runWorkerTriage({
+        symptoms: form.symptoms,
+        temperature_c: temp,
+        systolic_bp: sys,
+        diastolic_bp: dia,
+        age: age,
+        gender: form.gender as string,
+        duration: form.duration || undefined,
+        pregnancyContext: form.pregnancy_context,
+        o2Saturation: form.o2_saturation ? Number(form.o2_saturation) : undefined
+      });
+
+      // AI must NEVER downgrade a deterministic emergency/red flag
+      if (isDeterministicRed) {
+        result.risk_level = 'RED';
+      }
+
+      setAiResult(result as AiTriageResult);
+      setField('risk_level', result.risk_level);
+      if (!actionTouched) {
+        setField('recommended_action', result.recommended_action);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("AI Triage failed. Please proceed manually.");
+    } finally {
+      setIsAiRunning(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -595,9 +689,110 @@ export default function NewIntakePage() {
                     onChange={(event) => setField('diastolic_bp', event.target.value)}
                   />
                 </Field>
+                <Field id="o2_saturation" label="O2 Saturation (%)" optionalLabel={t('optional')}>
+                  <input
+                    id="o2_saturation"
+                    name="o2_saturation"
+                    type="number"
+                    inputMode="numeric"
+                    step="1"
+                    min="50"
+                    max="100"
+                    placeholder="98"
+                    className={INPUT_CLASS}
+                    value={form.o2_saturation}
+                    disabled={isSaving}
+                    onChange={(event) => setField('o2_saturation', event.target.value)}
+                  />
+                </Field>
+                <Field id="duration" label="Duration of Symptoms" optionalLabel={t('optional')}>
+                  <input
+                    id="duration"
+                    name="duration"
+                    type="text"
+                    placeholder="e.g. 3 days"
+                    className={INPUT_CLASS}
+                    value={form.duration}
+                    disabled={isSaving}
+                    onChange={(event) => setField('duration', event.target.value)}
+                  />
+                </Field>
+                {form.gender === 'FEMALE' && (
+                  <Field id="pregnancy_context" label="Pregnancy Context" optionalLabel={t('optional')}>
+                    <label className="flex items-center gap-2 mt-2">
+                      <input
+                        type="checkbox"
+                        checked={form.pregnancy_context}
+                        onChange={(e) => setField('pregnancy_context', e.target.checked)}
+                        className="w-4 h-4 bg-slate-900 border-slate-700 rounded text-emerald-600 focus:ring-emerald-600"
+                        disabled={isSaving}
+                      />
+                      <span className="text-sm text-white">Patient is pregnant</span>
+                    </label>
+                  </Field>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="flex justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={handleRunAiTriage}
+                  disabled={isAiRunning || isSaving}
+                  className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:opacity-50"
+                >
+                  {isAiRunning ? <Spinner /> : null}
+                  {isAiRunning ? t('runningAi') : t('runAiTriage')}
+                </button>
+              </div>
+
+              {aiPendingOffline && (
+                <div className="mt-4 p-4 rounded-lg bg-amber-950 border border-amber-800 text-amber-200 text-sm">
+                  {t('aiAnalysisPending')}
+                </div>
+              )}
+
+              {aiResult && (
+                <div className="mt-6 p-5 rounded-xl border border-indigo-500/30 bg-indigo-950/20 space-y-4">
+                  <div className="flex items-center gap-3 border-b border-indigo-500/20 pb-3">
+                    <span className="text-indigo-400 font-semibold">{t('aiAssistedTriage')}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-xs text-slate-400 uppercase">{t('riskScore')}</h4>
+                      <p className="text-sm text-white mt-1">{aiResult.risk_score}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs text-slate-400 uppercase">{t('urgency')}</h4>
+                      <p className="text-sm text-white mt-1">{aiResult.referral_urgency}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs text-slate-400 uppercase">{t('possibleHealthConcerns')}</h4>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {aiResult.health_concerns.map((c, i) => (
+                        <li key={i} className="text-xs bg-indigo-900/50 text-indigo-200 px-2 py-1 rounded border border-indigo-800/50">{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {aiResult.missing_info.length > 0 && (
+                    <div>
+                      <h4 className="text-xs text-slate-400 uppercase">{t('missingInformation')}</h4>
+                      <ul className="mt-1 list-disc list-inside text-sm text-amber-300/80">
+                        {aiResult.missing_info.map((m, i) => <li key={i}>{m}</li>)}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="bg-slate-950/50 p-3 rounded-lg text-xs text-slate-400 border border-slate-800">
+                    <strong>{t('safetyNote')}:</strong> {t('aiDisclaimer')}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 mt-6 border-t border-slate-800 pt-6">
                 <Field error={errors.risk_level} id="risk_level" label={t('riskLevel')} required optionalLabel={t('optional')}>
                   <div className="relative">
                     <select

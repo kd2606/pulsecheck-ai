@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function DistrictLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -154,6 +155,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           </div>
           
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             {/* Sync Warning Widget */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-md">
               <Activity className="size-4 text-amber-600" />
