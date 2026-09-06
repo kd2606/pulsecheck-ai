@@ -334,6 +334,7 @@
       "returnHome": "Return Home"
     },
     "pin": {
+      "createDevicePin": "Create Device PIN",
       "setDevicePin": "Set Device PIN",
       "confirmPin": "Confirm PIN",
       "unlockRecords": "Unlock offline records",
@@ -341,6 +342,9 @@
       "pinRequired": "PIN required",
       "deviceLocked": "Device locked",
       "unlockFailed": "Unlock failed",
+      "unlockDevice": "Unlock Device",
+      "setupSuccess": "Device PIN created successfully",
+      "setupFailed": "Failed to create Device PIN",
       "recoveryLimitation": "If you forget your PIN, offline data cannot be recovered without device reset.",
       "lockSignOut": "Lock / Sign out",
       "secureOfflineExplanation": "This PIN encrypts and unlocks offline patient records safely on this device."

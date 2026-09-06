@@ -58,7 +58,7 @@ export default function PinGuard({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const material = await OfflineCrypto.setupKeyWithPIN(pin);
-      await db.key_material.add(material);
+      await db.key_material.add({ id: material.keyId, ...material });
       setUnlocked(true);
       toast.success(t('setupSuccess') || 'Device PIN created successfully');
     } catch (error: any) {
