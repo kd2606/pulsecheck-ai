@@ -14,11 +14,17 @@ export default function Hero() {
           {isPublicHealth ? "AI-ASSISTED PUBLIC HEALTH COORDINATION" : "AI-ASSISTED RURAL CARE COORDINATION"}
         </p>
         <h1 className={styles.heroTitle}>
-          {isPublicHealth ? "Connect frontline workers, public facilities and district health teams." : "Connect every rural patient to the care they need."}
+          Offline-first rural healthcare coordination for ASHA workers and public-health teams.
         </h1>
         <p className={styles.heroSubtitle}>
-          DiagnoVerse strengthens rural care coordination by helping frontline health workers capture consent-aware intake, assess risk, coordinate referrals, find appropriate facilities, support queue management and close follow-up loops—even in low-connectivity settings.
+          DiagnoVerse supports structured intake, preliminary risk prioritization, service-aware referrals and follow-up continuity in low-connectivity settings. It does not provide autonomous diagnosis or treatment.
         </p>
+        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fffbeb', borderLeft: '4px solid #f59e0b', borderRadius: '4px', fontSize: '0.875rem', color: '#b45309' }}>
+          <strong>Prototype notice:</strong> This demonstration uses synthetic data only. Do not enter real patient information.
+        </div>
+        <div style={{ marginTop: '0.5rem', marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#fef2f2', borderLeft: '4px solid #ef4444', borderRadius: '4px', fontSize: '0.875rem', color: '#b91c1c' }}>
+          <strong>Emergency notice:</strong> If you are experiencing an emergency, do not wait for this application. Contact local emergency services, including 108 where applicable, or visit the nearest appropriate healthcare facility.
+        </div>
         <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           {publicNavigationConfig.showPatientEntry && (
             <Link href="/en/auth/patient" className={styles.btnPrimary} style={{ background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1' }}>

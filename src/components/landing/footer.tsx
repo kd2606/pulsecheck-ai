@@ -33,8 +33,8 @@ export default function Footer() {
         <div>
           <h4 className={styles.footerColTitle}>Legal</h4>
           <div className={styles.footerLinks}>
-            <Link href="/en/privacy-policy" prefetch={false} className={styles.footerLink}>Privacy Policy</Link>
-            <Link href="/disclaimer" prefetch={false} className={styles.footerLink}>Medical Disclaimer</Link>
+            <Link href="/en/privacy" prefetch={false} className={styles.footerLink}>Privacy Policy</Link>
+            <Link href="/en/disclaimer" prefetch={false} className={styles.footerLink}>Medical Disclaimer</Link>
           </div>
         </div>
       </div>

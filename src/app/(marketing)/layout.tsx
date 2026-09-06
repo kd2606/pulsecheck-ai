@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://diagnoverse.ai"),
   title: "Diagnoverse AI — Rural Health Accessibility Platform",
   description:
-    "AI-powered health diagnostic and tracking platform designed for rural health accessibility. Features vision scan, cough analysis, skin scan, and mental health screening.",
+    "Offline-first rural healthcare coordination for ASHA workers and public-health teams. Implemented in prototype.",
   icons: {
     icon: "/icon.svg",
   },
@@ -49,7 +49,7 @@ export default function RootLayout({
         "@type": "MedicalWebPage",
         name: "Diagnoverse AI — Rural Health Accessibility Platform",
         description:
-          "AI-powered health diagnostic and tracking platform designed for rural health accessibility. Features vision scan, cough analysis, skin scan, and mental health screening.",
+          "Offline-first rural healthcare coordination for ASHA workers and public-health teams. Implemented in prototype.",
         url: "https://diagnoverse.ai",
       },
     ],
