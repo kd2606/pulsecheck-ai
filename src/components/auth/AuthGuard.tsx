@@ -67,19 +67,24 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         }
 
         if (effectiveRole && effectiveRole !== role) {
-          try {
-            const token = await user.getIdToken();
-            await fetch('/api/auth/assign-role', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ idToken: token, role: effectiveRole }),
-            });
-            // Force refresh token to get the newly assigned custom claims
-            await user.getIdToken(true);
-            result = await user.getIdTokenResult();
-            role = result.claims.role as string | undefined;
-          } catch (e) {
-            console.warn("Role assignment failed:", e);
+          if (!sessionStorage.getItem('role_assign_attempted')) {
+            sessionStorage.setItem('role_assign_attempted', 'true');
+            try {
+              const token = await user.getIdToken();
+              await fetch('/api/auth/assign-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: token, role: effectiveRole }),
+              });
+              // Force refresh token to get the newly assigned custom claims
+              await user.getIdToken(true);
+              result = await user.getIdTokenResult();
+              role = result.claims.role as string | undefined;
+            } catch (e) {
+              console.warn("Role assignment failed:", e);
+            }
+          } else {
+            console.warn("Role assignment already attempted this session. Skipping to avoid infinite loop.");
           }
         }
       }

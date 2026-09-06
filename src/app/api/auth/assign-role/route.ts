@@ -59,10 +59,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, role });
     } catch (adminError: any) {
       console.error('ASSIGN-ROLE ADMIN ERROR:', adminError);
-      return NextResponse.json({ error: adminError.message || 'server admin error' }, { status: 500 });
+      return NextResponse.json({ success: false, error: "Admin SDK missing/failed, role assignment skipped" }, { status: 200 });
     }
   } catch (error: any) {
     console.error('ASSIGN-ROLE ERROR:', error);
-    return NextResponse.json({ error: error.message || 'server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Admin SDK missing/failed, role assignment skipped" }, { status: 200 });
   }
 }
