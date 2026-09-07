@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export default function DistrictLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,16 +28,17 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
   const params = useParams();
   const pathname = usePathname();
   const locale = params.locale as string || 'en';
+  const t = useTranslations('district');
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'SLA Dashboard', href: `/${locale}/dashboard/district` },
-    { icon: Activity, label: 'Command Analytics', href: `/${locale}/dashboard/district/analytics` },
-    { icon: Map, label: 'Facility Mapping', href: `/${locale}/dashboard/district/facilities` },
-    { icon: Building, label: 'Service Catalog', href: `/${locale}/dashboard/district/catalog` },
-    { icon: AlertOctagon, label: 'Critical Incidents', href: `/${locale}/dashboard/district/incidents` },
-    { icon: FileText, label: 'Audit Reports', href: `/${locale}/dashboard/district/audit` },
-    { icon: Settings, label: 'System Config', href: `/${locale}/dashboard/district/config` },
-    { icon: User, label: 'My Profile', href: `/${locale}/dashboard/district/profile` },
+    { icon: LayoutDashboard, label: t('dashboard.title'), href: `/${locale}/dashboard/district`, rawLabel: 'SLA Dashboard' },
+    { icon: Activity, label: t('dashboard.analytics'), href: `/${locale}/dashboard/district/analytics`, rawLabel: 'Command Analytics' },
+    { icon: Map, label: t('dashboard.facilities'), href: `/${locale}/dashboard/district/facilities`, rawLabel: 'Facility Mapping' },
+    { icon: Building, label: t('dashboard.catalog'), href: `/${locale}/dashboard/district/catalog`, rawLabel: 'Service Catalog' },
+    { icon: AlertOctagon, label: t('dashboard.incidents'), href: `/${locale}/dashboard/district/incidents`, rawLabel: 'Critical Incidents' },
+    { icon: FileText, label: t('dashboard.audit'), href: `/${locale}/dashboard/district/audit`, rawLabel: 'Audit Reports' },
+    { icon: Settings, label: t('dashboard.config'), href: `/${locale}/dashboard/district/config`, rawLabel: 'System Config' },
+    { icon: User, label: t('dashboard.profile'), href: `/${locale}/dashboard/district/profile`, rawLabel: 'My Profile' },
   ];
 
   return (
@@ -77,11 +79,11 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
               ? pathname === item.href 
               : pathname.startsWith(item.href);
               
-            const isRoadmap = ['Facility Mapping', 'Critical Incidents', 'Audit Reports', 'System Config'].includes(item.label);
+            const isRoadmap = ['Facility Mapping', 'Critical Incidents', 'Audit Reports', 'System Config'].includes(item.rawLabel);
             
             return (
               <Link
-                key={item.label}
+                key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
@@ -93,7 +95,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
               >
                 <Icon className={cn("size-5", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
                 {item.label}
-                {isRoadmap && <Badge variant="secondary" className="ml-auto text-[10px] leading-tight px-1.5 h-4 bg-muted text-muted-foreground">Planned</Badge>}
+                {isRoadmap && <Badge variant="secondary" className="ml-auto text-[10px] leading-tight px-1.5 h-4 bg-muted text-muted-foreground">{t('roadmap.planned')}</Badge>}
               </Link>
             );
           })}
@@ -109,7 +111,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
               </div>
               <div className="text-left flex-1">
                 <p className="text-sm font-semibold text-foreground">Dr. C. Mishra</p>
-                <p className="text-xs text-amber-500 font-medium">Chief Medical Officer</p>
+                <p className="text-xs text-amber-500 font-medium">{t('profile.cmo')}</p>
               </div>
             </div>
           </Link>
@@ -124,7 +126,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
             }}
           >
             <LogOut className="size-4 mr-2" />
-            Sign Out
+            {t('dashboard.signOut')}
           </Button>
         </div>
       </aside>
@@ -148,20 +150,13 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
                     ? pathname === item.href 
                     : pathname.startsWith(item.href)
                 );
-                return activeItem ? activeItem.label : "SLA Dashboard";
+                return activeItem ? activeItem.label : t('dashboard.title');
               })()}
             </h2>
           </div>
           
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
-            {/* Sync Warning Widget */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-md">
-              <Activity className="size-4 text-amber-600" />
-              <span className="text-xs font-medium text-amber-800">
-                12 ASHA devices haven't synced in 72+ hrs (Demo/Synthetic data)
-              </span>
-            </div>
 
             <Button variant="ghost" size="icon" className="relative text-muted-foreground">
               <Bell className="size-5" />
@@ -171,14 +166,6 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
         </header>
 
         <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-          {/* Mobile Sync Warning */}
-          <div className="lg:hidden flex items-center gap-3 p-3 mb-6 bg-amber-50 border border-amber-200 rounded-lg">
-            <Activity className="size-5 text-amber-600 shrink-0" />
-            <p className="text-sm font-medium text-amber-800">
-              Warning (Demo/Synthetic data): 12 ASHA devices haven't synced in 72+ hours. Local offline queues may be full.
-            </p>
-          </div>
-
           {children}
         </div>
       </main>

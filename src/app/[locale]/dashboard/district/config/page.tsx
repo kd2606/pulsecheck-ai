@@ -1,7 +1,10 @@
 import { Clock, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
+import { useTranslations } from "next-intl";
+
 export default function ConfigPage() {
+  const t = useTranslations("district");
   return (
     <div className="max-w-4xl mx-auto space-y-6 p-4">
       <h1 className="text-2xl font-bold text-foreground">System Config</h1>
@@ -22,11 +25,11 @@ export default function ConfigPage() {
               <Settings className="size-4 text-muted-foreground" />
               Current Status
             </p>
-            <p className="text-muted-foreground">Not Implemented. Configuration is currently hardcoded in the deployment environment variables.</p>
+            <p className="text-muted-foreground">{t("roadmap.configStatus")}</p>
           </div>
           <div className="bg-secondary/50 p-4 rounded-lg space-y-2">
-            <p className="font-semibold text-muted-foreground">Planned Next Step:</p>
-            <p className="text-muted-foreground">Migrate static thresholds to the centralized Firebase Remote Config module for real-time updates.</p>
+            <p className="font-semibold text-muted-foreground">{t("roadmap.plannedNextStep")}:</p>
+            <p className="text-muted-foreground">{t("roadmap.configNext")}</p>
           </div>
         </CardContent>
       </Card>

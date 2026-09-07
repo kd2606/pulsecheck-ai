@@ -6,7 +6,10 @@ import { Activity, Clock, FileText, Calendar, CheckCircle, AlertTriangle, Trendi
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+import { useTranslations } from 'next-intl';
+
 export default function AnalyticsPage() {
+  const t = useTranslations('district');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
@@ -96,8 +99,8 @@ export default function AnalyticsPage() {
     <div className="p-4 md:p-8 space-y-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">District Command Analytics</h1>
-          <p className="text-sm text-muted-foreground mt-1">Aggregate public-health operational metrics.</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("analytics.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("analytics.subtitle")}</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-border">
@@ -119,7 +122,7 @@ export default function AnalyticsPage() {
             value={selectedFacility}
             onChange={e => setSelectedFacility(e.target.value)}
           >
-            <option value="">All Facilities</option>
+            <option value="">{t("analytics.allFacilities")}</option>
             {facilities.map(f => (
               <option key={f.id} value={f.id}>{f.name}</option>
             ))}
@@ -130,7 +133,7 @@ export default function AnalyticsPage() {
       {loading && !data ? (
         <div className="flex justify-center items-center h-64 text-muted-foreground">
           <Activity className="size-8 animate-spin text-blue-500 mr-3" />
-          Loading secure aggregate metrics...
+          {t("analytics.loading")}
         </div>
       ) : data ? (
         <>
@@ -139,7 +142,7 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Total Referrals</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{t("analytics.totalReferrals")}</p>
                     <h3 className="text-3xl font-bold text-foreground">{data.totalReferrals}</h3>
                   </div>
                   <div className="p-3 bg-blue-50 rounded-lg"><Activity className="size-5 text-blue-600"/></div>
@@ -151,7 +154,7 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Pending Referrals</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{t("analytics.pendingReferrals")}</p>
                     <h3 className="text-3xl font-bold text-amber-600">{data.pendingReferrals}</h3>
                   </div>
                   <div className="p-3 bg-amber-50 rounded-lg"><Clock className="size-5 text-amber-600"/></div>
@@ -163,12 +166,12 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Avg Turnaround Time</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{t("analytics.avgTurnaround")}</p>
                     <h3 className="text-3xl font-bold text-foreground">
                       {data.averageTurnaroundHours > 0 ? `${data.averageTurnaroundHours.toFixed(1)} hrs` : '--'}
                     </h3>
                     {data.missingSlaData > 0 && (
-                      <p className="text-[10px] text-muted-foreground mt-1">Excludes {data.missingSlaData} records missing SLA timestamps.</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{t('analytics.missingSla', { count: data.missingSlaData })}</p>
                     )}
                   </div>
                   <div className="p-3 bg-emerald-50 rounded-lg"><CheckCircle className="size-5 text-emerald-600"/></div>
@@ -180,7 +183,7 @@ export default function AnalyticsPage() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Overdue Follow-ups</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{t("analytics.overdueFollowUps")}</p>
                     <h3 className="text-3xl font-bold text-red-600">{data.overdueFollowUps}</h3>
                   </div>
                   <div className="p-3 bg-red-50 rounded-lg"><AlertTriangle className="size-5 text-red-600"/></div>
@@ -192,20 +195,20 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-card border-border shadow-sm">
               <CardHeader className="border-b border-border pb-4">
-                <CardTitle className="text-base font-semibold text-foreground">Triage Distribution</CardTitle>
+                <CardTitle className="text-base font-semibold text-foreground">{t("analytics.triageDistribution")}</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"/> <span className="text-sm font-medium text-muted-foreground">RED (Emergency)</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"/> <span className="text-sm font-medium text-muted-foreground">{t("analytics.red")}</span></div>
                     <span className="font-semibold">{data.triageCounts?.RED || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"/> <span className="text-sm font-medium text-muted-foreground">YELLOW (Urgent)</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"/> <span className="text-sm font-medium text-muted-foreground">{t("analytics.yellow")}</span></div>
                     <span className="font-semibold">{data.triageCounts?.YELLOW || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"/> <span className="text-sm font-medium text-muted-foreground">GREEN (Routine)</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"/> <span className="text-sm font-medium text-muted-foreground">{t("analytics.green")}</span></div>
                     <span className="font-semibold">{data.triageCounts?.GREEN || 0}</span>
                   </div>
                 </div>
@@ -214,13 +217,13 @@ export default function AnalyticsPage() {
 
             <Card className="bg-card border-border shadow-sm">
               <CardHeader className="border-b border-border pb-4">
-                <CardTitle className="text-base font-semibold text-foreground">Workload Summary</CardTitle>
+                <CardTitle className="text-base font-semibold text-foreground">{t("analytics.workloadSummary")}</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between text-sm font-medium text-muted-foreground mb-2">
-                      <span>Appointments Completed</span>
+                      <span>{t("analytics.appointmentsCompleted")}</span>
                       <span>{data.appointments.completed} / {data.appointments.total}</span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
@@ -229,7 +232,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div>
                     <div className="flex justify-between text-sm font-medium text-muted-foreground mb-2">
-                      <span>Follow-up Tasks Completed</span>
+                      <span>{t("analytics.followUpsCompleted")}</span>
                       <span>{data.followUps.completed} / {data.followUps.total}</span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
@@ -243,7 +246,7 @@ export default function AnalyticsPage() {
 
           <Card className="bg-card border-border shadow-sm">
             <CardHeader className="border-b border-border pb-4">
-              <CardTitle className="text-base font-semibold text-foreground">Referral Trend (Last 30 Days)</CardTitle>
+              <CardTitle className="text-base font-semibold text-foreground">{t("analytics.referralTrend")}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               {data.trend && data.trend.length > 0 ? (
@@ -266,7 +269,7 @@ export default function AnalyticsPage() {
                  </div>
               ) : (
                 <div className="text-center py-12 text-muted-foreground text-sm">
-                  No trend data available for this range.
+                  {t("analytics.noTrendData")}
                 </div>
               )}
             </CardContent>
@@ -275,7 +278,7 @@ export default function AnalyticsPage() {
       ) : (
         <div className="flex flex-col justify-center items-center h-64 text-muted-foreground bg-card rounded-xl border border-border border-dashed">
           <FileText className="size-12 text-muted-foreground mb-4" />
-          <p>No aggregate data available.</p>
+          <p>{t("analytics.noData")}</p>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -31,6 +32,8 @@ export default function DistrictProfilePage() {
 
     const [errors, setErrors] = useState({ name: "", email: "" });
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    const t = useTranslations('district');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -117,10 +120,10 @@ export default function DistrictProfilePage() {
             });
             
             setInitialData(prev => ({ ...prev, name: formData.name, email: formData.email }));
-            toast.success("Profile updated successfully!");
+            toast.success(t('profile.success'));
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || "Failed to update profile. Please try again.");
+            toast.error(error.message || t('profile.error'));
         } finally {
             setSaving(false);
         }
@@ -128,7 +131,7 @@ export default function DistrictProfilePage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-12">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">System Profile & Settings</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('profile.title')}</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="col-span-1 shadow-sm border-border bg-card">
@@ -136,11 +139,11 @@ export default function DistrictProfilePage() {
                         <div className="h-24 w-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 text-3xl font-bold">
                             {initialData.name ? initialData.name.charAt(0).toUpperCase() : "CM"}
                         </div>
-                        <h2 className="text-xl font-bold text-foreground">{initialData.name || "Loading..."}</h2>
-                        <p className="text-sm text-muted-foreground font-medium">Chief Medical Officer</p>
+                        <h2 className="text-xl font-bold text-foreground">{initialData.name || t('profile.loading')}</h2>
+                        <p className="text-sm text-muted-foreground font-medium">{t('profile.cmo')}</p>
                         <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">
                             <Shield className="w-3.5 h-3.5" />
-                            Admin Access
+                            {t('profile.adminAccess')}
                         </div>
                     </CardContent>
                 </Card>
@@ -148,12 +151,12 @@ export default function DistrictProfilePage() {
                 <Card className="col-span-1 md:col-span-2 shadow-sm border-border bg-card">
                     <form onSubmit={handleSubmit}>
                         <CardHeader>
-                            <CardTitle className="text-lg text-foreground">Personal Information</CardTitle>
-                            <CardDescription>Administrative details and contact info. Role and scope changes require system administrator assistance.</CardDescription>
+                            <CardTitle className="text-lg text-foreground">{t('profile.personalInfo')}</CardTitle>
+                            <CardDescription>{t('profile.personalInfoDesc')}</CardDescription>
                             {hasUnsavedChanges && (
                                 <div className="mt-2 text-sm text-amber-600 flex items-center gap-1 font-medium bg-amber-50 p-2 rounded-md border border-amber-200">
                                     <AlertCircle className="w-4 h-4" />
-                                    You have unsaved changes
+                                    {t('profile.unsavedChanges')}
                                 </div>
                             )}
                         </CardHeader>
@@ -164,7 +167,7 @@ export default function DistrictProfilePage() {
                                 <>
                                     <div className="space-y-2">
                                         <Label htmlFor="profile-name" className="text-foreground flex items-center text-xs uppercase tracking-wider font-bold">
-                                            <User className="w-4 h-4 mr-2 text-muted-foreground" /> Full Name
+                                            <User className="w-4 h-4 mr-2 text-muted-foreground" /> {t('profile.fullName')}
                                         </Label>
                                         <Input 
                                             id="profile-name"
@@ -177,7 +180,7 @@ export default function DistrictProfilePage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="profile-email" className="text-foreground flex items-center text-xs uppercase tracking-wider font-bold">
-                                            <Mail className="w-4 h-4 mr-2 text-muted-foreground" /> Email Address
+                                            <Mail className="w-4 h-4 mr-2 text-muted-foreground" /> {t('profile.email')}
                                         </Label>
                                         <Input 
                                             id="profile-email"
@@ -191,7 +194,7 @@ export default function DistrictProfilePage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="profile-jurisdiction" className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-bold">
-                                            <Building className="w-4 h-4 mr-2" /> Jurisdiction (Read Only)
+                                            <Building className="w-4 h-4 mr-2" /> {t('profile.jurisdiction')}
                                         </Label>
                                         <Input 
                                             id="profile-jurisdiction"
@@ -204,7 +207,7 @@ export default function DistrictProfilePage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="profile-uid" className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-bold">
-                                                <Key className="w-4 h-4 mr-2" /> System UID
+                                                <Key className="w-4 h-4 mr-2" /> {t('profile.uid')}
                                             </Label>
                                             <Input 
                                                 id="profile-uid"
@@ -216,7 +219,7 @@ export default function DistrictProfilePage() {
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="profile-access" className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-bold">
-                                                <Shield className="w-4 h-4 mr-2" /> Access Level
+                                                <Shield className="w-4 h-4 mr-2" /> {t('profile.accessLevel')}
                                             </Label>
                                             <Input 
                                                 id="profile-access"
@@ -238,7 +241,7 @@ export default function DistrictProfilePage() {
                                 onClick={handleCancel}
                                 disabled={saving || !hasUnsavedChanges}
                             >
-                                Cancel
+                                {t('profile.cancel')}
                             </Button>
                             <Button 
                                 type="submit" 
@@ -246,7 +249,7 @@ export default function DistrictProfilePage() {
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                             >
                                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />} 
-                                {saving ? "Saving..." : "Save Changes"}
+                                {saving ? t('profile.saving') : t('profile.save')}
                             </Button>
                         </CardFooter>
                     </form>
