@@ -218,7 +218,7 @@ function LoginContent() {
                                 {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Mail className="w-4 h-4 mr-2" />} Login with Email
                             </Button>
                             <Button type="button" variant="outline" className="w-full h-12 rounded-2xl border-slate-200 bg-white text-slate-700 font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-[0.98]" disabled={loading} onClick={handleDemoLogin}>
-                                {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null} Demo District Access
+                                {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null} Demo Login
                             </Button>
                         </form>
 

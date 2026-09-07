@@ -636,7 +636,7 @@ export default function NewIntakePage() {
               </Field>
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                <Field error={errors.temperature_c} id="temperature_c" label={t('temperature')} required optionalLabel={t('optional')}>
+                <Field error={errors.temperature_c} id="temperature_c" label="Temperature (°C) *" required optionalLabel={t('optional')}>
                   <input
                     id="temperature_c"
                     name="temperature_c"
@@ -799,7 +799,7 @@ export default function NewIntakePage() {
                 <Field error={errors.risk_level} id="risk_level" label={t('riskLevel')} required optionalLabel={t('optional')}>
                   <div className="relative">
                     <Select
-                      value={form.risk_level || undefined}
+                      value={form.risk_level || ""}
                       onValueChange={(value) => handleRiskChange(value as RiskLevel)}
                       disabled={true}
                     >
