@@ -17,11 +17,7 @@ export default function Navbar() {
       </div>
       
       <div className={styles.navLinks}>
-        <a href="#features" className={styles.navLink}>Features</a>
-        <a href="#how-it-works" className={styles.navLink}>How It Works</a>
-        <a href="#workers" className={styles.navLink}>For Health Workers</a>
-        <a href="#impact" className={styles.navLink}>Impact</a>
-        <a href="#safety" className={styles.navLink}>Safety</a>
+        {/* Minimal navbar: inner links removed */}
       </div>
 
       <div className={styles.navRight}>
@@ -39,11 +35,6 @@ export default function Navbar() {
 
       {isOpen && (
         <div className={styles.mobileDrawer}>
-          <a href="#features" className={styles.navLink} onClick={() => setIsOpen(false)}>Features</a>
-          <a href="#how-it-works" className={styles.navLink} onClick={() => setIsOpen(false)}>How It Works</a>
-          <a href="#workers" className={styles.navLink} onClick={() => setIsOpen(false)}>For Health Workers</a>
-          <a href="#impact" className={styles.navLink} onClick={() => setIsOpen(false)}>Impact</a>
-          <a href="#safety" className={styles.navLink} onClick={() => setIsOpen(false)}>Safety</a>
           {publicNavigationConfig.showPatientEntry && (
               <Link href="/en/auth/patient" className={styles.navLink} onClick={() => setIsOpen(false)}>Patient Portal</Link>
           )}

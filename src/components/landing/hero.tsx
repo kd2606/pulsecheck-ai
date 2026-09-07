@@ -19,13 +19,7 @@ export default function Hero() {
         <p className={styles.heroSubtitle}>
           CareSanchaar helps frontline workers, Medical Officers, facilities, and district teams coordinate care from community intake to referral, queue support, and follow-up—even in low-connectivity settings.
         </p>
-        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fffbeb', borderLeft: '4px solid #f59e0b', borderRadius: '4px', fontSize: '0.875rem', color: '#b45309' }}>
-          <strong>Prototype notice:</strong> This demonstration uses synthetic/staging data only. Do not enter real patient information.
-        </div>
-        <div style={{ marginTop: '0.5rem', marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#fef2f2', borderLeft: '4px solid #ef4444', borderRadius: '4px', fontSize: '0.875rem', color: '#b91c1c' }}>
-          <strong>Emergency notice:</strong> If you are experiencing an emergency, do not wait for this application. Contact local emergency services, including 108 where applicable, or visit the nearest appropriate healthcare facility.
-        </div>
-        <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div className={styles.heroActions} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1.5rem' }}>
           {publicNavigationConfig.showPatientEntry && (
             <Link href="/en/auth/patient" className={styles.btnPrimary} style={{ background: 'transparent', color: '#64748b', border: '1px solid #cbd5e1' }}>
               Patient Portal
