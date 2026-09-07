@@ -3,7 +3,7 @@ import Image from "next/image";
 interface DiagnoverseLogoProps {
     /** Pixel size of the square logo. Default: 32 */
     size?: number;
-    /** Show the wordmark ("Diagnoverse AI") beside the icon. Default: true */
+    /** Show the wordmark ("CareSanchaar") beside the icon. Default: true */
     showWordmark?: boolean;
     className?: string;
 }
@@ -13,7 +13,7 @@ export function DiagnoverseLogo({ size = 32, showWordmark = true, className = ""
         <div className={`flex items-center gap-2.5 ${className}`}>
             <Image
                 src="/diagnoverse-logo.svg"
-                alt="Diagnoverse AI Logo"
+                alt="CareSanchaar Logo"
                 width={size}
                 height={size}
                 priority
@@ -21,8 +21,7 @@ export function DiagnoverseLogo({ size = 32, showWordmark = true, className = ""
             />
             {showWordmark && (
                 <div className="flex flex-col leading-none">
-                    <span className="text-sm font-bold tracking-tight">Diagnoverse AI</span>
-                    <span className="text-[10px] text-muted-foreground tracking-wide">Health · Intelligence · Care</span>
+                    <span className="text-sm font-bold tracking-tight">CareSanchaar</span>
                 </div>
             )}
         </div>

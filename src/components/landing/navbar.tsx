@@ -13,7 +13,7 @@ export default function Navbar() {
     <nav className={styles.navbar}>
       <div className={styles.navLogo}>
         <Activity size={28} />
-        <span>DiagnoVerse</span>
+        <span>CareSanchaar</span>
       </div>
       
       <div className={styles.navLinks}>

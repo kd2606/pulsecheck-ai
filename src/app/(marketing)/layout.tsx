@@ -15,9 +15,9 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://diagnoverse.ai"),
-  title: "Diagnoverse AI — Rural Health Accessibility Platform",
+  title: "CareSanchaar - Care that reaches. Coordination that connects.",
   description:
-    "Offline-first rural healthcare coordination for ASHA workers and public-health teams. Implemented in prototype.",
+    "CareSanchaar is an offline-first public-health care-coordination platform that connects ASHA workers, Medical Officers, healthcare facilities, and district teams.",
   icons: {
     icon: "/icon.svg",
   },
@@ -39,17 +39,17 @@ export default function RootLayout({
     "@graph": [
       {
         "@type": "Organization",
-        name: "Diagnoverse AI",
+        name: "CareSanchaar",
         url: "https://diagnoverse.ai",
         logo: "https://diagnoverse.ai/icon.svg",
         description:
-          "AI-powered health diagnostic and tracking platform designed for rural health accessibility.",
+          "CareSanchaar is an offline-first public-health care-coordination platform that connects ASHA workers, Medical Officers, healthcare facilities, and district teams across intake, triage, referral, queue, and follow-up workflows.",
       },
       {
         "@type": "MedicalWebPage",
-        name: "Diagnoverse AI — Rural Health Accessibility Platform",
+        name: "CareSanchaar - Care that reaches. Coordination that connects.",
         description:
-          "Offline-first rural healthcare coordination for ASHA workers and public-health teams. Implemented in prototype.",
+          "CareSanchaar is an offline-first public-health care-coordination platform that connects ASHA workers, Medical Officers, healthcare facilities, and district teams across intake, triage, referral, queue, and follow-up workflows.",
         url: "https://diagnoverse.ai",
       },
     ],

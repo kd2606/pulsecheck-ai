@@ -10,7 +10,7 @@ export default function FeatureGrid() {
     {
       icon: <Activity size={32} />,
       title: "Assisted Digital Triage",
-      desc: "Capture symptoms, vitals and red flags through a guided workflow. DiagnoVerse helps frontline workers prioritize cases while keeping clinical decisions with qualified professionals."
+      desc: "Capture symptoms, vitals and red flags through a guided workflow. CareSanchaar helps frontline workers prioritize cases while keeping clinical decisions with qualified professionals."
     },
     {
       icon: <ArrowRightCircle size={32} />,
@@ -61,7 +61,7 @@ export default function FeatureGrid() {
       <div className={styles.featureGridContainer}>
         <div className={styles.featureGridHeader}>
           <h2 className={styles.featureGridTitle}>From first contact to completed care</h2>
-          <p className={styles.featureCardDesc}>DiagnoVerse strengthens the public-health system by helping frontline workers identify risk, coordinate services and close the loop on every referral.</p>
+          <p className={styles.featureCardDesc}>CareSanchaar strengthens the public-health system by helping frontline workers identify risk, coordinate services and close the loop on every referral.</p>
         </div>
         <div className={styles.featureGridGrid}>
           {features.map((feature, idx) => (

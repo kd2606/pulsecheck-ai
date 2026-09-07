@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'DiagnoVerse AI'
+export const alt = 'CareSanchaar'
 export const size = {
   width: 1200,
   height: 630,
@@ -24,8 +24,8 @@ export default async function Image() {
           flexDirection: 'column',
         }}
       >
-        <div style={{ color: '#14B8A6', fontSize: 80, fontWeight: 'bold' }}>DiagnoVerse AI</div>
-        <div style={{ fontSize: 32, marginTop: 20, color: '#B8BFCC' }}>Rural Health Accessibility Platform</div>
+        <div style={{ color: '#14B8A6', fontSize: 80, fontWeight: 'bold' }}>CareSanchaar</div>
+        <div style={{ fontSize: 32, marginTop: 20, color: '#B8BFCC' }}>Care that reaches. Coordination that connects.</div>
       </div>
     ),
     {

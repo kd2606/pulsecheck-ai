@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "PulseCheck AI",
+    "appName": "CareSanchaar",
     "tagline": "Rural Health Accessibility Platform",
     "loading": "Loading...",
     "submit": "Submit",
@@ -32,7 +32,7 @@
     "home": "Home"
   },
   "auth": {
-    "title": "Welcome to PulseCheck AI",
+    "title": "Welcome to CareSanchaar",
     "subtitle": "Your AI-powered health companion for accessible healthcare",
     "googleSignIn": "Sign in with Google",
     "phoneSignIn": "Sign in with Phone",
@@ -64,7 +64,7 @@
     "quickActions": "Quick Health Actions",
     "recentReports": "Recent Reports",
     "systemOnline": "System Online",
-    "welcome": "Welcome to Diagnoverse",
+    "welcome": "Welcome to CareSanchaar",
     "health": "Health",
     "dashboardSpan": "Dashboard",
     "aiHelperReady": "AI Helper Ready",
@@ -181,12 +181,12 @@
   },
   "disclaimer": {
     "title": "Medical Disclaimer",
-    "text": "PulseCheck AI provides health information for educational purposes only. Results are AI-generated estimations and are NOT medical diagnoses or prescriptions. Always consult a qualified healthcare professional for medical advice, diagnosis, or treatment. Do not disregard professional medical advice because of information provided by this application."
+    "text": "CareSanchaar provides health information for educational purposes only. Results are AI-generated estimations and are NOT medical diagnoses or prescriptions. Always consult a qualified healthcare professional for medical advice, diagnosis, or treatment. Do not disregard professional medical advice because of information provided by this application."
   },
   "chat": {
     "title": "Medu",
     "placeholder": "Type a message...",
-    "welcome": "Hi! I'm Medu, your PulseCheck AI assistant. How can I help you today?"
+    "welcome": "Hi! I'm Medu, your CareSanchaar assistant. How can I help you today?"
   },
   "symptomChecker": {
     "title": "Symptom Checker",
