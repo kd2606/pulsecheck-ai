@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     let allowedDistrict = null;
     let allowedFacility = null;
     
-    if (role === 'district_admin' || role === 'asha' || role === 'admin') {
+    if (role === 'district_admin' || role === 'asha' || role === 'worker' || role === 'admin') {
        allowedDistrict = decodedToken.district_id;
     } else if (role === 'mo') {
        allowedDistrict = decodedToken.district_id;

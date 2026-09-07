@@ -406,7 +406,16 @@
       "qrHint": "Show this to facility staff upon arrival.",
       "activeBadge": "Active",
       "emptyTitle": "No Active Referrals",
-      "emptyDesc": "There are currently no active referrals requiring your attention."
+      "emptyDesc": "There are currently no active referrals requiring your attention.",
+      "THPATIENT": "Patient",
+      "THFACILITY": "Facility",
+      "THTOKEN": "Token / Appt",
+      "THURGENCY": "Urgency",
+      "THSTATUS": "Status",
+      "emergencyCount": "Emergency Cases",
+      "unscheduled": "Unscheduled",
+      "noFacilities": "No facilities found",
+      "syncCatalogNow": "Sync Catalog Now"
     },
     "queue": {
       "title": "Queue & Appointments"
