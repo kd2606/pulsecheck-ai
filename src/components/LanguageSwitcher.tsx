@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useParams } from 'next/navigation';
 import { Globe } from 'lucide-react';
-import { ChangeEvent } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -16,8 +16,7 @@ export default function LanguageSwitcher() {
   const params = useParams();
   const locale = (params.locale as string) || 'en';
 
-  const switchLanguage = (e: ChangeEvent<HTMLSelectElement>) => {
-    const nextLocale = e.target.value;
+  const switchLanguage = (nextLocale: string) => {
     if (!pathname) return;
     
     const segments = pathname.split('/');
@@ -29,20 +28,20 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Globe className="w-4 h-4 text-slate-400" />
-      <select
-        value={locale}
-        onChange={switchLanguage}
-        className="bg-transparent text-sm font-medium text-slate-200 outline-none cursor-pointer focus:ring-0 border-none appearance-none hover:text-white"
-        aria-label="Select language"
-      >
-        {LOCALES.map((loc) => (
-          <option key={loc.code} value={loc.code} className="bg-slate-900 text-slate-200">
-            {loc.label}
-          </option>
-        ))}
-      </select>
+    <div className="flex items-center">
+      <Select value={locale} onValueChange={switchLanguage}>
+        <SelectTrigger className="h-8 border-none bg-transparent shadow-none hover:bg-secondary/50 focus:ring-0 gap-2 px-2 text-sm font-medium text-foreground outline-none">
+          <Globe className="w-4 h-4 text-muted-foreground" />
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end">
+          {LOCALES.map((loc) => (
+            <SelectItem key={loc.code} value={loc.code} className="cursor-pointer">
+              {loc.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

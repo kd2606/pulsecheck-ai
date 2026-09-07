@@ -53,18 +53,18 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
   }, [patientId]);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0B1120]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
        <Activity className="w-8 h-8 animate-spin text-emerald-500 mb-4" />
-       <p className="text-slate-400 font-medium">Loading secure health record...</p>
+       <p className="text-muted-foreground font-medium">Loading secure health record...</p>
     </div>
   );
 
   if (error) return (
-    <div className="min-h-screen bg-[#0B1120] p-8 flex flex-col items-center">
-       <div className="max-w-md w-full bg-slate-900 rounded-2xl shadow-sm border border-red-500/20 p-8 text-center mt-12">
+    <div className="min-h-screen bg-background p-8 flex flex-col items-center">
+       <div className="max-w-md w-full bg-card rounded-2xl shadow-sm border border-red-500/20 p-8 text-center mt-12">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">Access Denied</h2>
-          <p className="text-slate-400 text-sm mb-6">{error}</p>
+          <p className="text-muted-foreground text-sm mb-6">{error}</p>
           <button 
             onClick={() => router.back()}
             className="px-6 py-2 bg-emerald-600 text-white rounded-full text-sm font-medium hover:bg-emerald-500"
@@ -85,8 +85,8 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
       case 'TRIAGE': return <Activity className="w-5 h-5 text-orange-400" />;
       case 'APPOINTMENT': return <Clock className="w-5 h-5 text-blue-400" />;
       case 'FOLLOW_UP_RECORD': return <Pill className="w-5 h-5 text-emerald-400" />;
-      case 'REFERRAL_EVENT': return <FileText className="w-5 h-5 text-slate-400" />;
-      default: return <Activity className="w-5 h-5 text-slate-400" />;
+      case 'REFERRAL_EVENT': return <FileText className="w-5 h-5 text-muted-foreground" />;
+      default: return <Activity className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -112,31 +112,31 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
+    <div className="min-h-screen bg-background">
       <SyncStatusBar />
       
-      <div className="bg-slate-900 border-b border-slate-800 sticky top-0 z-10">
+      <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => router.back()}
-              className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-400"
+              className="p-2 hover:bg-secondary rounded-full transition-colors text-muted-foreground"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div>
               <h1 className="text-xl font-bold text-white flex items-center gap-2">
-                <UserCircle className="w-6 h-6 text-slate-500" />
+                <UserCircle className="w-6 h-6 text-muted-foreground" />
                 {patient.name}
               </h1>
-              <div className="flex items-center gap-3 text-sm text-slate-400 mt-1">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                 <span>{patient.age}y • {patient.gender}</span>
                 <span>•</span>
                 <span className="flex items-center gap-1"><MapPin className="w-3 h-3"/> {patient.village}</span>
                 {patient.abha_id && patient.abha_id !== '[REDACTED]' && (
                   <>
                     <span>•</span>
-                    <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-xs border border-slate-700 text-slate-300">
+                    <span className="font-mono bg-secondary px-2 py-0.5 rounded text-xs border border-border text-muted-foreground">
                       ABHA: {patient.abha_id}
                     </span>
                   </>
@@ -149,7 +149,7 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
               <ShieldCheck className="w-4 h-4" />
               Consent: {consentStatus?.replace('_', ' ')}
             </span>
-            <span className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">
+            <span className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
               {accessPurpose.replace(/_/g, ' ')}
             </span>
           </div>
@@ -157,40 +157,40 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
       </div>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-800 overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-800 bg-slate-800/30">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Longitudinal Care Record</h2>
+        <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+          <div className="px-6 py-5 border-b border-border bg-secondary/30">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Longitudinal Care Record</h2>
           </div>
           
           <div className="p-6">
             {timeline.length === 0 ? (
-               <div className="text-center py-12 text-slate-500">
+               <div className="text-center py-12 text-muted-foreground">
                   No records found for this patient.
                </div>
             ) : (
-               <div className="relative border-l-2 border-slate-800 ml-4 space-y-8 pb-4">
+               <div className="relative border-l-2 border-border ml-4 space-y-8 pb-4">
                   {timeline.map((event: any, idx: number) => (
                     <div key={event.id || idx} className="relative pl-8">
-                       <div className="absolute -left-[17px] top-1 bg-slate-900 p-1 rounded-full border border-slate-700 shadow-sm">
+                       <div className="absolute -left-[17px] top-1 bg-card p-1 rounded-full border border-border shadow-sm">
                           {getEventIcon(event._type)}
                        </div>
                        
-                       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm hover:border-slate-700 transition-colors">
+                       <div className="bg-card border border-border rounded-xl p-5 shadow-sm hover:border-border transition-colors">
                           <div className="flex justify-between items-start mb-3">
                              <div>
                                 <h3 className="font-semibold text-white">{getEventTitle(event)}</h3>
-                                <p className="text-xs text-slate-400 mt-1">
+                                <p className="text-xs text-muted-foreground mt-1">
                                    {formatTime(event.created_at || event.timestamp || event.occurred_at)}
                                 </p>
                              </div>
-                             <span className="px-2.5 py-1 bg-slate-800 text-slate-300 text-[10px] font-bold rounded-md uppercase tracking-wider">
+                             <span className="px-2.5 py-1 bg-secondary text-muted-foreground text-[10px] font-bold rounded-md uppercase tracking-wider">
                                 {event._type.replace(/_/g, ' ')}
                              </span>
                           </div>
 
-                          <div className="text-sm text-slate-300 space-y-2 mt-4">
+                          <div className="text-sm text-muted-foreground space-y-2 mt-4">
                              {event._type === 'TRIAGE' && (
-                                <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                <div className="bg-secondary/50 p-3 rounded-lg border border-border">
                                    <p><strong className="text-white">Symptoms:</strong> {event.symptoms?.join(', ')}</p>
                                    <p className="mt-1"><strong className="text-white">Recommendation:</strong> {event.recommendation}</p>
                                 </div>
@@ -202,25 +202,25 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
                                 </div>
                              )}
                              {event._type === 'FOLLOW_UP_RECORD' && (
-                                <div className="grid grid-cols-2 gap-4 bg-slate-800/50 p-3 rounded-lg border border-slate-700 mt-2">
+                                <div className="grid grid-cols-2 gap-4 bg-secondary/50 p-3 rounded-lg border border-border mt-2">
                                    <div>
-                                      <p className="text-xs text-slate-400 uppercase">Vitals</p>
+                                      <p className="text-xs text-muted-foreground uppercase">Vitals</p>
                                       <p className="font-medium text-white">BP: {event.vitals?.systolic || '--'}/{event.vitals?.diastolic || '--'}</p>
                                    </div>
                                    <div>
-                                      <p className="text-xs text-slate-400 uppercase">Adherence</p>
+                                      <p className="text-xs text-muted-foreground uppercase">Adherence</p>
                                       <p className="font-medium text-white">{event.adherence}</p>
                                    </div>
                                    {event.notes && (
                                       <div className="col-span-2 mt-1">
-                                        <p className="text-xs text-slate-400 uppercase">Notes</p>
+                                        <p className="text-xs text-muted-foreground uppercase">Notes</p>
                                         <p>{event.notes}</p>
                                       </div>
                                    )}
                                 </div>
                              )}
                              {event._type === 'REFERRAL_EVENT' && (
-                                <p className="text-slate-400 italic">"{event.note || 'Status transitioned without explicit note.'}"</p>
+                                <p className="text-muted-foreground italic">"{event.note || 'Status transitioned without explicit note.'}"</p>
                              )}
                           </div>
                        </div>

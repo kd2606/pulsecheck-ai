@@ -100,11 +100,11 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#FAFAF9] dark:bg-[#0B1120] text-slate-600 dark:text-slate-400 font-sans flex overflow-hidden">
+        <div className="min-h-screen bg-[#FAFAF9] dark:bg-[#0B1120] text-muted-foreground dark:text-muted-foreground font-sans flex overflow-hidden">
             
             {/* Sidebar Navigation */}
             <aside className={`
-                fixed inset-y-0 left-0 z-50 w-24 bg-[#0B1120] dark:bg-[#0B1120]/80 backdrop-blur-3xl border-r border-slate-200 dark:border-slate-800 
+                fixed inset-y-0 left-0 z-50 w-24 bg-[#0B1120] dark:bg-[#0B1120]/80 backdrop-blur-3xl border-r border-border dark:border-border 
                 flex flex-col items-center py-10 transition-transform duration-500 ease-in-out
                 md:relative md:translate-x-0
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -120,29 +120,29 @@ export default function DashboardPage() {
                 <nav className="flex flex-col gap-8 flex-1">
                     {navItems.map((item, index) => (
                         <Link key={index} href={item.path || "#"} className="group relative" onClick={() => setIsSidebarOpen(false)}>
-                            <item.icon className={`w-6 h-6 transition-all duration-300 ${item.active ? 'text-[#0D9488] dark:text-[#14B8A6]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+                            <item.icon className={`w-6 h-6 transition-all duration-300 ${item.active ? 'text-[#0D9488] dark:text-[#14B8A6]' : 'text-muted-foreground dark:text-muted-foreground group-hover:text-muted-foreground dark:group-hover:text-muted-foreground'}`} />
                             {item.active && <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#0D9488] dark:bg-[#14B8A6] rounded-r-full shadow-[0_0_15px_rgba(13,148,136,0.5)] dark:shadow-[0_0_15px_rgba(20,184,166,0.5)]" />}
-                            <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#0B1120] dark:bg-slate-800 text-slate-800 dark:text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter z-50 shadow-xl border border-slate-200 dark:border-slate-700">
+                            <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#0B1120] dark:bg-secondary text-muted-foreground dark:text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-tighter z-50 shadow-xl border border-border dark:border-border">
                                 {item.label}
                             </span>
                         </Link>
                     ))}
                 </nav>
 
-                <div className="flex flex-col gap-6 pt-8 border-t border-slate-200 dark:border-slate-800 w-full items-center">
+                <div className="flex flex-col gap-6 pt-8 border-t border-border dark:border-border w-full items-center">
                     <UserProfileModal>
-                        <Settings className="w-6 h-6 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer transition-colors" />
+                        <Settings className="w-6 h-6 text-muted-foreground hover:text-muted-foreground dark:text-muted-foreground dark:hover:text-muted-foreground cursor-pointer transition-colors" />
                     </UserProfileModal>
                     <UserProfileModal>
-                        <button className="h-10 w-10 rounded-full border border-slate-300 dark:border-slate-700 overflow-hidden hover:border-[#0D9488]/50 dark:hover:border-[#14B8A6]/50 transition-all">
+                        <button className="h-10 w-10 rounded-full border border-border dark:border-border overflow-hidden hover:border-[#0D9488]/50 dark:hover:border-[#14B8A6]/50 transition-all">
                             {user.photoURL ? (
                                 <img src={user.photoURL} alt="P" className="w-full h-full object-cover" />
                             ) : (
-                                <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">U</div>
+                                <div className="w-full h-full bg-secondary dark:bg-secondary flex items-center justify-center text-[10px] font-bold text-muted-foreground dark:text-muted-foreground">U</div>
                             )}
                         </button>
                     </UserProfileModal>
-                    <button onClick={handleLogout} className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors">
+                    <button onClick={handleLogout} className="p-2 text-muted-foreground dark:text-muted-foreground hover:text-red-500 transition-colors">
                         <LogOut className="w-5 h-5" />
                     </button>
                 </div>
@@ -170,7 +170,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-6">
                             <button 
                                 onClick={() => setIsSidebarOpen(true)}
-                                className="p-3 bg-[#0B1120] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl md:hidden hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+                                className="p-3 bg-[#0B1120] dark:bg-secondary border border-border dark:border-border rounded-xl md:hidden hover:bg-slate-50 dark:hover:bg-secondary/80 transition-all"
                             >
                                 <Menu className="w-5 h-5" />
                             </button>
@@ -179,14 +179,14 @@ export default function DashboardPage() {
                                     {t("welcome")}
                                 </p>
                                 <h1 className="text-4xl font-heading font-bold tracking-tighter text-[#0F172A] dark:text-[#F8FAFC]">
-                                    {t("health")} <span className="text-slate-400 dark:text-slate-500">{t("dashboardSpan")}</span>
+                                    {t("health")} <span className="text-muted-foreground dark:text-muted-foreground">{t("dashboardSpan")}</span>
                                 </h1>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 self-end sm:self-auto">
-                            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0B1120] dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <div className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0B1120] dark:bg-secondary border border-border dark:border-border">
                                 <div className="h-2 w-2 rounded-full bg-[#0D9488] dark:bg-[#14B8A6] animate-pulse" />
-                                <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{t("systemOnline")}</span>
+                                <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-muted-foreground dark:text-muted-foreground">{t("systemOnline")}</span>
                             </div>
                             <AddVitalsModal />
                             <VoiceAssistantButton />
@@ -197,7 +197,7 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-12 gap-8">
                         
                         {/* Hero Section: AI Diagnostic Vector */}
-                        <section className="col-span-12 group relative rounded-[24px] border border-slate-100 dark:border-slate-800 bg-[#0B1120] dark:bg-[#1E293B] p-12 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
+                        <section className="col-span-12 group relative rounded-[24px] border border-border dark:border-border bg-[#0B1120] dark:bg-[#1E293B] p-12 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none">
                             
                             <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
                                 <div className="space-y-10">
@@ -207,29 +207,29 @@ export default function DashboardPage() {
                                     </div>
                                     
                                     <div className="space-y-4">
-                                        <h2 className="text-5xl md:text-6xl font-heading font-bold tracking-tight leading-tight text-slate-800 dark:text-white">
+                                        <h2 className="text-5xl md:text-6xl font-heading font-bold tracking-tight leading-tight text-muted-foreground dark:text-white">
                                             {t("quick")} <br/> 
                                             <span className="text-[#0D9488] dark:text-[#14B8A6]">{t("healthCheck")}</span>
                                         </h2>
-                                        <p className="text-xl text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-lg">
+                                        <p className="text-xl text-muted-foreground dark:text-muted-foreground font-medium leading-relaxed max-w-lg">
                                             {t("heroDesc")}
                                         </p>
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-6 pt-4">
                                         <Link href={`/${locale}/skin-scan`}>
-                                            <button className="h-16 px-10 rounded-[16px] bg-[#0D9488] text-white dark:bg-[#14B8A6] dark:text-slate-900 font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#0D9488]/20 dark:shadow-[#14B8A6]/20 group">
+                                            <button className="h-16 px-10 rounded-[16px] bg-[#0D9488] text-white dark:bg-[#14B8A6] dark:text-muted-foreground font-bold flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#0D9488]/20 dark:shadow-[#14B8A6]/20 group">
                                                 {t("startScan")}
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         </Link>
-                                        <div className="flex items-center gap-4 px-6 h-16 rounded-[16px] border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-[#1E293B]/50 backdrop-blur-xl">
+                                        <div className="flex items-center gap-4 px-6 h-16 rounded-[16px] border border-border dark:border-border bg-white/50 dark:bg-[#1E293B]/50 backdrop-blur-xl">
                                             <div className="flex -space-x-3">
                                                 {[1, 2, 3].map(i => (
-                                                    <div key={i} className="h-8 w-8 rounded-full border-2 border-[#FAFAF9] dark:border-[#0B1120] bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold">U{i}</div>
+                                                    <div key={i} className="h-8 w-8 rounded-full border-2 border-[#FAFAF9] dark:border-[#0B1120] bg-secondary dark:bg-secondary flex items-center justify-center text-[8px] font-bold">U{i}</div>
                                                 ))}
                                             </div>
-                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t("connectDoctors")}</span>
+                                            <span className="text-xs font-bold text-muted-foreground dark:text-muted-foreground uppercase tracking-widest">{t("connectDoctors")}</span>
                                         </div>
                                     </div>
                                 </div>

@@ -133,13 +133,13 @@ export default function FacilityCatalogPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-slate-500">{t('loading')}</div>;
+  if (loading) return <div className="p-8 text-muted-foreground">{t('loading')}</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
-  if (!selectedFacility) return <div className="p-8 text-slate-500">{t('permissionDenied')}</div>;
+  if (!selectedFacility) return <div className="p-8 text-muted-foreground">{t('permissionDenied')}</div>;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 p-4">
-      <h1 className="text-2xl font-bold text-slate-900">{t('title')}</h1>
+      <h1 className="text-2xl font-bold text-muted-foreground">{t('title')}</h1>
       
       <Card>
         <CardHeader>
@@ -148,16 +148,16 @@ export default function FacilityCatalogPage() {
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4">
           <div>
-            <div className="text-xs text-slate-500 uppercase">{t('name')}</div>
-            <div className="font-medium text-slate-900">{selectedFacility.name}</div>
+            <div className="text-xs text-muted-foreground uppercase">{t('name')}</div>
+            <div className="font-medium text-muted-foreground">{selectedFacility.name}</div>
           </div>
           <div>
-            <div className="text-xs text-slate-500 uppercase">{t('type')}</div>
-            <div className="font-medium text-slate-900">{selectedFacility.type}</div>
+            <div className="text-xs text-muted-foreground uppercase">{t('type')}</div>
+            <div className="font-medium text-muted-foreground">{selectedFacility.type}</div>
           </div>
           <div>
-            <div className="text-xs text-slate-500 uppercase">{t('status')}</div>
-            <div className="font-medium text-slate-900">{selectedFacility.status}</div>
+            <div className="text-xs text-muted-foreground uppercase">{t('status')}</div>
+            <div className="font-medium text-muted-foreground">{selectedFacility.status}</div>
           </div>
         </CardContent>
       </Card>
@@ -183,11 +183,11 @@ export default function FacilityCatalogPage() {
         </CardHeader>
         <CardContent>
           {(!selectedFacility.services || selectedFacility.services.length === 0) ? (
-            <div className="text-center py-8 text-slate-500">{t('emptyCatalog')}</div>
+            <div className="text-center py-8 text-muted-foreground">{t('emptyCatalog')}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-500 uppercase bg-slate-50">
+                <thead className="text-xs text-muted-foreground uppercase bg-slate-50">
                   <tr>
                     <th className="px-4 py-3">{t('serviceName')}</th>
                     <th className="px-4 py-3">{t('serviceCategory')}</th>
@@ -197,8 +197,8 @@ export default function FacilityCatalogPage() {
                 </thead>
                 <tbody>
                   {selectedFacility.services.map((svc: any) => (
-                    <tr key={svc.serviceId} className="border-b border-slate-200 hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-900">{svc.serviceName}</td>
+                    <tr key={svc.serviceId} className="border-b border-border hover:bg-slate-50">
+                      <td className="px-4 py-3 font-medium text-muted-foreground">{svc.serviceName}</td>
                       <td className="px-4 py-3">{svc.category}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${

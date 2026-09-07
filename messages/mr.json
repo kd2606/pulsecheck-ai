@@ -339,7 +339,8 @@
       "aiDisclaimer": "AI-assisted decision support — not a diagnosis. Medical Officer review is required.",
       "missingInformation": "Missing information",
       "runAiTriage": "Run AI Triage",
-      "runningAi": "Running AI Triage..."
+      "runningAi": "Running AI Triage...",
+      "symptomsPlaceholder": "उदा. तीव्र ताप, कोरडा खोकला, अंगदुखी"
     },
     "catalog": {
       "title": "सुविधा कॅटलॉग (Facility Catalog)",

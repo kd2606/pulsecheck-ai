@@ -134,7 +134,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
+    <div className="min-h-screen bg-background">
       <SyncStatusBar/>
       <main className="px-4 py-8 sm:px-6 lg:px-10">
         <div className="mx-auto w-full max-w-6xl">
@@ -142,7 +142,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
             <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               Reports &amp; Follow-ups
             </h1>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-muted-foreground">
               Live figures computed from this device&apos;s offline records. Works
               without a network connection.
             </p>
@@ -170,12 +170,12 @@ export default function WorkerReportsPage(): React.JSX.Element {
 
           {/* ---------------- Follow-up list ---------------- */}
           <section aria-label="High-risk follow-ups" className="mt-10">
-            <div className="rounded-xl border border-slate-800 bg-slate-900">
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-800 px-5 py-4">
+            <div className="rounded-xl border border-border bg-card">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border px-5 py-4">
                 <h2 className="text-base font-medium text-white">
                   High-Risk Follow-ups Required
                 </h2>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-muted-foreground">
                   {isLoading
                     ? 'Loading…'
                     : `${report.followUps.length} patient${
@@ -192,28 +192,28 @@ export default function WorkerReportsPage(): React.JSX.Element {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] border-collapse text-left text-sm">
                     <thead>
-                      <tr className="border-b border-slate-800">
+                      <tr className="border-b border-border">
                         <th
                           scope="col"
-                          className="px-5 py-3 text-xs font-medium uppercase tracking-wider text-slate-400"
+                          className="px-5 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground"
                         >
                           Patient
                         </th>
                         <th
                           scope="col"
-                          className="px-5 py-3 text-xs font-medium uppercase tracking-wider text-slate-400"
+                          className="px-5 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground"
                         >
                           Risk Level
                         </th>
                         <th
                           scope="col"
-                          className="px-5 py-3 text-xs font-medium uppercase tracking-wider text-slate-400"
+                          className="px-5 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground"
                         >
                           Date of Screening
                         </th>
                         <th
                           scope="col"
-                          className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-400"
+                          className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground"
                         >
                           Action
                         </th>
@@ -223,7 +223,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
                       {report.followUps.map((followUp) => (
                         <tr
                           key={followUp.triageId}
-                          className="border-b border-slate-800 last:border-b-0"
+                          className="border-b border-border last:border-b-0"
                         >
                           <td className="px-5 py-4 font-medium text-white">
                             {followUp.patientName}
@@ -231,7 +231,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
                           <td className="px-5 py-4">
                             <RiskBadge risk={followUp.riskLevel}/>
                           </td>
-                          <td className="px-5 py-4 text-slate-400">
+                          <td className="px-5 py-4 text-muted-foreground">
                             {followUp.screenedAt === 0
                               ? '—'
                               : DATE_FORMATTER.format(new Date(followUp.screenedAt))}
@@ -240,7 +240,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
                             <button
                               type="button"
                               onClick={() => handleLogVisit(followUp)}
-                              className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-600"
+                              className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-600"
                             >
                               Log Visit
                             </button>
@@ -281,20 +281,20 @@ function MetricCard({
       ? 'bg-red-400'
       : accent === 'yellow'
         ? 'bg-yellow-400'
-        : 'bg-slate-600';
+        : 'bg-secondary';
 
   return (
-    <article className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+    <article className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center gap-2">
         <span className={`h-1.5 w-1.5 rounded-full ${accentDot}`} aria-hidden />
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
       </div>
       <p className="mt-4 text-3xl font-semibold tabular-nums tracking-tight text-white">
         {value.toLocaleString('en-IN')}
       </p>
-      <p className="mt-1 text-xs text-slate-400">{hint}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
     </article>
   );
 }
@@ -303,11 +303,11 @@ function MetricCardSkeleton(): React.JSX.Element {
   return (
     <div
       aria-hidden
-      className="animate-pulse rounded-xl border border-slate-800 bg-slate-900 p-5"
+      className="animate-pulse rounded-xl border border-border bg-card p-5"
     >
-      <div className="h-3 w-28 rounded bg-slate-800" />
-      <div className="mt-5 h-8 w-20 rounded bg-slate-800" />
-      <div className="mt-3 h-3 w-36 rounded bg-slate-800" />
+      <div className="h-3 w-28 rounded bg-secondary" />
+      <div className="mt-5 h-8 w-20 rounded bg-secondary" />
+      <div className="mt-3 h-3 w-36 rounded bg-secondary" />
     </div>
   );
 }
@@ -334,13 +334,13 @@ function RiskBadge({
 
 function TableSkeleton(): React.JSX.Element {
   return (
-    <div aria-hidden className="animate-pulse divide-y divide-slate-800">
+    <div aria-hidden className="animate-pulse divide-y divide-border">
       {[0, 1, 2, 3].map((row) => (
         <div key={row} className="flex items-center gap-4 px-5 py-4">
-          <div className="h-4 w-40 rounded bg-slate-800" />
-          <div className="h-5 w-20 rounded-full bg-slate-800" />
-          <div className="h-4 w-32 rounded bg-slate-800" />
-          <div className="ml-auto h-7 w-20 rounded-lg bg-slate-800" />
+          <div className="h-4 w-40 rounded bg-secondary" />
+          <div className="h-5 w-20 rounded-full bg-secondary" />
+          <div className="h-4 w-32 rounded bg-secondary" />
+          <div className="ml-auto h-7 w-20 rounded-lg bg-secondary" />
         </div>
       ))}
     </div>
@@ -351,7 +351,7 @@ function EmptyState(): React.JSX.Element {
   return (
     <div className="px-5 py-12 text-center">
       <p className="text-sm font-medium text-white">No follow-ups pending</p>
-      <p className="mt-1 text-xs text-slate-400">
+      <p className="mt-1 text-xs text-muted-foreground">
         Every screened patient is currently marked low risk.
       </p>
     </div>

@@ -40,7 +40,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen dashboard-true-black dark bg-background text-foreground flex flex-col md:flex-row font-sans">
       {/* Mobile Sidebar Overlay */}
       <div 
         className={cn(
@@ -53,18 +53,18 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 transform transition-all duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-all duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="h-16 flex items-center px-6 border-b border-slate-200">
+        <div className="h-16 flex items-center px-6 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="bg-slate-900 p-2 rounded-lg">
-              <Building className="size-5 text-white" />
+            <div className="bg-primary p-2 rounded-lg">
+              <Building className="size-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-bold text-slate-900 leading-tight">DIAGNOVERSE</h1>
-              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">District Command</p>
+              <h1 className="font-bold text-foreground leading-tight">CARESANCHAAR</h1>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">District Command</p>
             </div>
           </div>
         </div>
@@ -87,12 +87,12 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                   isActive 
-                    ? "bg-slate-100 text-slate-900" 
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                    ? "bg-secondary text-secondary-foreground" 
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
                   isRoadmap && "opacity-50 cursor-not-allowed"
                 )}
               >
-                <Icon className={cn("size-5", isActive ? "text-slate-900" : "text-slate-400")} />
+                <Icon className={cn("size-5", isActive ? "text-secondary-foreground" : "text-muted-foreground")} />
                 {item.label}
                 {isRoadmap && <Badge variant="outline" className="ml-auto text-[10px] leading-tight px-1.5 h-4">Roadmap</Badge>}
               </button>
@@ -100,23 +100,23 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           })}
         </div>
 
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-border">
           <Link href={`/${locale}/dashboard/district/profile`}>
             <div 
-              className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-slate-50 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-secondary/50 rounded-lg transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center font-bold text-amber-700">
+              <div className="w-10 h-10 rounded-full bg-amber-100/10 border border-amber-200/20 flex items-center justify-center font-bold text-amber-500">
                 CM
               </div>
               <div className="text-left flex-1">
-                <p className="text-sm font-semibold text-slate-900">Dr. C. Mishra</p>
-                <p className="text-xs text-amber-600 font-medium">Chief Medical Officer</p>
+                <p className="text-sm font-semibold text-foreground">Dr. C. Mishra</p>
+                <p className="text-xs text-amber-500 font-medium">Chief Medical Officer</p>
               </div>
             </div>
           </Link>
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-slate-600 hover:text-red-600 hover:bg-red-50 mt-2"
+            className="w-full justify-start text-muted-foreground hover:text-red-500 hover:bg-red-500/10 mt-2"
             onClick={async () => {
               const { signOut } = await import('firebase/auth');
               const { auth } = await import('@/firebase/clientApp');
@@ -132,17 +132,17 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
+        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-slate-500"
+              className="md:hidden text-muted-foreground"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="size-5" />
             </Button>
-            <h2 className="text-lg font-semibold text-slate-900 hidden sm:block">
+            <h2 className="text-lg font-semibold text-muted-foreground hidden sm:block">
               {(() => {
                 const activeItem = navItems.slice().reverse().find(item => 
                   item.href === `/${locale}/dashboard/district` 
@@ -164,7 +164,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
               </span>
             </div>
 
-            <Button variant="ghost" size="icon" className="relative text-slate-500">
+            <Button variant="ghost" size="icon" className="relative text-muted-foreground">
               <Bell className="size-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
             </Button>

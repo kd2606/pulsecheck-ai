@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { saveIntakeOffline } from '@/lib/services/intake.service';
 import { runWorkerTriage } from '@/ai/flows/worker-triage';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
@@ -75,10 +76,10 @@ const RISK_DOT: Record<RiskLevel, string> = {
 };
 
 const INPUT_CLASS =
-  'w-full rounded-md border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-white placeholder:text-slate-400 outline-none transition-colors focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60';
+  'w-full rounded-lg border border-border/50 bg-card/50 px-4 py-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground outline-none transition-all duration-200 hover:border-border/80 focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 backdrop-blur-sm';
 
-const LABEL_CLASS = 'block text-sm font-medium text-white';
-const CARD_CLASS = 'rounded-xl border border-slate-800 bg-slate-900 p-5 sm:p-6';
+const LABEL_CLASS = 'block text-sm font-medium text-foreground mb-1.5';
+const CARD_CLASS = 'rounded-xl border border-border bg-card p-5 sm:p-6';
 
 function createInitialState(): IntakeFormState {
   return {
@@ -152,7 +153,7 @@ function Field({ id, label, children, required = false, hint, error, className, 
           {label}
           {required ? <span className="ml-1 text-emerald-500">*</span> : null}
         </label>
-        {!required ? <span className="text-xs text-slate-400">{optionalLabel}</span> : null}
+        {!required ? <span className="text-xs text-muted-foreground">{optionalLabel}</span> : null}
       </div>
       {children}
       {error ? (
@@ -160,7 +161,7 @@ function Field({ id, label, children, required = false, hint, error, className, 
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-slate-400">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-muted-foreground">
           {hint}
         </p>
       ) : null}
@@ -482,12 +483,12 @@ export default function NewIntakePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0B1120] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t('fieldOps')}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('fieldOps')}</p>
           <h1 className="mt-1 text-2xl font-semibold text-white sm:text-3xl">{t('pageTitle')}</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t('pageSubtitle')}
           </p>
         </header>
@@ -509,11 +510,11 @@ export default function NewIntakePage() {
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           {/* ------------------------- Card 1: Patient ------------------------- */}
           <section className={CARD_CLASS} aria-labelledby="patient-details-heading">
-            <div className="mb-5 border-b border-slate-800 pb-4">
+            <div className="mb-5 border-b border-border pb-4">
               <h2 id="patient-details-heading" className="text-base font-semibold text-white">
                 {t('patientDetails')}
               </h2>
-              <p className="mt-1 text-sm text-slate-400">{t('patientDetailsHint')}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t('patientDetailsHint')}</p>
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -550,25 +551,27 @@ export default function NewIntakePage() {
               </Field>
 
               <Field error={errors.gender} id="gender" label={t('gender')} required optionalLabel={t('optional')}>
-                <select
-                  id="gender"
-                  name="gender"
-                  className={INPUT_CLASS}
-                  value={form.gender}
+                <Select
+                  value={form.gender || undefined}
+                  onValueChange={(value) => setField('gender', value as Gender)}
                   disabled={isSaving}
-                  aria-invalid={errors.gender !== undefined}
-                  aria-describedby={errors.gender !== undefined ? 'gender-error' : undefined}
-                  onChange={(event) => setField('gender', event.target.value as Gender | '')}
                 >
-                  <option value="" className="bg-slate-950 text-slate-400">
-                    {t('selectGender')}
-                  </option>
-                  {GENDER_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-slate-950 text-white">
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger
+                    id="gender"
+                    className={INPUT_CLASS}
+                    aria-invalid={errors.gender !== undefined}
+                    aria-describedby={errors.gender !== undefined ? 'gender-error' : undefined}
+                  >
+                    <SelectValue placeholder={t('selectGender')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GENDER_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </Field>
 
               <Field error={errors.dob} hint={age !== null ? t('approximateAge', { age }) : undefined} id="dob" label={t('dob')} required optionalLabel={t('optional')}>
@@ -607,11 +610,11 @@ export default function NewIntakePage() {
 
           {/* --------------------- Card 2: Vitals & Triage --------------------- */}
           <section className={CARD_CLASS} aria-labelledby="triage-heading">
-            <div className="mb-5 border-b border-slate-800 pb-4">
+            <div className="mb-5 border-b border-border pb-4">
               <h2 id="triage-heading" className="text-base font-semibold text-white">
                 {t('triage')}
               </h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {t('triageHint')}
               </p>
             </div>
@@ -724,7 +727,7 @@ export default function NewIntakePage() {
                         type="checkbox"
                         checked={form.pregnancy_context}
                         onChange={(e) => setField('pregnancy_context', e.target.checked)}
-                        className="w-4 h-4 bg-slate-900 border-slate-700 rounded text-emerald-600 focus:ring-emerald-600"
+                        className="w-4 h-4 bg-card border-border rounded text-emerald-600 focus:ring-emerald-600"
                         disabled={isSaving}
                       />
                       <span className="text-sm text-white">Patient is pregnant</span>
@@ -759,17 +762,17 @@ export default function NewIntakePage() {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="text-xs text-slate-400 uppercase">{t('riskScore')}</h4>
+                      <h4 className="text-xs text-muted-foreground uppercase">{t('riskScore')}</h4>
                       <p className="text-sm text-white mt-1">{aiResult.risk_score}</p>
                     </div>
                     <div>
-                      <h4 className="text-xs text-slate-400 uppercase">{t('urgency')}</h4>
+                      <h4 className="text-xs text-muted-foreground uppercase">{t('urgency')}</h4>
                       <p className="text-sm text-white mt-1">{aiResult.referral_urgency}</p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-xs text-slate-400 uppercase">{t('possibleHealthConcerns')}</h4>
+                    <h4 className="text-xs text-muted-foreground uppercase">{t('possibleHealthConcerns')}</h4>
                     <ul className="mt-2 flex flex-wrap gap-2">
                       {aiResult.health_concerns.map((c, i) => (
                         <li key={i} className="text-xs bg-indigo-900/50 text-indigo-200 px-2 py-1 rounded border border-indigo-800/50">{c}</li>
@@ -779,48 +782,50 @@ export default function NewIntakePage() {
 
                   {aiResult.missing_info.length > 0 && (
                     <div>
-                      <h4 className="text-xs text-slate-400 uppercase">{t('missingInformation')}</h4>
+                      <h4 className="text-xs text-muted-foreground uppercase">{t('missingInformation')}</h4>
                       <ul className="mt-1 list-disc list-inside text-sm text-amber-300/80">
                         {aiResult.missing_info.map((m, i) => <li key={i}>{m}</li>)}
                       </ul>
                     </div>
                   )}
 
-                  <div className="bg-slate-950/50 p-3 rounded-lg text-xs text-slate-400 border border-slate-800">
+                  <div className="bg-background/50 p-3 rounded-lg text-xs text-muted-foreground border border-border">
                     <strong>{t('safetyNote')}:</strong> {t('aiDisclaimer')}
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 mt-6 border-t border-slate-800 pt-6">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 mt-6 border-t border-border pt-6">
                 <Field error={errors.risk_level} id="risk_level" label={t('riskLevel')} required optionalLabel={t('optional')}>
                   <div className="relative">
-                    <select
-                      id="risk_level"
-                      name="risk_level"
-                      className={INPUT_CLASS}
-                      value={form.risk_level}
-                      disabled={isSaving}
-                      aria-invalid={errors.risk_level !== undefined}
-                      aria-describedby={errors.risk_level !== undefined ? 'risk_level-error' : undefined}
-                      onChange={(event) => handleRiskChange(event.target.value as RiskLevel | '')}
+                    <Select
+                      value={form.risk_level || undefined}
+                      onValueChange={(value) => handleRiskChange(value as RiskLevel)}
+                      disabled={true}
                     >
-                      <option value="" className="bg-slate-950 text-slate-400">
-                        {t('selectRiskLevel')}
-                      </option>
-                      {RISK_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value} className="bg-slate-950 text-white">
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger
+                        id="risk_level"
+                        className={INPUT_CLASS}
+                        aria-invalid={errors.risk_level !== undefined}
+                        aria-describedby={errors.risk_level !== undefined ? 'risk_level-error' : undefined}
+                      >
+                        <SelectValue placeholder={t('selectRiskLevel')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RISK_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   {form.risk_level !== '' ? (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                       <span
                         aria-hidden="true"
                         className={`h-2 w-2 rounded-full ${
-                          RISK_OPTIONS.find((option) => option.value === form.risk_level)?.dot ?? 'bg-slate-400'
+                          RISK_OPTIONS.find((option) => option.value === form.risk_level)?.dot ?? 'bg-secondary'
                         }`}
                       />
                       {t('triageFlagSet', { level: form.risk_level })}
@@ -833,10 +838,10 @@ export default function NewIntakePage() {
                     id="recommended_action"
                     name="recommended_action"
                     rows={3}
+                    disabled={true}
                     placeholder={t('actionPlaceholder')}
                     className={`${INPUT_CLASS} resize-y`}
                     value={form.recommended_action}
-                    disabled={isSaving}
                     aria-describedby="recommended_action-hint"
                     onChange={(event) => {
                       setActionTouched(true);
@@ -850,15 +855,15 @@ export default function NewIntakePage() {
 
           {/* ------------------------- Card 3: Consent ------------------------- */}
           <section className={CARD_CLASS} aria-labelledby="consent-heading">
-            <div className="mb-5 border-b border-slate-800 pb-4">
+            <div className="mb-5 border-b border-border pb-4">
               <h2 id="consent-heading" className="text-base font-semibold text-white">
                 {t('consent')}
               </h2>
-              <p className="mt-1 text-sm text-slate-400">{t('consentHint')}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t('consentHint')}</p>
             </div>
 
-            <div className="rounded-lg bg-slate-950 p-4 border border-slate-800 mb-4">
-              <p className="text-sm text-slate-300 italic mb-3">
+            <div className="rounded-lg bg-background p-4 border border-border mb-4">
+              <p className="text-sm text-muted-foreground italic mb-3">
                 &quot;{t('consentStatement')}&quot;
               </p>
             </div>
@@ -868,7 +873,7 @@ export default function NewIntakePage() {
                 <input
                   type="checkbox"
                   name="consent"
-                  className="w-4 h-4 bg-slate-900 border-slate-700 rounded text-emerald-600 focus:ring-emerald-600 focus:ring-offset-slate-900"
+                  className="w-4 h-4 bg-card border-border rounded text-emerald-600 focus:ring-emerald-600 focus:ring-offset-background"
                   checked={form.consent_granted}
                   onChange={(e) => setField('consent_granted', e.target.checked)}
                   disabled={isSaving}
@@ -882,8 +887,8 @@ export default function NewIntakePage() {
           </section>
 
           {/* ------------------------------ Actions ---------------------------- */}
-          <div className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <p className="text-sm text-slate-400">
+          <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <p className="text-sm text-muted-foreground">
               {t('offlineNote')}
             </p>
             <div className="flex items-center gap-3">
@@ -891,14 +896,14 @@ export default function NewIntakePage() {
                 type="button"
                 onClick={resetForm}
                 disabled={isSaving}
-                className="rounded-md border border-slate-800 px-4 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-md border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {t('clear')}
               </button>
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSaving ? <Spinner/> : null}
                 {isSaving ? t('savingIntake') : t('saveIntake')}

@@ -294,6 +294,9 @@ function LoginContent() {
                             <Button type="submit" className="w-full h-12 rounded-2xl bg-white text-black font-bold hover:bg-emerald-50 transition-all shadow-xl active:scale-[0.98]" disabled={loading}>
                                 {loading ? <Loader2 className="animate-spin" /> : <><Mail className="w-4 h-4 mr-2" /> Login with Email</>}
                             </Button>
+                            <Button type="button" variant="outline" className="w-full h-12 rounded-2xl border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 hover:text-white transition-all shadow-xl active:scale-[0.98]" disabled={loading} onClick={handleDemoLogin}>
+                                {loading ? <Loader2 className="animate-spin" /> : 'Demo Worker Access'}
+                            </Button>
                         </form>
 
                         <div className="relative my-8">
@@ -342,14 +345,6 @@ function LoginContent() {
                                 Create Account
                             </Link>
                         </div>
-                        <Button 
-                            variant="secondary"
-                            onClick={handleDemoLogin}
-                            disabled={loading}
-                            className="mt-6 w-full h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 font-bold uppercase tracking-widest transition-all shadow-inner border border-emerald-500/20"
-                        >
-                            Guest Demo Login
-                        </Button>
                     </CardFooter>
                 </Card>
             </motion.div>

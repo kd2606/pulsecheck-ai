@@ -339,7 +339,8 @@
       "aiDisclaimer": "AI-assisted decision support — not a diagnosis. Medical Officer review is required.",
       "missingInformation": "Missing information",
       "runAiTriage": "Run AI Triage",
-      "runningAi": "Running AI Triage..."
+      "runningAi": "Running AI Triage...",
+      "symptomsPlaceholder": "e.g. High fever, dry cough, body ache"
     },
     "catalog": {
       "title": "Facility Catalog",
@@ -402,7 +403,10 @@
       "confirm": "Confirm Assignment",
       "showQr": "Show QR",
       "qrTitle": "Referral QR Code",
-      "qrHint": "Show this to facility staff upon arrival."
+      "qrHint": "Show this to facility staff upon arrival.",
+      "activeBadge": "Active",
+      "emptyTitle": "No Active Referrals",
+      "emptyDesc": "There are currently no active referrals requiring your attention."
     },
     "queue": {
       "title": "Queue & Appointments"

@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useUser } from "@/firebase/auth/useUser";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,6 +90,50 @@ function LoginContent() {
         }
     };
 
+    const handleDemoLogin = async () => {
+        setLoading(true);
+        const DEMO_EMAIL = "dmo@caresanchaar.ai";
+        const DEMO_PASSWORD = "demo123456";
+
+        try {
+            let userCred;
+            try {
+                userCred = await signInWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+            } catch (signInError: any) {
+                if (
+                    signInError.code === "auth/user-not-found" ||
+                    signInError.code === "auth/invalid-credential" ||
+                    signInError.code === "auth/invalid-login-credentials"
+                ) {
+                    userCred = await createUserWithEmailAndPassword(auth, DEMO_EMAIL, DEMO_PASSWORD);
+                } else {
+                    throw signInError;
+                }
+            }
+
+            const token = await userCred.user.getIdToken();
+            await fetch('/api/auth/assign-role', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: token, role: 'district_admin' }),
+            });
+
+            const freshToken = await userCred.user.getIdToken(true);
+            await fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken: freshToken }),
+            });
+
+            toast.success("District demo login successful! 👋");
+            router.push(getSafeRedirect(`/${locale}/dashboard/district`));
+        } catch (error: any) {
+            toast.error("Demo login failed: " + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleGoogleSignIn = async () => {
         setLoading(true);
         try {
@@ -171,7 +215,10 @@ function LoginContent() {
                                 />
                             </div>
                             <Button type="submit" className="w-full h-12 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]" disabled={loading}>
-                                <Mail className="w-4 h-4 mr-2" /> Login with Email
+                                {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Mail className="w-4 h-4 mr-2" />} Login with Email
+                            </Button>
+                            <Button type="button" variant="outline" className="w-full h-12 rounded-2xl border-slate-200 bg-white text-slate-700 font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-[0.98]" disabled={loading} onClick={handleDemoLogin}>
+                                {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null} Demo District Access
                             </Button>
                         </form>
 

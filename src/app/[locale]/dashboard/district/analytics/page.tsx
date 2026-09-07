@@ -96,18 +96,18 @@ export default function AnalyticsPage() {
     <div className="p-4 md:p-8 space-y-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">District Command Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Aggregate public-health operational metrics.</p>
+          <h1 className="text-2xl font-bold text-muted-foreground">District Command Analytics</h1>
+          <p className="text-sm text-muted-foreground mt-1">Aggregate public-health operational metrics.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-border">
           <input 
             type="date" 
             className="text-sm border-none bg-slate-50 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             value={startDate}
             onChange={e => setStartDate(e.target.value)}
           />
-          <span className="text-slate-400 text-sm">to</span>
+          <span className="text-muted-foreground text-sm">to</span>
           <input 
             type="date" 
             className="text-sm border-none bg-slate-50 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
@@ -128,30 +128,30 @@ export default function AnalyticsPage() {
       </div>
 
       {loading && !data ? (
-        <div className="flex justify-center items-center h-64 text-slate-500">
+        <div className="flex justify-center items-center h-64 text-muted-foreground">
           <Activity className="size-8 animate-spin text-blue-500 mr-3" />
           Loading secure aggregate metrics...
         </div>
       ) : data ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-white border-slate-200 shadow-sm">
+            <Card className="bg-white border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">Total Referrals</p>
-                    <h3 className="text-3xl font-bold text-slate-900">{data.totalReferrals}</h3>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Total Referrals</p>
+                    <h3 className="text-3xl font-bold text-muted-foreground">{data.totalReferrals}</h3>
                   </div>
                   <div className="p-3 bg-blue-50 rounded-lg"><Activity className="size-5 text-blue-600"/></div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-white border-slate-200 shadow-sm">
+            <Card className="bg-white border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">Pending Referrals</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Pending Referrals</p>
                     <h3 className="text-3xl font-bold text-amber-600">{data.pendingReferrals}</h3>
                   </div>
                   <div className="p-3 bg-amber-50 rounded-lg"><Clock className="size-5 text-amber-600"/></div>
@@ -159,16 +159,16 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-slate-200 shadow-sm">
+            <Card className="bg-white border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">Avg Turnaround Time</p>
-                    <h3 className="text-3xl font-bold text-slate-900">
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Avg Turnaround Time</p>
+                    <h3 className="text-3xl font-bold text-muted-foreground">
                       {data.averageTurnaroundHours > 0 ? `${data.averageTurnaroundHours.toFixed(1)} hrs` : '--'}
                     </h3>
                     {data.missingSlaData > 0 && (
-                      <p className="text-[10px] text-slate-400 mt-1">Excludes {data.missingSlaData} records missing SLA timestamps.</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Excludes {data.missingSlaData} records missing SLA timestamps.</p>
                     )}
                   </div>
                   <div className="p-3 bg-emerald-50 rounded-lg"><CheckCircle className="size-5 text-emerald-600"/></div>
@@ -176,11 +176,11 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-slate-200 shadow-sm">
+            <Card className="bg-white border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500 mb-1">Overdue Follow-ups</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Overdue Follow-ups</p>
                     <h3 className="text-3xl font-bold text-red-600">{data.overdueFollowUps}</h3>
                   </div>
                   <div className="p-3 bg-red-50 rounded-lg"><AlertTriangle className="size-5 text-red-600"/></div>
@@ -190,49 +190,49 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white border-slate-200 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-4">
-                <CardTitle className="text-base font-semibold text-slate-900">Triage Distribution</CardTitle>
+            <Card className="bg-white border-border shadow-sm">
+              <CardHeader className="border-b border-border pb-4">
+                <CardTitle className="text-base font-semibold text-muted-foreground">Triage Distribution</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"/> <span className="text-sm font-medium text-slate-700">RED (Emergency)</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500"/> <span className="text-sm font-medium text-muted-foreground">RED (Emergency)</span></div>
                     <span className="font-semibold">{data.triageCounts?.RED || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"/> <span className="text-sm font-medium text-slate-700">YELLOW (Urgent)</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"/> <span className="text-sm font-medium text-muted-foreground">YELLOW (Urgent)</span></div>
                     <span className="font-semibold">{data.triageCounts?.YELLOW || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"/> <span className="text-sm font-medium text-slate-700">GREEN (Routine)</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"/> <span className="text-sm font-medium text-muted-foreground">GREEN (Routine)</span></div>
                     <span className="font-semibold">{data.triageCounts?.GREEN || 0}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-slate-200 shadow-sm">
-              <CardHeader className="border-b border-slate-100 pb-4">
-                <CardTitle className="text-base font-semibold text-slate-900">Workload Summary</CardTitle>
+            <Card className="bg-white border-border shadow-sm">
+              <CardHeader className="border-b border-border pb-4">
+                <CardTitle className="text-base font-semibold text-muted-foreground">Workload Summary</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
                   <div>
-                    <div className="flex justify-between text-sm font-medium text-slate-700 mb-2">
+                    <div className="flex justify-between text-sm font-medium text-muted-foreground mb-2">
                       <span>Appointments Completed</span>
                       <span>{data.appointments.completed} / {data.appointments.total}</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
+                    <div className="w-full bg-secondary rounded-full h-2">
                       <div className="bg-blue-600 h-2 rounded-full" style={{ width: data.appointments.total > 0 ? `${(data.appointments.completed / data.appointments.total) * 100}%` : '0%' }}></div>
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-sm font-medium text-slate-700 mb-2">
+                    <div className="flex justify-between text-sm font-medium text-muted-foreground mb-2">
                       <span>Follow-up Tasks Completed</span>
                       <span>{data.followUps.completed} / {data.followUps.total}</span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
+                    <div className="w-full bg-secondary rounded-full h-2">
                       <div className="bg-indigo-600 h-2 rounded-full" style={{ width: data.followUps.total > 0 ? `${(data.followUps.completed / data.followUps.total) * 100}%` : '0%' }}></div>
                     </div>
                   </div>
@@ -241,9 +241,9 @@ export default function AnalyticsPage() {
             </Card>
           </div>
 
-          <Card className="bg-white border-slate-200 shadow-sm">
-            <CardHeader className="border-b border-slate-100 pb-4">
-              <CardTitle className="text-base font-semibold text-slate-900">Referral Trend (Last 30 Days)</CardTitle>
+          <Card className="bg-white border-border shadow-sm">
+            <CardHeader className="border-b border-border pb-4">
+              <CardTitle className="text-base font-semibold text-muted-foreground">Referral Trend (Last 30 Days)</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               {data.trend && data.trend.length > 0 ? (
@@ -257,7 +257,7 @@ export default function AnalyticsPage() {
                             className="bg-blue-200 hover:bg-blue-400 rounded-t-sm transition-all w-full"
                             style={{ height: `${height}%`, minHeight: '4px' }}
                           />
-                          <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10 pointer-events-none transition-opacity">
+                          <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-secondary text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10 pointer-events-none transition-opacity">
                             {t.date}: {t.count}
                           </div>
                         </div>
@@ -265,7 +265,7 @@ export default function AnalyticsPage() {
                    })}
                  </div>
               ) : (
-                <div className="text-center py-12 text-slate-400 text-sm">
+                <div className="text-center py-12 text-muted-foreground text-sm">
                   No trend data available for this range.
                 </div>
               )}
@@ -273,8 +273,8 @@ export default function AnalyticsPage() {
           </Card>
         </>
       ) : (
-        <div className="flex flex-col justify-center items-center h-64 text-slate-500 bg-white rounded-xl border border-slate-200 border-dashed">
-          <FileText className="size-12 text-slate-300 mb-4" />
+        <div className="flex flex-col justify-center items-center h-64 text-muted-foreground bg-white rounded-xl border border-border border-dashed">
+          <FileText className="size-12 text-muted-foreground mb-4" />
           <p>No aggregate data available.</p>
         </div>
       )}

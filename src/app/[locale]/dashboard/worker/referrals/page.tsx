@@ -195,7 +195,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
+    <div className="min-h-screen bg-background">
       <SyncStatusBar/>
 
       <main className="mx-auto w-full max-w-7xl px-4 py-8">
@@ -204,13 +204,13 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
             <h1 className="text-2xl font-semibold tracking-tight text-white">
               {tr('activeReferrals')}
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               {tr('subtitle')}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="rounded-md border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-400">
+            <span className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
               {tr('activeBadge')}
               <span className="ml-2 font-semibold tabular-nums text-white">
                 {rows?.length ?? 0}
@@ -224,7 +224,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
           </div>
         </header>
 
-        <section className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
+        <section className="overflow-hidden rounded-xl border border-border bg-card">
           {rows === undefined ? (
             <TableSkeleton/>
           ) : rows.length === 0 ? (
@@ -233,7 +233,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800">
+                  <tr className="border-b border-border">
                     <Th>{tr('thPatient')}</Th>
                     <Th>{tr('thFacility')}</Th>
                     <Th>{tr('thToken')}</Th>
@@ -247,7 +247,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                   {rows.map((row) => (
                     <tr
                       key={row.id}
-                      className="border-b border-slate-800 last:border-b-0 transition-colors hover:bg-slate-800/40"
+                      className="border-b border-border last:border-b-0 transition-colors hover:bg-secondary/40"
                     >
                       <td className="px-4 py-3">
                         <span className="font-medium text-white block">
@@ -259,11 +259,11 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         >
                           View 360 Record
                         </a>
-                        <span className="mt-1 block font-mono text-xs text-slate-400">
+                        <span className="mt-1 block font-mono text-xs text-muted-foreground">
                           #{row.id.slice(0, 8)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {row.target_facility === 'PENDING_ASSIGNMENT' ? (
                           <div className="flex flex-col gap-1">
                               <span className="text-orange-400 text-xs italic">{tc('pending')}</span>
@@ -277,7 +277,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         {row.queue_token ? (
                           <span className="font-mono bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs font-bold">{row.queue_token}</span>
                         ) : (
-                          <span className="text-slate-500 text-xs italic">{tr('unscheduled')}</span>
+                          <span className="text-muted-foreground text-xs italic">{tr('unscheduled')}</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -288,27 +288,27 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-800 bg-slate-800/60 px-2 py-1 text-xs font-medium text-slate-400">
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary/60 px-2 py-1 text-xs font-medium text-muted-foreground">
                           <span
-                            className="h-1.5 w-1.5 rounded-full bg-slate-400"
+                            className="h-1.5 w-1.5 rounded-full bg-secondary"
                             aria-hidden="true"
                           />
                           {row.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right tabular-nums text-slate-400">
+                      <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
                         {formatWhen(row.sortKey, locale)}
                       </td>
                       <td className="px-4 py-3 flex gap-2 justify-end">
                         <button
                           onClick={() => setSelectedQr(row.id)}
-                          className="px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md hover:bg-slate-700 transition-colors"
+                          className="px-3 py-1.5 bg-secondary text-white text-xs font-semibold rounded-md hover:bg-secondary/80 transition-colors"
                         >
                           Show QR
                         </button>
                         <button
                           onClick={() => fetchTimeline(row.id)}
-                          className="px-3 py-1.5 border border-slate-700 text-white text-xs font-semibold rounded-md hover:bg-slate-800 transition-colors"
+                          className="px-3 py-1.5 border border-border text-white text-xs font-semibold rounded-md hover:bg-secondary transition-colors"
                         >
                           Timeline
                         </button>
@@ -321,7 +321,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
           )}
         </section>
 
-        <p className="mt-4 text-xs text-slate-400">
+        <p className="mt-4 text-xs text-muted-foreground">
           {tr('sortNote')}
         </p>
 
@@ -335,35 +335,35 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
 
         {timelineRef && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-            <div className="bg-slate-900 p-6 rounded-2xl w-full max-w-sm border border-slate-800 shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="bg-card p-6 rounded-2xl w-full max-w-sm border border-border shadow-2xl max-h-[80vh] overflow-y-auto">
               <h3 className="text-xl font-bold text-white mb-2">{tr('timelineTitle')}</h3>
-              <p className="text-sm text-slate-400 mb-6">{tr('timelineHint')}</p>
+              <p className="text-sm text-muted-foreground mb-6">{tr('timelineHint')}</p>
 
               <div className="space-y-4">
                 {loadingTimeline ? (
-                  <div className="text-center py-4 text-slate-400">{tr('loading')}</div>
+                  <div className="text-center py-4 text-muted-foreground">{tr('loading')}</div>
                 ) : timelineEvents.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">{tr('noEvents')}</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">{tr('noEvents')}</p>
                 ) : (
-                  <div className="relative border-l border-slate-700 ml-3 space-y-6">
+                  <div className="relative border-l border-border ml-3 space-y-6">
                     {timelineEvents.map((ev, idx) => (
                       <div key={idx} className="pl-6 relative">
-                        <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-slate-900" />
+                        <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-background" />
                         <div className="text-sm font-semibold text-white">
                           {ev.action === 'CONSULTATION_OUTCOME' ? 'CONSULTATION OUTCOME' : ev.action}
                         </div>
-                        <div className="text-xs text-slate-400 mb-1">{new Date(ev.occurred_at).toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground mb-1">{new Date(ev.occurred_at).toLocaleString()}</div>
                         {ev.disposition && (
                           <div className="text-xs font-bold text-emerald-400 mt-1 uppercase">{tr('disposition')}: {ev.disposition.replace(/_/g, ' ')}</div>
                         )}
-                        {ev.note && <div className="text-sm text-slate-300 bg-slate-800 p-2 rounded-md mt-1">{ev.note}</div>}
+                        {ev.note && <div className="text-sm text-muted-foreground bg-secondary p-2 rounded-md mt-1">{ev.note}</div>}
                       </div>
                     ))}
                   </div>
                 )}
 
-                <div className="pt-4 mt-6 border-t border-slate-800 flex justify-end">
-                  <button onClick={() => setTimelineRef(null)} className="px-4 py-2 bg-slate-800 text-white text-sm font-semibold rounded-md hover:bg-slate-700">{tr('close')}</button>
+                <div className="pt-4 mt-6 border-t border-border flex justify-end">
+                  <button onClick={() => setTimelineRef(null)} className="px-4 py-2 bg-secondary text-white text-sm font-semibold rounded-md hover:bg-secondary/80">{tr('close')}</button>
                 </div>
               </div>
             </div>
@@ -373,21 +373,21 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
 
       {showCatalogModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-slate-900 p-6 shadow-xl border border-slate-700">
+          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border border-border">
             <h2 className="text-xl font-bold text-white mb-4">{tr('assignModalTitle')}</h2>
 
             <div className="mb-6 space-y-2 max-h-[60vh] overflow-y-auto">
               {facilities.length === 0 && !catalogSyncing && (
-                <p className="text-sm text-slate-400">{tr('noFacilities')}</p>
+                <p className="text-sm text-muted-foreground">{tr('noFacilities')}</p>
               )}
               {catalogSyncing && (
-                <p className="text-sm text-slate-400">{tr('syncing')}</p>
+                <p className="text-sm text-muted-foreground">{tr('syncing')}</p>
               )}
               {facilities.map(fac => (
-                <div key={fac.id} className="flex items-center justify-between p-3 border border-slate-800 rounded-lg bg-slate-800/40">
+                <div key={fac.id} className="flex items-center justify-between p-3 border border-border rounded-lg bg-secondary/40">
                   <div>
                     <h3 className="font-semibold text-white">{fac.name}</h3>
-                    <p className="text-xs text-slate-400">{fac.type}</p>
+                    <p className="text-xs text-muted-foreground">{fac.type}</p>
                   </div>
                   <button
                     onClick={() => handleConfirmAssign(fac.id)}
@@ -399,7 +399,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
               ))}
             </div>
 
-            <div className="flex justify-between items-center mt-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
               <button
                 onClick={handleSyncCatalog}
                 className="text-xs text-indigo-400 hover:text-indigo-300"
@@ -409,7 +409,7 @@ export default function ActiveReferralsPage({ params }: ReferralsPageProps) {
               </button>
               <button
                 onClick={() => { setShowCatalogModal(false); setAssignTarget(null); }}
-                className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-md font-medium"
+                className="bg-secondary hover:bg-secondary/80 text-white px-4 py-2 rounded-md font-medium"
               >
                 {tr('cancel')}
               </button>
@@ -432,7 +432,7 @@ function Th({
   return (
     <th
       scope="col"
-      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-400 ${className}`}
+      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground ${className}`}
     >
       {children}
     </th>
@@ -441,12 +441,12 @@ function Th({
 
 function TableSkeleton() {
   return (
-    <div className="divide-y divide-slate-800" aria-busy="true">
+    <div className="divide-y divide-border" aria-busy="true">
       {[0, 1, 2, 3].map((key) => (
         <div key={key} className="flex items-center gap-4 px-4 py-4">
-          <div className="h-3 w-40 animate-pulse rounded bg-slate-800" />
-          <div className="h-3 w-32 animate-pulse rounded bg-slate-800" />
-          <div className="ml-auto h-5 w-20 animate-pulse rounded bg-slate-800" />
+          <div className="h-3 w-40 animate-pulse rounded bg-secondary" />
+          <div className="h-3 w-32 animate-pulse rounded bg-secondary" />
+          <div className="ml-auto h-5 w-20 animate-pulse rounded bg-secondary" />
         </div>
       ))}
     </div>
@@ -456,7 +456,7 @@ function TableSkeleton() {
 function EmptyState({ tr }: { tr: (key: string) => string }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-slate-800/40">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-secondary/40">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -464,7 +464,7 @@ function EmptyState({ tr }: { tr: (key: string) => string }) {
           strokeWidth={1.5}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-6 w-6 text-slate-400"
+          className="h-6 w-6 text-muted-foreground"
           aria-hidden="true"
         >
           <path d="M9 12h6M12 9v6" />
@@ -472,7 +472,7 @@ function EmptyState({ tr }: { tr: (key: string) => string }) {
         </svg>
       </div>
       <h2 className="text-base font-semibold text-white">{tr('emptyTitle')}</h2>
-      <p className="mt-1 max-w-sm text-sm text-slate-400">
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
         {tr('emptyDesc')}
       </p>
     </div>
