@@ -12,7 +12,8 @@
  * are cheap.
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -190,6 +191,7 @@ async function main(): Promise<void> {
       slice.map(({ doc }) => ({ title: doc.title, content: doc.content })),
       'document',
     );
+    await new Promise(resolve => setTimeout(resolve, 22000));
 
     slice.forEach(({ doc, hash }, index) => {
       buffer.push({

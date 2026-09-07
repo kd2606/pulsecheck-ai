@@ -442,7 +442,7 @@ export const DIABETES_CONFIG: TabularDatasetConfig = {
   provenance:
     'National Institute of Diabetes and Digestive and Kidney Diseases, Pima Indians Diabetes Database. Cohort restricted to adult female patients of Pima heritage — generalisability to other populations is limited.',
   outcomeLabel: 'a diabetes diagnosis',
-  label: { column: 'Outcome', aliases: ['class', 'target'], isPositive: (v) => v === '1' || v === 'yes' || v === 'positive' },
+  label: { column: 'Outcome', aliases: ['class', 'target', 'Value', 'Code'], isPositive: (v) => v === '1' || v === 'yes' || v === 'positive' },
   numeric: [
     { column: 'Age', label: 'Age', unit: 'years', bins: [30, 40, 50, 60] },
     { column: 'Glucose', label: 'Plasma glucose (2-hour OGTT)', unit: 'mg/dL', bins: [100, 126, 160] },
