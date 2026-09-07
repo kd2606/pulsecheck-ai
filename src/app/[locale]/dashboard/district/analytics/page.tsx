@@ -96,11 +96,11 @@ export default function AnalyticsPage() {
     <div className="p-4 md:p-8 space-y-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-muted-foreground">District Command Analytics</h1>
+          <h1 className="text-2xl font-bold text-foreground">District Command Analytics</h1>
           <p className="text-sm text-muted-foreground mt-1">Aggregate public-health operational metrics.</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-border">
+        <div className="flex flex-wrap items-center gap-3 bg-card p-2 rounded-xl shadow-sm border border-border">
           <input 
             type="date" 
             className="text-sm border-none bg-slate-50 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
@@ -135,19 +135,19 @@ export default function AnalyticsPage() {
       ) : data ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-white border-border shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">Total Referrals</p>
-                    <h3 className="text-3xl font-bold text-muted-foreground">{data.totalReferrals}</h3>
+                    <h3 className="text-3xl font-bold text-foreground">{data.totalReferrals}</h3>
                   </div>
                   <div className="p-3 bg-blue-50 rounded-lg"><Activity className="size-5 text-blue-600"/></div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="bg-white border-border shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -159,12 +159,12 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-border shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">Avg Turnaround Time</p>
-                    <h3 className="text-3xl font-bold text-muted-foreground">
+                    <h3 className="text-3xl font-bold text-foreground">
                       {data.averageTurnaroundHours > 0 ? `${data.averageTurnaroundHours.toFixed(1)} hrs` : '--'}
                     </h3>
                     {data.missingSlaData > 0 && (
@@ -176,7 +176,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-border shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -190,9 +190,9 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white border-border shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardHeader className="border-b border-border pb-4">
-                <CardTitle className="text-base font-semibold text-muted-foreground">Triage Distribution</CardTitle>
+                <CardTitle className="text-base font-semibold text-foreground">Triage Distribution</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4">
@@ -212,9 +212,9 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white border-border shadow-sm">
+            <Card className="bg-card border-border shadow-sm">
               <CardHeader className="border-b border-border pb-4">
-                <CardTitle className="text-base font-semibold text-muted-foreground">Workload Summary</CardTitle>
+                <CardTitle className="text-base font-semibold text-foreground">Workload Summary</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
@@ -241,9 +241,9 @@ export default function AnalyticsPage() {
             </Card>
           </div>
 
-          <Card className="bg-white border-border shadow-sm">
+          <Card className="bg-card border-border shadow-sm">
             <CardHeader className="border-b border-border pb-4">
-              <CardTitle className="text-base font-semibold text-muted-foreground">Referral Trend (Last 30 Days)</CardTitle>
+              <CardTitle className="text-base font-semibold text-foreground">Referral Trend (Last 30 Days)</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               {data.trend && data.trend.length > 0 ? (
@@ -273,7 +273,7 @@ export default function AnalyticsPage() {
           </Card>
         </>
       ) : (
-        <div className="flex flex-col justify-center items-center h-64 text-muted-foreground bg-white rounded-xl border border-border border-dashed">
+        <div className="flex flex-col justify-center items-center h-64 text-muted-foreground bg-card rounded-xl border border-border border-dashed">
           <FileText className="size-12 text-muted-foreground mb-4" />
           <p>No aggregate data available.</p>
         </div>

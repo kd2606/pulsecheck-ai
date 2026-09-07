@@ -139,7 +139,7 @@ export default function FacilityCatalogPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 p-4">
-      <h1 className="text-2xl font-bold text-muted-foreground">{t('title')}</h1>
+      <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
       
       <Card>
         <CardHeader>
@@ -149,15 +149,15 @@ export default function FacilityCatalogPage() {
         <CardContent className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-xs text-muted-foreground uppercase">{t('name')}</div>
-            <div className="font-medium text-muted-foreground">{selectedFacility.name}</div>
+            <div className="font-medium text-foreground">{selectedFacility.name}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground uppercase">{t('type')}</div>
-            <div className="font-medium text-muted-foreground">{selectedFacility.type}</div>
+            <div className="font-medium text-foreground">{selectedFacility.type}</div>
           </div>
           <div>
             <div className="text-xs text-muted-foreground uppercase">{t('status')}</div>
-            <div className="font-medium text-muted-foreground">{selectedFacility.status}</div>
+            <div className="font-medium text-foreground">{selectedFacility.status}</div>
           </div>
         </CardContent>
       </Card>
@@ -198,7 +198,7 @@ export default function FacilityCatalogPage() {
                 <tbody>
                   {selectedFacility.services.map((svc: any) => (
                     <tr key={svc.serviceId} className="border-b border-border hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-muted-foreground">{svc.serviceName}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{svc.serviceName}</td>
                       <td className="px-4 py-3">{svc.category}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -241,7 +241,7 @@ export default function FacilityCatalogPage() {
       {/* Editor Modal */}
       {(isAddingService || isEditingService) && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-white">
+          <Card className="w-full max-w-md bg-card">
             <CardHeader>
               <CardTitle>{isAddingService ? t('addTitle') : t('editTitle')}</CardTitle>
             </CardHeader>

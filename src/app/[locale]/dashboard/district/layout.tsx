@@ -69,33 +69,32 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 scrollbar-thin scrollbar-thumb-border">
           {navItems.map((item) => {
             const Icon = item.icon;
+            // Precise active route matching
             const isActive = item.href === `/${locale}/dashboard/district` 
               ? pathname === item.href 
               : pathname.startsWith(item.href);
+              
             const isRoadmap = ['Facility Mapping', 'Critical Incidents', 'Audit Reports', 'System Config'].includes(item.label);
+            
             return (
-              <button
+              <Link
                 key={item.label}
-                onClick={() => {
-                  if (item.href !== '#' && !isRoadmap) router.push(item.href);
-                  setSidebarOpen(false);
-                }}
-                disabled={isRoadmap}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   isActive 
-                    ? "bg-secondary text-secondary-foreground" 
-                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
-                  isRoadmap && "opacity-50 cursor-not-allowed"
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-foreground hover:bg-secondary/80 hover:text-foreground"
                 )}
               >
-                <Icon className={cn("size-5", isActive ? "text-secondary-foreground" : "text-muted-foreground")} />
+                <Icon className={cn("size-5", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
                 {item.label}
-                {isRoadmap && <Badge variant="outline" className="ml-auto text-[10px] leading-tight px-1.5 h-4">Roadmap</Badge>}
-              </button>
+                {isRoadmap && <Badge variant="secondary" className="ml-auto text-[10px] leading-tight px-1.5 h-4 bg-muted text-muted-foreground">Planned</Badge>}
+              </Link>
             );
           })}
         </div>

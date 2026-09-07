@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useUser } from "@/firebase/auth/useUser";
-import { User, Mail, Shield, Building, Key, CheckCircle2, Loader2 } from "lucide-react";
+import { User, Mail, Shield, Building, Key, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,13 +16,21 @@ export default function DistrictProfilePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     
-    const [formData, setFormData] = useState({
+    const [initialData, setInitialData] = useState({
         name: "",
         email: "",
         jurisdiction: "Raipur District Command Center",
         uid: "",
         accessLevel: "Level 4 (District Wide)"
     });
+    
+    const [formData, setFormData] = useState({
+        name: "",
+        email: ""
+    });
+
+    const [errors, setErrors] = useState({ name: "", email: "" });
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -30,23 +38,18 @@ export default function DistrictProfilePage() {
             try {
                 const docRef = doc(db, `users/${user.uid}`);
                 const snap = await getDoc(docRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    setFormData({
-                        name: data.name || user.displayName || "Dr. C. Mishra",
-                        email: data.email || user.email || "dmo@diagnoverse.ai",
-                        jurisdiction: data.jurisdiction || "Raipur District Command Center",
-                        uid: user.uid,
-                        accessLevel: data.accessLevel || "Level 4 (District Wide)"
-                    });
-                } else {
-                    setFormData(prev => ({
-                        ...prev,
-                        name: user.displayName || "Dr. C. Mishra",
-                        email: user.email || "dmo@diagnoverse.ai",
-                        uid: user.uid
-                    }));
-                }
+                const data = snap.exists() ? snap.data() : {};
+                
+                const initial = {
+                    name: data.name || user.displayName || "Dr. C. Mishra",
+                    email: data.email || user.email || "dmo@diagnoverse.ai",
+                    jurisdiction: data.jurisdiction || "Raipur District Command Center",
+                    uid: user.uid,
+                    accessLevel: data.accessLevel || "Level 4 (District Wide)"
+                };
+                
+                setInitialData(initial);
+                setFormData({ name: initial.name, email: initial.email });
             } catch (error) {
                 console.error("Failed to load profile:", error);
             } finally {
@@ -56,118 +59,192 @@ export default function DistrictProfilePage() {
         fetchProfile();
     }, [user]);
 
+    useEffect(() => {
+        setHasUnsavedChanges(formData.name !== initialData.name || formData.email !== initialData.email);
+        
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [formData, initialData, hasUnsavedChanges]);
+
+    const validateForm = () => {
+        let valid = true;
+        const newErrors = { name: "", email: "" };
+        
+        if (!formData.name.trim()) {
+            newErrors.name = "Full Name is required";
+            valid = false;
+        } else if (formData.name.length < 3) {
+            newErrors.name = "Name must be at least 3 characters";
+            valid = false;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email.trim()) {
+            newErrors.email = "Email is required";
+            valid = false;
+        } else if (!emailRegex.test(formData.email)) {
+            newErrors.email = "Invalid email format";
+            valid = false;
+        }
+        
+        setErrors(newErrors);
+        return valid;
+    };
+
+    const handleCancel = () => {
+        setFormData({ name: initialData.name, email: initialData.email });
+        setErrors({ name: "", email: "" });
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) return;
+        if (!user || saving) return;
+        if (!validateForm()) return;
 
         setSaving(true);
         try {
             const docRef = doc(db, `users/${user.uid}`);
             await updateDoc(docRef, {
                 name: formData.name,
-                email: formData.email,
-                jurisdiction: formData.jurisdiction
+                email: formData.email
             });
+            
+            setInitialData(prev => ({ ...prev, name: formData.name, email: formData.email }));
             toast.success("Profile updated successfully!");
         } catch (error: any) {
             console.error(error);
-            toast.error(error.message || "Failed to update profile.");
+            toast.error(error.message || "Failed to update profile. Please try again.");
         } finally {
             setSaving(false);
         }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <h1 className="text-2xl font-bold text-muted-foreground tracking-tight">System Profile & Settings</h1>
+        <div className="max-w-4xl mx-auto space-y-6 pb-12">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">System Profile & Settings</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="col-span-1 shadow-sm border-border">
+                <Card className="col-span-1 shadow-sm border-border bg-card">
                     <CardContent className="p-6 flex flex-col items-center text-center">
                         <div className="h-24 w-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 text-3xl font-bold">
-                            {formData.name ? formData.name.charAt(0).toUpperCase() : "CM"}
+                            {initialData.name ? initialData.name.charAt(0).toUpperCase() : "CM"}
                         </div>
-                        <h2 className="text-xl font-bold text-muted-foreground">{formData.name || "Dr. C. Mishra"}</h2>
+                        <h2 className="text-xl font-bold text-foreground">{initialData.name || "Loading..."}</h2>
                         <p className="text-sm text-muted-foreground font-medium">Chief Medical Officer</p>
-                        <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">
-                            <Shield className="w-3 h-3" />
+                        <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">
+                            <Shield className="w-3.5 h-3.5" />
                             Admin Access
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="col-span-1 md:col-span-2 shadow-sm border-border">
+                <Card className="col-span-1 md:col-span-2 shadow-sm border-border bg-card">
                     <form onSubmit={handleSubmit}>
                         <CardHeader>
-                            <CardTitle className="text-lg">Personal Information</CardTitle>
-                            <CardDescription>Administrative details and contact info</CardDescription>
+                            <CardTitle className="text-lg text-foreground">Personal Information</CardTitle>
+                            <CardDescription>Administrative details and contact info. Role and scope changes require system administrator assistance.</CardDescription>
+                            {hasUnsavedChanges && (
+                                <div className="mt-2 text-sm text-amber-600 flex items-center gap-1 font-medium bg-amber-50 p-2 rounded-md border border-amber-200">
+                                    <AlertCircle className="w-4 h-4" />
+                                    You have unsaved changes
+                                </div>
+                            )}
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {loading ? (
-                                <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+                                <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>
                             ) : (
                                 <>
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                                            <User className="w-4 h-4 mr-2" /> Full Name
+                                        <Label htmlFor="profile-name" className="text-foreground flex items-center text-xs uppercase tracking-wider font-bold">
+                                            <User className="w-4 h-4 mr-2 text-muted-foreground" /> Full Name
                                         </Label>
                                         <Input 
+                                            id="profile-name"
                                             value={formData.name} 
                                             onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                            className="font-medium" 
-                                            required
+                                            className={`font-medium focus-visible:ring-2 ${errors.name ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                                            disabled={saving}
                                         />
+                                        {errors.name && <p className="text-xs text-red-500 font-medium">{errors.name}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                                            <Mail className="w-4 h-4 mr-2" /> Email Address
+                                        <Label htmlFor="profile-email" className="text-foreground flex items-center text-xs uppercase tracking-wider font-bold">
+                                            <Mail className="w-4 h-4 mr-2 text-muted-foreground" /> Email Address
                                         </Label>
                                         <Input 
+                                            id="profile-email"
                                             value={formData.email} 
                                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                                             type="email"
-                                            className="font-medium" 
-                                            required
+                                            className={`font-medium focus-visible:ring-2 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'}`}
+                                            disabled={saving}
                                         />
+                                        {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                                            <Building className="w-4 h-4 mr-2" /> Jurisdiction
+                                        <Label htmlFor="profile-jurisdiction" className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-bold">
+                                            <Building className="w-4 h-4 mr-2" /> Jurisdiction (Read Only)
                                         </Label>
                                         <Input 
-                                            value={formData.jurisdiction} 
-                                            onChange={e => setFormData({ ...formData, jurisdiction: e.target.value })}
-                                            className="font-medium" 
+                                            id="profile-jurisdiction"
+                                            value={initialData.jurisdiction} 
+                                            className="font-medium bg-secondary text-muted-foreground border-transparent cursor-not-allowed" 
+                                            disabled
+                                            readOnly
                                         />
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                                                <Key className="w-4 h-4 mr-2" /> UID
+                                            <Label htmlFor="profile-uid" className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-bold">
+                                                <Key className="w-4 h-4 mr-2" /> System UID
                                             </Label>
                                             <Input 
-                                                value={formData.uid || "SYS-ADMIN-001"} 
-                                                className="font-mono bg-slate-50" 
+                                                id="profile-uid"
+                                                value={initialData.uid || "SYS-ADMIN-001"} 
+                                                className="font-mono text-sm bg-secondary text-muted-foreground border-transparent cursor-not-allowed" 
                                                 disabled
+                                                readOnly
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
+                                            <Label htmlFor="profile-access" className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-bold">
                                                 <Shield className="w-4 h-4 mr-2" /> Access Level
                                             </Label>
                                             <Input 
-                                                value={formData.accessLevel} 
-                                                className="font-medium bg-slate-50" 
+                                                id="profile-access"
+                                                value={initialData.accessLevel} 
+                                                className="font-medium bg-secondary text-muted-foreground border-transparent cursor-not-allowed" 
                                                 disabled
+                                                readOnly
                                             />
                                         </div>
                                     </div>
                                 </>
                             )}
                         </CardContent>
-                        <CardFooter className="border-t border-border bg-slate-50 p-6 flex justify-end gap-3 rounded-b-lg">
-                            <Button type="button" variant="outline" className="text-muted-foreground">Cancel</Button>
-                            <Button type="submit" disabled={saving || loading} className="bg-card hover:bg-secondary text-white font-semibold">
+                        <CardFooter className="border-t border-border bg-slate-50 dark:bg-card p-6 flex justify-end gap-3 rounded-b-lg">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="text-foreground border-border hover:bg-secondary"
+                                onClick={handleCancel}
+                                disabled={saving || !hasUnsavedChanges}
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                disabled={saving || loading || !hasUnsavedChanges} 
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                            >
                                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />} 
                                 {saving ? "Saving..." : "Save Changes"}
                             </Button>

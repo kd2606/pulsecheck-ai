@@ -386,8 +386,8 @@ export default function DistrictDashboardPage() {
       {/* ─── Scanner Modal ─── */}
       {showScanner && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-2 text-muted-foreground">Scan Referral QR</h3>
+          <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-2 text-foreground">Scan Referral QR</h3>
             <p className="text-sm text-muted-foreground mb-4">Scan the ASHA worker&apos;s referral QR code or manually enter the Referral ID.</p>
 
             {/* Tabs */}
@@ -396,7 +396,7 @@ export default function DistrictDashboardPage() {
                 onClick={() => { setScanTab('camera'); setQrLookupResult(null); }}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors",
-                  scanTab === 'camera' ? "bg-white text-blue-600 shadow-sm" : "text-muted-foreground hover:text-muted-foreground"
+                  scanTab === 'camera' ? "bg-card text-blue-600 shadow-sm" : "text-muted-foreground hover:text-muted-foreground"
                 )}
               >
                 <Camera className="size-4" /> Camera
@@ -405,7 +405,7 @@ export default function DistrictDashboardPage() {
                 onClick={() => { setScanTab('manual'); setQrLookupResult(null); }}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors",
-                  scanTab === 'manual' ? "bg-white text-blue-600 shadow-sm" : "text-muted-foreground hover:text-muted-foreground"
+                  scanTab === 'manual' ? "bg-card text-blue-600 shadow-sm" : "text-muted-foreground hover:text-muted-foreground"
                 )}
               >
                 <Keyboard className="size-4" /> Manual Lookup
@@ -563,8 +563,8 @@ export default function DistrictDashboardPage() {
       {/* ─── Timeline Modal ─── */}
       {timelineRef && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4 text-muted-foreground">Referral Timeline</h3>
+          <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4 text-foreground">Referral Timeline</h3>
             <p className="text-sm text-muted-foreground mb-6">Complete audit history for this referral.</p>
             
             <div className="space-y-4">
@@ -597,14 +597,14 @@ export default function DistrictDashboardPage() {
       {/* ─── Assign Facility Modal ─── */}
       {assignRef && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4 text-muted-foreground">Assign Target Facility</h3>
+          <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4 text-foreground">Assign Target Facility</h3>
             <p className="text-sm text-muted-foreground mb-6">Select a facility to route this referral to.</p>
             
             <div className="space-y-4">
               {facilities.length > 0 ? (
                 <select 
-                  className="w-full h-12 px-4 rounded-xl border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  className="w-full h-12 px-4 rounded-xl border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-card"
                   value={selectedFacility}
                   onChange={e => setSelectedFacility(e.target.value)}
                 >
@@ -637,15 +637,15 @@ export default function DistrictDashboardPage() {
       {/* ─── Schedule Appointment Modal ─── */}
       {scheduleRef && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4 text-muted-foreground">Schedule Appointment</h3>
+          <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4 text-foreground">Schedule Appointment</h3>
             <p className="text-sm text-muted-foreground mb-6">Book a slot and generate a queue token.</p>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Service</label>
                 <select 
-                    className="w-full h-10 px-3 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                    className="w-full h-10 px-3 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-card text-sm"
                     value={selectedService}
                     onChange={e => setSelectedService(e.target.value)}
                   >
@@ -682,7 +682,7 @@ export default function DistrictDashboardPage() {
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Time Slot</label>
                 <select 
-                  className="w-full h-10 px-3 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                  className="w-full h-10 px-3 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-card text-sm"
                   value={selectedTime}
                   onChange={e => setSelectedTime(e.target.value)}
                 >
@@ -712,15 +712,15 @@ export default function DistrictDashboardPage() {
       {/* ─── Record Outcome Modal ─── */}
       {outcomeRef && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4 text-muted-foreground">Record Consultation Outcome</h3>
+          <div className="bg-card p-6 rounded-2xl shadow-2xl w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4 text-foreground">Record Consultation Outcome</h3>
             <p className="text-sm text-muted-foreground mb-6">Log clinical notes and decide the next step.</p>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Disposition</label>
                 <select 
-                  className="w-full h-10 px-3 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                  className="w-full h-10 px-3 rounded-lg border border-border focus:ring-2 focus:ring-blue-500 outline-none bg-card text-sm"
                   value={outcomeDisposition}
                   onChange={e => setOutcomeDisposition(e.target.value)}
                 >
@@ -774,7 +774,7 @@ export default function DistrictDashboardPage() {
       {/* ─── Metrics Row ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         
-        <Card className="bg-white border-border shadow-sm">
+        <Card className="bg-card border-border shadow-sm">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-4 bg-blue-50 rounded-full border border-blue-100">
               <Users className="size-6 text-blue-600" />
@@ -782,14 +782,14 @@ export default function DistrictDashboardPage() {
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Total Active Referrals</p>
               <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-bold text-muted-foreground">{loading ? '-' : activeReferrals}</h3>
+                <h3 className="text-3xl font-bold text-foreground">{loading ? '-' : activeReferrals}</h3>
                 <span className="text-xs font-medium text-muted-foreground">Live from Field</span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-red-100 shadow-sm ring-1 ring-red-500/10">
+        <Card className="bg-card border-red-100 shadow-sm ring-1 ring-red-500/10">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-4 bg-red-50 rounded-full border border-red-100">
               <AlertOctagon className="size-6 text-red-600" />
@@ -814,7 +814,7 @@ export default function DistrictDashboardPage() {
                 <ScanLine className="size-6" /> Scan Referral QR
               </h3>
             </div>
-            <div className="p-3 bg-white/10 rounded-full">
+            <div className="p-3 bg-card/10 rounded-full">
               <Camera className="size-6 text-white" />
             </div>
           </CardContent>
@@ -822,7 +822,7 @@ export default function DistrictDashboardPage() {
       </div>
 
       {/* ─── Open Defects Table ─── */}
-      <Card className="bg-white border-border shadow-sm overflow-hidden">
+      <Card className="bg-card border-border shadow-sm overflow-hidden">
         <CardHeader className="border-b border-border bg-slate-50/50 pb-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
