@@ -23,7 +23,7 @@ export interface SyncMeta {
 }
 
 export interface Vitals {
-  readonly temperature_c?: number | undefined;
+  readonly temperature_f?: number | undefined;
   readonly systolic_bp?: number | undefined;
   readonly diastolic_bp?: number | undefined;
   readonly pulse_bpm?: number | undefined;

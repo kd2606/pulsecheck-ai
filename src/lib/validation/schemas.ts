@@ -41,7 +41,7 @@ export const patientIntakeSchema = z.object({
  */
 export const vitalsSchema = z
   .object({
-    temperature_c: z.number().min(25).max(45).optional(),
+    temperature_f: z.number().min(90).max(110).optional(),
     systolic_bp: z.number().int().min(50).max(300).optional(),
     diastolic_bp: z.number().int().min(20).max(200).optional(),
     pulse_bpm: z.number().int().min(20).max(250).optional(),

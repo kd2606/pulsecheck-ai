@@ -5,7 +5,7 @@ import { z } from "genkit";
 
 const WorkerTriageInputSchema = z.object({
   symptoms: z.string(),
-  temperature_c: z.number(),
+  temperature_f: z.number(),
   systolic_bp: z.number(),
   diastolic_bp: z.number(),
   age: z.number().nullable(),
@@ -33,7 +33,7 @@ export async function runWorkerTriage(input: z.infer<typeof WorkerTriageInputSch
   ].filter(Boolean).join(", ");
 
   const clinicalMetadata = `
-Temperature: ${input.temperature_c}°C
+Temperature: ${input.temperature_f}°F
 Systolic BP: ${input.systolic_bp}
 Diastolic BP: ${input.diastolic_bp}
 ${input.o2Saturation ? `O2 Saturation: ${input.o2Saturation}%` : ""}
@@ -49,7 +49,7 @@ Vitals: ${clinicalMetadata}
 Reported Symptoms: ${input.symptoms}
 
 CRITICAL RULES:
-1. deterministic red-flag rules must be respected. If temperature > 40C, or systolic > 180, or diastolic > 120, or systolic < 90, or diastolic < 60, or severe symptoms (e.g. bleeding, breathing difficulty) are present, the risk level MUST be RED.
+1. deterministic red-flag rules must be respected. If temperature > 104F, or systolic > 180, or diastolic > 120, or systolic < 90, or diastolic < 60, or severe symptoms (e.g. bleeding, breathing difficulty) are present, the risk level MUST be RED.
 2. Output must not be a definitive diagnosis, but rather "Possible health concern categories".
 3. Provide a clear explanation for the risk level.
 4. Recommend the immediate next action.

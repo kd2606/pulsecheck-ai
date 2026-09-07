@@ -36,7 +36,7 @@ interface PatientPayload {
 interface TriagePayload {
   symptoms: string[];
   vitals: {
-    temperature_c: number;
+    temperature_f: number;
     systolic_bp: number;
     diastolic_bp: number;
   };
@@ -51,7 +51,7 @@ interface IntakeFormState {
   dob: string;
   phone: string;
   symptoms: string;
-  temperature_c: string;
+  temperature_f: string;
   systolic_bp: string;
   diastolic_bp: string;
   o2_saturation: string;
@@ -89,7 +89,7 @@ function createInitialState(): IntakeFormState {
     dob: '',
     phone: '',
     symptoms: '',
-    temperature_c: '',
+    temperature_f: '',
     systolic_bp: '',
     diastolic_bp: '',
     o2_saturation: '',
@@ -256,11 +256,11 @@ export default function NewIntakePage() {
       errs.symptoms = t('validation.symptomsRequired');
     }
 
-    const temperature = toNumber(f.temperature_c);
+    const temperature = toNumber(f.temperature_f);
     if (temperature === null) {
-      errs.temperature_c = t('validation.temperatureRequired');
-    } else if (temperature < 30 || temperature > 45) {
-      errs.temperature_c = t('validation.temperatureRange');
+      errs.temperature_f = t('validation.temperatureRequired');
+    } else if (temperature < 90 || temperature > 110) {
+      errs.temperature_f = t('validation.temperatureRange');
     }
 
     const systolic = toNumber(f.systolic_bp);
@@ -341,7 +341,7 @@ export default function NewIntakePage() {
   const handleRunAiTriage = async () => {
     // Validate required inputs for AI
     const validationErrors = validate(form);
-    const requiredForAi = ['symptoms', 'temperature_c', 'systolic_bp', 'diastolic_bp', 'gender'];
+    const requiredForAi = ['symptoms', 'temperature_f', 'systolic_bp', 'diastolic_bp', 'gender'];
     const aiErrors = Object.keys(validationErrors).filter(k => requiredForAi.includes(k));
     if (aiErrors.length > 0) {
       setErrors(validationErrors);
@@ -350,13 +350,13 @@ export default function NewIntakePage() {
     }
 
     // Deterministic rules
-    const temp = Number(form.temperature_c);
+    const temp = Number(form.temperature_f);
     const sys = Number(form.systolic_bp);
     const dia = Number(form.diastolic_bp);
     const symps = form.symptoms.toLowerCase();
     
     let isDeterministicRed = false;
-    if (temp > 40 || sys > 180 || dia > 120 || sys < 90 || dia < 60 || symps.includes('bleed') || symps.includes('breath')) {
+    if (temp > 104 || sys > 180 || dia > 120 || sys < 90 || dia < 60 || symps.includes('bleed') || symps.includes('breath')) {
       isDeterministicRed = true;
       setField('risk_level', 'RED');
     }
@@ -365,7 +365,7 @@ export default function NewIntakePage() {
       setAiPendingOffline(true);
       if (!isDeterministicRed) {
         // Fallback for offline if not red
-        if (temp > 38 || sys > 140 || dia > 90) {
+        if (temp > 100.4 || sys > 140 || dia > 90) {
           setField('risk_level', 'YELLOW');
         } else {
           setField('risk_level', 'GREEN');
@@ -381,7 +381,7 @@ export default function NewIntakePage() {
     try {
       const result = await runWorkerTriage({
         symptoms: form.symptoms,
-        temperature_c: temp,
+        temperature_f: temp,
         systolic_bp: sys,
         diastolic_bp: dia,
         age: age,
@@ -441,7 +441,7 @@ export default function NewIntakePage() {
     const triageData: TriagePayload = {
       symptoms: parseSymptoms(form.symptoms),
       vitals: {
-        temperature_c: Number(form.temperature_c),
+        temperature_f: Number(form.temperature_f),
         systolic_bp: Number(form.systolic_bp),
         diastolic_bp: Number(form.diastolic_bp),
       },
@@ -636,22 +636,22 @@ export default function NewIntakePage() {
               </Field>
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                <Field error={errors.temperature_c} id="temperature_c" label="Temperature (°C) *" required optionalLabel={t('optional')}>
+                <Field error={errors.temperature_f} id="temperature_f" label="Temperature (°F) *" required optionalLabel={t('optional')}>
                   <input
-                    id="temperature_c"
-                    name="temperature_c"
+                    id="temperature_f"
+                    name="temperature_f"
                     type="number"
                     inputMode="decimal"
                     step="0.1"
-                    min="30"
-                    max="45"
-                    placeholder="37.0"
+                    min="90"
+                    max="110"
+                    placeholder="98.6"
                     className={INPUT_CLASS}
-                    value={form.temperature_c}
+                    value={form.temperature_f}
                     disabled={isSaving}
-                    aria-invalid={errors.temperature_c !== undefined}
-                    aria-describedby={errors.temperature_c !== undefined ? 'temperature_c-error' : undefined}
-                    onChange={(event) => setField('temperature_c', event.target.value)}
+                    aria-invalid={errors.temperature_f !== undefined}
+                    aria-describedby={errors.temperature_f !== undefined ? 'temperature_f-error' : undefined}
+                    onChange={(event) => setField('temperature_f', event.target.value)}
                   />
                 </Field>
 
