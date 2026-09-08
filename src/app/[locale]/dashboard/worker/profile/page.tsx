@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { auth, db } from "@/firebase/clientApp";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useUser } from "@/firebase/auth/useUser";
+import { updateProfile } from "firebase/auth";
 
 export default function WorkerProfilePage() {
   const { user } = useUser();
@@ -62,6 +63,11 @@ export default function WorkerProfilePage() {
         phc: formData.phc,
         phone: formData.phone
       });
+      
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: formData.name });
+      }
+      
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error(error);

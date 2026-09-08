@@ -50,13 +50,17 @@ export async function GET(request: Request) {
       }
     } else {
       // district_admin or admin
-      if (role === 'district_admin' && !decodedToken.district_id) {
+      if (role === 'district_admin' && !decodedToken.district_id && !decodedToken.districtId) {
          return NextResponse.json({ error: 'Forbidden: District Admin missing district claim' }, { status: 403 });
       }
       
       let facilitiesQuery: any = adminDb.collection('facilities');
       if (role === 'district_admin') {
-         facilitiesQuery = facilitiesQuery.where('district', '==', decodedToken.district_id);
+         const dId = decodedToken.district_id || decodedToken.districtId;
+         if (!dId) {
+           return NextResponse.json({ error: 'Forbidden: District Admin missing district claim' }, { status: 403 });
+         }
+         facilitiesQuery = facilitiesQuery.where('districtId', '==', dId);
       }
       const facilitiesSnap = await facilitiesQuery.get();
       

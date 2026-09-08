@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { db } from "@/firebase/clientApp";
+import { auth, db } from "@/firebase/clientApp";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { updateProfile } from "firebase/auth";
 
 export default function DistrictProfilePage() {
     const { user } = useUser();
@@ -118,6 +119,10 @@ export default function DistrictProfilePage() {
                 name: formData.name,
                 email: formData.email
             });
+            
+            if (auth.currentUser) {
+                await updateProfile(auth.currentUser, { displayName: formData.name });
+            }
             
             setInitialData(prev => ({ ...prev, name: formData.name, email: formData.email }));
             toast.success(t('profile.success'));
