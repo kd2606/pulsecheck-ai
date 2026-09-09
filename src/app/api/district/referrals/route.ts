@@ -1,13 +1,17 @@
-import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+// src/app/api/district/referrals/route.ts
+import { NextResponse, type NextRequest } from 'next/server';
+import { getAdminAuth, getAdminDb, getAdminInitError } from '@/lib/firebase/admin';
 
+// Firebase Admin uses Node built-ins (crypto, fs, net) and cannot run on Edge.
 export const runtime = 'nodejs';
+// Never let Next.js cache or statically prerender this handler at build time.
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+export const maxDuration = 30;
 
-const SLA_MINUTES = Number(process.env.NEXT_PUBLIC_SLA_MINUTES ?? 60);
-const FACILITY_FIELDS = ['facilityId', 'facility_id', 'assignedFacilityId', 'destinationFacilityId'];
-
+// Backward-compatible type re-export consumed by useDistrictReferrals and other
+// client-side code. Kept as a superset so existing UI code doesn't break.
 export type ReferralRow = {
   id: string;
   patientName: string;
@@ -25,159 +29,173 @@ export type ReferralRow = {
   slaBreached: boolean;
 };
 
+type Referral = {
+  id: string;
+  districtId: string | null;
+  patientName: string | null;
+  facility: string | null;
+  reason: string | null;
+  status: string | null;
+  priority: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+type ReferralsResponse = {
+  ok: boolean;
+  data: Referral[];
+  count: number;
+  degraded: boolean;
+  error: string | null;
+  code:
+    | 'OK'
+    | 'ADMIN_UNAVAILABLE'
+    | 'UNAUTHENTICATED'
+    | 'QUERY_FAILED'
+    | 'UNEXPECTED';
+};
+
+const NO_STORE = {
+  'Cache-Control': 'no-store, max-age=0, must-revalidate',
+} as const;
+
 function toIso(value: unknown): string | null {
   if (!value) return null;
-  if (typeof value === 'string') {
-    const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? null : d.toISOString();
+  if (typeof value === 'string') return value;
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === 'object' && value !== null) {
+    const maybe = value as { toDate?: () => Date; _seconds?: number };
+    if (typeof maybe.toDate === 'function') {
+      try {
+        return maybe.toDate().toISOString();
+      } catch {
+        return null;
+      }
+    }
+    if (typeof maybe._seconds === 'number') {
+      return new Date(maybe._seconds * 1000).toISOString();
+    }
   }
-  if (typeof value === 'number') {
-    const ms = value < 1e12 ? value * 1000 : value;
-    return new Date(ms).toISOString();
-  }
-  const v = value as { toDate?: () => Date; _seconds?: number; seconds?: number };
-  if (typeof v.toDate === 'function') return v.toDate().toISOString();
-  const secs = v._seconds ?? v.seconds;
-  if (typeof secs === 'number') return new Date(secs * 1000).toISOString();
   return null;
 }
 
-function normalizeStatus(raw: unknown): ReferralRow['status'] {
-  const s = String(raw ?? 'pending').toLowerCase().replace(/[\s-]+/g, '_');
-  const allowed = ['pending', 'acknowledged', 'in_transit', 'admitted', 'completed', 'cancelled'];
-  if (allowed.includes(s)) return s as ReferralRow['status'];
-  if (s === 'new' || s === 'created' || s === 'synced' || s === 'open') return 'pending';
-  if (s === 'transit' || s === 'ontheway' || s === 'en_route') return 'in_transit';
-  if (s === 'done' || s === 'closed' || s === 'discharged') return 'completed';
-  return 'pending';
+function str(value: unknown): string | null {
+  return typeof value === 'string' && value.length > 0 ? value : null;
 }
 
-function normalizeUrgency(raw: unknown): ReferralRow['urgency'] {
-  const s = String(raw ?? 'routine').toLowerCase();
-  if (['critical', 'emergency', 'red', 'severe'].includes(s)) return 'critical';
-  if (['high', 'urgent', 'yellow', 'moderate'].includes(s)) return 'high';
-  return 'routine';
+/** Every response leaves this handler with HTTP 200 by design. */
+function ok(body: ReferralsResponse) {
+  return NextResponse.json(body, { status: 200, headers: NO_STORE });
 }
 
-function pick(data: Record<string, unknown>, keys: string[], fallback = ''): string {
-  for (const k of keys) {
-    const val = data[k];
-    if (typeof val === 'string' && val.trim()) return val.trim();
-    if (typeof val === 'number') return String(val);
-  }
-  return fallback;
-}
-
-function mapDoc(id: string, data: Record<string, unknown>): ReferralRow {
-  const createdAt =
-    toIso(data.createdAt) ?? toIso(data.created_at) ?? toIso(data.syncedAt) ?? toIso(data.timestamp);
-  const status = normalizeStatus(data.status);
-  const ageMinutes = createdAt
-    ? Math.max(0, Math.round((Date.now() - new Date(createdAt).getTime()) / 60000))
-    : null;
-  const isOpen = !['completed', 'admitted', 'cancelled'].includes(status);
-
-  const rawAge = data.age ?? data.patientAge;
-  const parsedAge = typeof rawAge === 'number' ? rawAge : Number.parseInt(String(rawAge ?? ''), 10);
-
-  return {
-    id,
-    patientName: pick(data as Record<string, unknown>, ['patientName', 'patient_name', 'name'], 'Unnamed patient'),
-    age: Number.isFinite(parsedAge) ? parsedAge : null,
-    gender: pick(data as Record<string, unknown>, ['gender', 'sex'], '—'),
-    village: pick(data as Record<string, unknown>, ['village', 'villageName', 'location', 'address'], '—'),
-    ashaName: pick(data as Record<string, unknown>, ['ashaName', 'asha_name', 'createdByName', 'workerName'], 'ASHA Worker'),
-    reason: pick(data as Record<string, unknown>, ['reason', 'referralReason', 'complaint', 'symptoms', 'notes'], '—'),
-    urgency: normalizeUrgency(data.urgency ?? data.priority ?? data.severity),
-    status,
-    facilityId: pick(data as Record<string, unknown>, FACILITY_FIELDS, ''),
-    createdAt,
-    updatedAt: toIso(data.updatedAt) ?? toIso(data.updated_at),
-    ageMinutes,
-    slaBreached: isOpen && ageMinutes !== null && ageMinutes > SLA_MINUTES,
-  };
-}
-
-async function resolveFacilityId(req: Request): Promise<{ facilityId: string | null; source: string }> {
-  const header = req.headers.get('authorization') ?? '';
-  const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
-
-    if (token) {
-    try {
-      const auth = adminAuth()!;
-      if (!auth) throw new Error('admin_auth_failed');
-      const decoded = await auth.verifyIdToken(token);
-      const claimFacility = (decoded.facilityId as string | undefined) ?? undefined;
-      if (claimFacility) return { facilityId: claimFacility, source: 'claims' };
-      if (decoded.admin === true || decoded.role === 'mo') {
-        const url = new URL(req.url);
-        const q = url.searchParams.get('facilityId');
-        if (q) return { facilityId: q, source: 'admin-query' };
-      }
-    } catch {
-      // fall through to query param — never hard-fail the dashboard
-    }
-  }
-
-  const url = new URL(req.url);
-  const q = url.searchParams.get('facilityId');
-  return q ? { facilityId: q, source: 'query' } : { facilityId: null, source: 'none' };
-}
-
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { facilityId, source } = await resolveFacilityId(req);
+    const db = getAdminDb();
 
-    if (!facilityId) {
-      return NextResponse.json(
-        { referrals: [], count: 0, facilityId: null, source, warning: 'No facilityId resolved from token claims or query.' },
-        { status: 200, headers: { 'Cache-Control': 'no-store' } },
+    if (!db) {
+      console.error(
+        '[api/district/referrals] Admin SDK unavailable:',
+        getAdminInitError(),
       );
+      return ok({
+        ok: false,
+        data: [],
+        count: 0,
+        degraded: true,
+        error: 'Referral service is temporarily unavailable.',
+        code: 'ADMIN_UNAVAILABLE',
+      });
     }
 
-    const seen = new Map<string, ReferralRow>();
+    const url = new URL(request.url);
+    const limitParam = Number.parseInt(url.searchParams.get('limit') ?? '', 10);
+    const limit =
+      Number.isFinite(limitParam) && limitParam > 0
+        ? Math.min(limitParam, 200)
+        : 50;
+    const statusFilter = url.searchParams.get('status');
+    let districtId = url.searchParams.get('districtId');
 
-    // Single-field equality queries only -> no composite index required.
-    for (const field of FACILITY_FIELDS) {
-      try {
-        const db = adminDb()!;
-        if (!db) return NextResponse.json({ referrals: [], count: 0, error: 'admin_failed_silently' }, { status: 200 });
-        const snap = await db.collection('referrals').where(field, '==', facilityId).limit(300).get();
-        snap.forEach((doc) => {
-          if (!seen.has(doc.id)) seen.set(doc.id, mapDoc(doc.id, doc.data() as Record<string, unknown>));
-        });
-        if (seen.size > 0) break; // primary field matched; stop probing aliases
-      } catch {
-        continue;
+    // Optional bearer-token scoping. A missing/invalid token degrades to the
+    // districtId query param rather than failing the request.
+    const authHeader = request.headers.get('authorization') ?? '';
+    if (authHeader.toLowerCase().startsWith('bearer ')) {
+      const token = authHeader.slice(7).trim();
+      const auth = getAdminAuth();
+      if (auth && token) {
+        try {
+          const decoded = await auth.verifyIdToken(token);
+          const claimDistrict = decoded.districtId;
+          if (typeof claimDistrict === 'string' && claimDistrict) {
+            districtId = claimDistrict;
+          }
+        } catch (err) {
+          console.warn(
+            '[api/district/referrals] Token verification failed:',
+            err instanceof Error ? err.message : err,
+          );
+        }
       }
     }
 
-    const referrals = Array.from(seen.values()).sort((a, b) => {
-      const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return bt - at;
+    try {
+      let query = db.collection('referrals').limit(limit);
+      if (districtId) query = query.where('districtId', '==', districtId);
+      if (statusFilter) query = query.where('status', '==', statusFilter);
+
+      const snapshot = await query.get();
+
+      const data: Referral[] = snapshot.docs.map((doc) => {
+        const d = doc.data() as Record<string, unknown>;
+        return {
+          id: doc.id,
+          districtId: str(d.districtId),
+          patientName: str(d.patientName),
+          facility: str(d.facility),
+          reason: str(d.reason),
+          status: str(d.status) ?? 'pending',
+          priority: str(d.priority) ?? 'normal',
+          createdAt: toIso(d.createdAt),
+          updatedAt: toIso(d.updatedAt),
+        };
+      });
+
+      data.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+
+      return ok({
+        ok: true,
+        data,
+        count: data.length,
+        degraded: false,
+        error: null,
+        code: 'OK',
+      });
+    } catch (err) {
+      console.error(
+        '[api/district/referrals] Firestore query failed:',
+        err instanceof Error ? err.stack : err,
+      );
+      return ok({
+        ok: false,
+        data: [],
+        count: 0,
+        degraded: true,
+        error: 'Could not load referrals right now.',
+        code: 'QUERY_FAILED',
+      });
+    }
+  } catch (err) {
+    console.error(
+      '[api/district/referrals] Unexpected failure:',
+      err instanceof Error ? err.stack : err,
+    );
+    return ok({
+      ok: false,
+      data: [],
+      count: 0,
+      degraded: true,
+      error: 'Unexpected server error.',
+      code: 'UNEXPECTED',
     });
-
-    const openCount = referrals.filter((r) => !['completed', 'admitted', 'cancelled'].includes(r.status)).length;
-
-    return NextResponse.json(
-      {
-        referrals,
-        count: referrals.length,
-        openCount,
-        breachedCount: referrals.filter((r) => r.slaBreached).length,
-        criticalCount: referrals.filter((r) => r.urgency === 'critical').length,
-        facilityId,
-        source,
-        slaMinutes: SLA_MINUTES,
-      },
-      { status: 200, headers: { 'Cache-Control': 'no-store' } },
-    );
-  } catch (error) {
-    console.error('[district/referrals] fatal:', error);
-    return NextResponse.json(
-      { referrals: [], count: 0, openCount: 0, breachedCount: 0, criticalCount: 0, facilityId: null, error: 'fetch_failed' },
-      { status: 200, headers: { 'Cache-Control': 'no-store' } },
-    );
   }
 }

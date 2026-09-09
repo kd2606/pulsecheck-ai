@@ -4,7 +4,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["genkit", "@genkit-ai/googleai"],
+  serverExternalPackages: ["genkit", "@genkit-ai/googleai", "firebase-admin"],
+  experimental: {
+    serverComponentsExternalPackages: ["firebase-admin"],
+  },
   async headers() {
     return [
       {
