@@ -1,3 +1,4 @@
+﻿import { useTranslations } from "next-intl";
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -78,6 +79,8 @@ const RISK_WEIGHT: Record<Exclude<RiskLevel, 'GREEN'>, number> = {
 /* ------------------------------------------------------------------ */
 
 export default function WorkerReportsPage(): React.JSX.Element {
+  const t = useTranslations("worker.inbox");
+
   const report = useLiveQuery<ReportSnapshot | undefined>(async () => {
     const db = getOfflineDb();
 
@@ -177,7 +180,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
                 </h2>
                 <span className="text-xs text-muted-foreground">
                   {isLoading
-                    ? 'Loading…'
+                    ? 'LoadingÃ¢â‚¬Â¦'
                     : `${report.followUps.length} patient${
                         report.followUps.length === 1 ? '' : 's'
                       } pending`}
@@ -233,7 +236,7 @@ export default function WorkerReportsPage(): React.JSX.Element {
                           </td>
                           <td className="px-5 py-4 text-muted-foreground">
                             {followUp.screenedAt === 0
-                              ? '—'
+                              ? 'Ã¢â‚¬â€'
                               : DATE_FORMATTER.format(new Date(followUp.screenedAt))}
                           </td>
                           <td className="px-5 py-4 text-right">
@@ -348,9 +351,10 @@ function TableSkeleton(): React.JSX.Element {
 }
 
 function EmptyState(): React.JSX.Element {
+  const t = useTranslations("worker.inbox");
   return (
     <div className="px-5 py-12 text-center">
-      <p className="text-sm font-medium text-white">No follow-ups pending</p>
+      <p className="text-sm font-medium text-white">{t("noTasks")}</p>
       <p className="mt-1 text-xs text-muted-foreground">
         Every screened patient is currently marked low risk.
       </p>

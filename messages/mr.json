@@ -340,7 +340,15 @@
       "missingInformation": "Missing information",
       "runAiTriage": "Run AI Triage",
       "runningAi": "Running AI Triage...",
-      "symptomsPlaceholder": "उदा. तीव्र ताप, कोरडा खोकला, अंगदुखी"
+      "symptomsPlaceholder": "उदा. तीव्र ताप, कोरडा खोकला, अंगदुखी",
+      "patientIsPregnant": "????? ??????? ???",
+      "placeholderAbha": "12 3456 7890 1234",
+      "placeholderPhone": "98765 43210",
+      "placeholderTemp": "98.6",
+      "placeholderSys": "120",
+      "placeholderDia": "80",
+      "placeholderSpo2": "98",
+      "placeholderDuration": "???. ? ????"
     },
     "catalog": {
       "title": "सुविधा कॅटलॉग (Facility Catalog)",
@@ -476,6 +484,53 @@
       "setupFailed": "डिव्हाइस पिन तयार करण्यात अयशस्वी",
       "unlockDevice": "डिव्हाइस अनलॉक करा",
       "setupSuccess": "डिव्हाइस पिन यशस्वीरित्या तयार केले"
+    },
+    "nav": {
+      "dashboard": "डॅशबोर्ड",
+      "assignedFamilies": "नेमून दिलेली कुटुंबे",
+      "newIntake": "नवीन इनटेक",
+      "referrals": "रेफरल्स",
+      "inbox": "इनबॉक्स",
+      "reports": "अहवाल",
+      "myProfile": "माझी प्रोफाइल"
+    },
+    "layout": {
+      "portalName": "आरोग्य कार्यकर्ता पोर्टल",
+      "appName": "केअरसंचार",
+      "online": "ऑनलाइन",
+      "unsynced": "{count} सिंक झालेले नाहीत",
+      "healthWorker": "आरोग्य कार्यकर्ता",
+      "ashaWorker": "आशा कार्यकर्ता",
+      "syncData": "डेटा सिंक करा"
+    },
+    "profile": {
+      "title": "माझी प्रोफाइल",
+      "subtitle": "तुमची व्यावसायिक माहिती आणि क्रेडेन्शियल्स व्यवस्थापित करा.",
+      "verifiedRole": "सत्यापित आशा / एएनएम",
+      "fullName": "पूर्ण नाव",
+      "email": "ईमेल पत्ता",
+      "assignedPhc": "नेमून दिलेले पीएचसी",
+      "employeeId": "कर्मचारी / एनएचए आयडी",
+      "contactAdmin": "अधिकृत आयडी बदलण्यासाठी प्रशासकाशी संपर्क साधा.",
+      "contactNumber": "संपर्क क्रमांक",
+      "cancel": "रद्द करा",
+      "saveChanges": "बदल जतन करा",
+      "saving": "जतन करत आहे...",
+      "success": "प्रोफाइल यशस्वीरित्या अद्यतनित केले!",
+      "error": "प्रोफाइल अद्यतनित करण्यात अयशस्वी.",
+      "healthWorkerDefault": "आरोग्य कार्यकर्ता"
+    },
+    "patientTimeline": {
+      "accessDenied": "?????? ???????",
+      "loadingRecord": "???????? ?????? ??????? ??? ??? ???...",
+      "recommendation": "??????:",
+      "longitudinalRecord": "?????????? ????? ???????",
+      "notes": "????",
+      "targetFacility": "?????? ??????:",
+      "adherence": "????",
+      "vitals": "?????????? ?????",
+      "careCategory": "????? ??????:",
+      "symptoms": "??????:"
     }
   },
   "admin": {
@@ -514,7 +569,11 @@
       "inactive": "निष्क्रिय",
       "cancel": "रद्द करा",
       "addTitle": "नवीन सेवा जोडा",
-      "editTitle": "सेवा संपादित करा"
+      "editTitle": "सेवा संपादित करा",
+      "actions": "??????",
+      "placeholderHours": "???. ???-?????",
+      "placeholderServiceId": "???. opd_pediatrics",
+      "placeholderTime": "???. 09:00-17:00"
     }
   },
   "district": {
@@ -548,7 +607,9 @@
       "followUpsCompleted": "फॉलो-अप कार्ये पूर्ण झाली",
       "referralTrend": "संदर्भ कल",
       "noTrendData": "या श्रेणीसाठी कोणताही कल डेटा उपलब्ध नाही.",
-      "noData": "कोणताही समग्र डेटा उपलब्ध नाही."
+      "noData": "कोणताही समग्र डेटा उपलब्ध नाही.",
+      "retry": "?????? ??????? ???",
+      "to": "??"
     },
     "roadmap": {
       "planned": "नियोजित",
@@ -614,6 +675,30 @@
       "schedule": "नियोजित करा",
       "outcome": "परिणाम",
       "details": "तपशील"
+    },
+    "nav": {
+      "dashboard": "डॅशबोर्ड",
+      "analytics": "अॅनालिटिक्स",
+      "facilities": "सुविधा",
+      "catalog": "कॅटलॉग",
+      "incidents": "घटना",
+      "audit": "ऑडिट",
+      "config": "कॉन्फिगरेशन",
+      "profile": "माझी प्रोफाइल"
+    },
+    "layout": {
+      "portalName": "जिल्हा कमांड",
+      "appName": "केअरसंचार",
+      "cmo": "मुख्य वैद्यकीय अधिकारी",
+      "adminAccess": "प्रशासक प्रवेश",
+      "syncData": "डेटा सिंक करा",
+      "online": "ऑनलाइन"
+    },
+    "catalog": {
+      "actions": "??????",
+      "placeholderHours": "???. ???-?????",
+      "placeholderServiceId": "???. opd_pediatrics",
+      "placeholderTime": "???. 09:00-17:00"
     }
   }
 }

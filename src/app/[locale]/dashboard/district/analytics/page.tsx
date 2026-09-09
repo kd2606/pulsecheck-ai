@@ -90,7 +90,7 @@ export default function AnalyticsPage() {
            <AlertTriangle className="size-5" />
            {error}
         </div>
-        <Button className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
+        <Button className="mt-4" onClick={() => window.location.reload()}>{t("analytics.retry")}</Button>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
             value={startDate}
             onChange={e => setStartDate(e.target.value)}
           />
-          <span className="text-muted-foreground text-sm">to</span>
+          <span className="text-muted-foreground text-sm">{t("analytics.to")}</span>
           <input 
             type="date" 
             className="text-sm border-none bg-slate-50 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"

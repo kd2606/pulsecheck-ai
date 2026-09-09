@@ -13,7 +13,8 @@ import {
   LogOut,
   Building,
   Activity,
-  User
+  User,
+  HeartPulse
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,14 +60,12 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="h-16 flex items-center px-6 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary p-2 rounded-lg">
-              <Building className="size-5 text-primary-foreground" />
-            </div>
+        <div className="flex flex-col flex-1 p-4 overflow-y-auto">
+          <div className="flex items-center gap-2 px-2 mb-6 text-indigo-500">
+            <HeartPulse className="w-8 h-8" />
             <div>
-              <h1 className="font-bold text-foreground leading-tight">CARESANCHAAR</h1>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">District Command</p>
+              <h1 className="font-bold text-foreground leading-tight">{t("layout.appName")}</h1>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{t("layout.portalName")}</p>
             </div>
           </div>
         </div>
@@ -101,20 +100,19 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           })}
         </div>
 
-        <div className="p-4 border-t border-border">
-          <Link href={`/${locale}/dashboard/district/profile`}>
-            <div 
-              className="flex items-center gap-3 px-2 py-3 cursor-pointer hover:bg-secondary/50 rounded-lg transition-colors"
-            >
-              <div className="w-10 h-10 rounded-full bg-amber-100/10 border border-amber-200/20 flex items-center justify-center font-bold text-amber-500">
-                CM
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-sm font-semibold text-foreground">Dr. C. Mishra</p>
-                <p className="text-xs text-amber-500 font-medium">{t('profile.cmo')}</p>
-              </div>
+        <div className="p-4 border-t border-border mt-auto">
+          <div className="flex items-center gap-3 px-2 py-3 rounded-lg bg-muted/50 border border-border">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800">
+              CM
             </div>
-          </Link>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate">Dr. C. Mishra</p>
+              <p className="text-[10px] text-muted-foreground truncate">{t("layout.cmo")}</p>
+            </div>
+            <Badge variant="outline" className="text-[10px] bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800">
+              {t("layout.adminAccess")}
+            </Badge>
+          </div>
           <Button 
             variant="ghost" 
             className="w-full justify-start text-muted-foreground hover:text-red-500 hover:bg-red-500/10 mt-2"

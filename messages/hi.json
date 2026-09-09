@@ -303,7 +303,15 @@
       "missingInformation": "Missing information",
       "runAiTriage": "Run AI Triage",
       "runningAi": "Running AI Triage...",
-      "symptomsPlaceholder": "उदा. तेज बुखार, सूखी खांसी, बदन दर्द"
+      "symptomsPlaceholder": "उदा. तेज बुखार, सूखी खांसी, बदन दर्द",
+      "patientIsPregnant": "????? ??????? ??",
+      "placeholderAbha": "12 3456 7890 1234",
+      "placeholderPhone": "98765 43210",
+      "placeholderTemp": "98.6",
+      "placeholderSys": "120",
+      "placeholderDia": "80",
+      "placeholderSpo2": "98",
+      "placeholderDuration": "???. ? ???"
     },
     "catalog": {
       "title": "सुविधा कैटलॉग (Facility Catalog)",
@@ -422,6 +430,53 @@
       "recoveryLimitation": "यदि आप अपना पिन भूल जाते हैं, तो डिवाइस रीसेट किए बिना ऑफ़लाइन डेटा पुनर्प्राप्त नहीं किया जा सकता है।",
       "lockSignOut": "लॉक / साइन आउट करें",
       "secureOfflineExplanation": "यह पिन इस डिवाइस पर ऑफ़लाइन रोगी रिकॉर्ड को सुरक्षित रूप से एन्क्रिप्ट और अनलॉक करता है。"
+    },
+    "nav": {
+      "dashboard": "डैशबोर्ड",
+      "assignedFamilies": "आवंटित परिवार",
+      "newIntake": "नया इंटेक",
+      "referrals": "रेफरल",
+      "inbox": "इनबॉक्स",
+      "reports": "रिपोर्ट्स",
+      "myProfile": "मेरी प्रोफ़ाइल"
+    },
+    "layout": {
+      "portalName": "स्वास्थ्य कार्यकर्ता पोर्टल",
+      "appName": "केयरसंचार",
+      "online": "ऑनलाइन",
+      "unsynced": "{count} सिंक नहीं हुए",
+      "healthWorker": "स्वास्थ्य कार्यकर्ता",
+      "ashaWorker": "आशा कार्यकर्ता",
+      "syncData": "डेटा सिंक करें"
+    },
+    "profile": {
+      "title": "मेरी प्रोफ़ाइल",
+      "subtitle": "अपनी पेशेवर जानकारी और क्रेडेंशियल प्रबंधित करें।",
+      "verifiedRole": "सत्यापित आशा / एएनएम",
+      "fullName": "पूरा नाम",
+      "email": "ईमेल पता",
+      "assignedPhc": "आवंटित पीएचसी",
+      "employeeId": "कर्मचारी / एनएचए आईडी",
+      "contactAdmin": "आधिकारिक आईडी बदलने के लिए व्यवस्थापक से संपर्क करें।",
+      "contactNumber": "संपर्क नंबर",
+      "cancel": "रद्द करें",
+      "saveChanges": "परिवर्तन सहेजें",
+      "saving": "सहेजा जा रहा है...",
+      "success": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई!",
+      "error": "प्रोफ़ाइल अपडेट करने में विफल।",
+      "healthWorkerDefault": "स्वास्थ्य कार्यकर्ता"
+    },
+    "patientTimeline": {
+      "accessDenied": "????? ????????",
+      "loadingRecord": "???????? ????????? ??????? ??? ?? ??? ??...",
+      "recommendation": "???????:",
+      "longitudinalRecord": "?????????? ?????? ???????",
+      "notes": "??????????",
+      "targetFacility": "?????? ??????:",
+      "adherence": "???????",
+      "vitals": "?????????? ?????",
+      "careCategory": "?????? ??????:",
+      "symptoms": "?????:"
     }
   },
   "admin": {
@@ -460,7 +515,11 @@
       "inactive": "निष्क्रिय",
       "cancel": "रद्द करें",
       "addTitle": "नई सेवा जोड़ें",
-      "editTitle": "सेवा संपादित करें"
+      "editTitle": "सेवा संपादित करें",
+      "actions": "???????????",
+      "placeholderHours": "???. ???-?????",
+      "placeholderServiceId": "???. opd_pediatrics",
+      "placeholderTime": "???. 09:00-17:00"
     }
   },
   "district": {
@@ -494,7 +553,9 @@
       "followUpsCompleted": "फॉलो-अप कार्य पूरे हुए",
       "referralTrend": "रेफरल प्रवृत्ति",
       "noTrendData": "इस सीमा के लिए कोई प्रवृत्ति डेटा उपलब्ध नहीं है।",
-      "noData": "कोई समग्र डेटा उपलब्ध नहीं है।"
+      "noData": "कोई समग्र डेटा उपलब्ध नहीं है।",
+      "retry": "???? ?????? ????",
+      "to": "??"
     },
     "roadmap": {
       "planned": "नियोजित",
@@ -560,6 +621,30 @@
       "schedule": "शेड्यूल करें",
       "outcome": "परिणाम",
       "details": "विवरण"
+    },
+    "nav": {
+      "dashboard": "डैशबोर्ड",
+      "analytics": "एनालिटिक्स",
+      "facilities": "सुविधाएं",
+      "catalog": "कैटलॉग",
+      "incidents": "घटनाएं",
+      "audit": "ऑडिट",
+      "config": "कॉन्फ़िगरेशन",
+      "profile": "मेरी प्रोफ़ाइल"
+    },
+    "layout": {
+      "portalName": "जिला कमांड",
+      "appName": "केयरसंचार",
+      "cmo": "मुख्य चिकित्सा अधिकारी",
+      "adminAccess": "व्यवस्थापक पहुँच",
+      "syncData": "डेटा सिंक करें",
+      "online": "ऑनलाइन"
+    },
+    "catalog": {
+      "actions": "???????????",
+      "placeholderHours": "???. ???-?????",
+      "placeholderServiceId": "???. opd_pediatrics",
+      "placeholderTime": "???. 09:00-17:00"
     }
   }
 }

@@ -540,7 +540,7 @@ export default function NewIntakePage() {
                   name="abha_id"
                   type="text"
                   inputMode="numeric"
-                  placeholder="12 3456 7890 1234"
+                  placeholder={t("placeholderAbha")}
                   className={INPUT_CLASS}
                   value={form.abha_id}
                   disabled={isSaving}
@@ -596,7 +596,7 @@ export default function NewIntakePage() {
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
-                  placeholder="98765 43210"
+                  placeholder={t("placeholderPhone")}
                   className={INPUT_CLASS}
                   value={form.phone}
                   disabled={isSaving}
@@ -645,7 +645,7 @@ export default function NewIntakePage() {
                     step="0.1"
                     min="90"
                     max="110"
-                    placeholder="98.6"
+                    placeholder={t("placeholderTemp")}
                     className={INPUT_CLASS}
                     value={form.temperature_f}
                     disabled={isSaving}
@@ -664,7 +664,7 @@ export default function NewIntakePage() {
                     step="1"
                     min="60"
                     max="260"
-                    placeholder="120"
+                    placeholder={t("placeholderSys")}
                     className={INPUT_CLASS}
                     value={form.systolic_bp}
                     disabled={isSaving}
@@ -683,7 +683,7 @@ export default function NewIntakePage() {
                     step="1"
                     min="30"
                     max="200"
-                    placeholder="80"
+                    placeholder={t("placeholderDia")}
                     className={INPUT_CLASS}
                     value={form.diastolic_bp}
                     disabled={isSaving}
@@ -701,7 +701,7 @@ export default function NewIntakePage() {
                     step="1"
                     min="50"
                     max="100"
-                    placeholder="98"
+                    placeholder={t("placeholderSpo2")}
                     className={INPUT_CLASS}
                     value={form.o2_saturation}
                     disabled={isSaving}
@@ -713,7 +713,7 @@ export default function NewIntakePage() {
                     id="duration"
                     name="duration"
                     type="text"
-                    placeholder="e.g. 3 days"
+                    placeholder={t("placeholderDuration")}
                     className={INPUT_CLASS}
                     value={form.duration}
                     disabled={isSaving}
@@ -730,7 +730,7 @@ export default function NewIntakePage() {
                         className="w-4 h-4 bg-card border-border rounded text-emerald-600 focus:ring-emerald-600"
                         disabled={isSaving}
                       />
-                      <span className="text-sm text-white">Patient is pregnant</span>
+                      <span className="text-sm text-white">{t("patientIsPregnant")}</span>
                     </label>
                   </Field>
                 )}

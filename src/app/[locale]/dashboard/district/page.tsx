@@ -34,8 +34,10 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string }>
 };
 
 import { useParams } from 'next/navigation';
+import { useTranslations } from "next-intl";
 
 export default function DistrictDashboardPage() {
+  const t = useTranslations("district");
   const { locale } = useParams();
   const [search, setSearch] = useState('');
   const [liveReferrals, setLiveReferrals] = useState<any[]>([]);

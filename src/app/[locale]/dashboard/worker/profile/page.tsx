@@ -11,8 +11,10 @@ import { auth, db } from "@/firebase/clientApp";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useUser } from "@/firebase/auth/useUser";
 import { updateProfile } from "firebase/auth";
+import { useTranslations } from "next-intl";
 
 export default function WorkerProfilePage() {
+  const t = useTranslations("worker.profile");
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -68,10 +70,10 @@ export default function WorkerProfilePage() {
         await updateProfile(auth.currentUser, { displayName: formData.name });
       }
       
-      toast.success("Profile updated successfully!");
+      toast.success(t("success"));
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || "Failed to update profile.");
+      toast.error(error.message || t("error"));
     } finally {
       setSaving(false);
     }
@@ -80,8 +82,8 @@ export default function WorkerProfilePage() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">My Profile</h1>
-        <p className="text-muted-foreground mt-1">Manage your professional information and credentials.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">{t("title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
 
       <Card className="bg-background border-border shadow-xl overflow-hidden">
@@ -91,10 +93,10 @@ export default function WorkerProfilePage() {
               {formData.name ? formData.name.charAt(0).toUpperCase() : "HW"}
             </div>
             <div>
-              <CardTitle className="text-2xl text-white">{formData.name || "Health Worker"}</CardTitle>
+              <CardTitle className="text-2xl text-white">{formData.name || t("healthWorkerDefault")}</CardTitle>
               <CardDescription className="text-emerald-400 font-medium mt-1 uppercase tracking-wider text-xs flex items-center">
                 <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                Verified ASHA / ANM
+                {t("verifiedRole")}
               </CardDescription>
             </div>
           </div>
@@ -108,7 +110,7 @@ export default function WorkerProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
                   <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                    <User className="w-3.5 h-3.5 mr-2 text-emerald-500" /> Full Name
+                    <User className="w-3.5 h-3.5 mr-2 text-emerald-500" /> {t("fullName")}
                   </Label>
                   <Input 
                     value={formData.name} 
@@ -120,7 +122,7 @@ export default function WorkerProfilePage() {
                 
                 <div className="space-y-2">
                   <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                    <Mail className="w-3.5 h-3.5 mr-2 text-emerald-500" /> Email Address
+                    <Mail className="w-3.5 h-3.5 mr-2 text-emerald-500" /> {t("email")}
                   </Label>
                   <Input 
                     value={formData.email} 
@@ -133,7 +135,7 @@ export default function WorkerProfilePage() {
                 
                 <div className="space-y-2">
                   <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                    <Building className="w-3.5 h-3.5 mr-2 text-emerald-500" /> Assigned PHC
+                    <Building className="w-3.5 h-3.5 mr-2 text-emerald-500" /> {t("assignedPhc")}
                   </Label>
                   <Input 
                     value={formData.phc} 
@@ -144,19 +146,19 @@ export default function WorkerProfilePage() {
                 
                 <div className="space-y-2">
                   <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                    <ShieldCheck className="w-3.5 h-3.5 mr-2 text-emerald-500" /> Employee / NHA ID
+                    <ShieldCheck className="w-3.5 h-3.5 mr-2 text-emerald-500" /> {t("employeeId")}
                   </Label>
                   <Input 
                     value={formData.employeeId} 
                     className="bg-card/50 border-border text-white focus-visible:ring-emerald-500 font-medium" 
                     disabled
                   />
-                  <p className="text-[10px] text-muted-foreground">Contact admin to change official ID.</p>
+                  <p className="text-[10px] text-muted-foreground">{t("contactAdmin")}</p>
                 </div>
                 
                 <div className="space-y-2">
                   <Label className="text-muted-foreground flex items-center text-xs uppercase tracking-wider font-semibold">
-                    <Phone className="w-3.5 h-3.5 mr-2 text-emerald-500" /> Contact Number
+                    <Phone className="w-3.5 h-3.5 mr-2 text-emerald-500" /> {t("contactNumber")}
                   </Label>
                   <Input 
                     value={formData.phone} 
@@ -169,10 +171,10 @@ export default function WorkerProfilePage() {
           </CardContent>
 
           <CardFooter className="border-t border-border bg-card/20 p-6 flex justify-end gap-3">
-            <Button type="button" variant="ghost" className="text-muted-foreground hover:text-white">Cancel</Button>
+            <Button type="button" variant="ghost" className="text-muted-foreground hover:text-white">{t("cancel")}</Button>
             <Button type="submit" disabled={saving || loading} className="bg-[#0D9488] hover:bg-[#0F766E] text-white font-semibold">
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />} 
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? t("saving") : t("saveChanges")}
             </Button>
           </CardFooter>
         </form>

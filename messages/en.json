@@ -340,7 +340,15 @@
       "missingInformation": "Missing information",
       "runAiTriage": "Run AI Triage",
       "runningAi": "Running AI Triage...",
-      "symptomsPlaceholder": "e.g. High fever, dry cough, body ache"
+      "symptomsPlaceholder": "e.g. High fever, dry cough, body ache",
+      "patientIsPregnant": "Patient is pregnant",
+      "placeholderAbha": "12 3456 7890 1234",
+      "placeholderPhone": "98765 43210",
+      "placeholderTemp": "98.6",
+      "placeholderSys": "120",
+      "placeholderDia": "80",
+      "placeholderSpo2": "98",
+      "placeholderDuration": "e.g. 3 days"
     },
     "catalog": {
       "title": "Facility Catalog",
@@ -468,6 +476,53 @@
       "recoveryLimitation": "If you forget your PIN, offline data cannot be recovered without device reset.",
       "lockSignOut": "Lock / Sign out",
       "secureOfflineExplanation": "This PIN encrypts and unlocks offline patient records safely on this device."
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "assignedFamilies": "Assigned Families",
+      "newIntake": "New Intake",
+      "referrals": "Referrals",
+      "inbox": "Inbox",
+      "reports": "Reports",
+      "myProfile": "My Profile"
+    },
+    "layout": {
+      "portalName": "Health Worker Portal",
+      "appName": "CARESANCHAAR",
+      "online": "Online",
+      "unsynced": "{count} unsynced",
+      "healthWorker": "Health Worker",
+      "ashaWorker": "ASHA Worker",
+      "syncData": "Sync Data"
+    },
+    "profile": {
+      "title": "My Profile",
+      "subtitle": "Manage your professional information and credentials.",
+      "verifiedRole": "Verified ASHA / ANM",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "assignedPhc": "Assigned PHC",
+      "employeeId": "Employee / NHA ID",
+      "contactAdmin": "Contact admin to change official ID.",
+      "contactNumber": "Contact Number",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "success": "Profile updated successfully!",
+      "error": "Failed to update profile.",
+      "healthWorkerDefault": "Health Worker"
+    },
+    "patientTimeline": {
+      "accessDenied": "Access Denied",
+      "loadingRecord": "Loading secure health record...",
+      "recommendation": "Recommendation:",
+      "longitudinalRecord": "Longitudinal Care Record",
+      "notes": "Notes",
+      "targetFacility": "Target Facility:",
+      "adherence": "Adherence",
+      "vitals": "Vitals",
+      "careCategory": "Care Category:",
+      "symptoms": "Symptoms:"
     }
   },
   "admin": {
@@ -506,7 +561,11 @@
       "inactive": "Inactive",
       "cancel": "Cancel",
       "addTitle": "Add New Service",
-      "editTitle": "Edit Service"
+      "editTitle": "Edit Service",
+      "actions": "Actions",
+      "placeholderHours": "e.g. Mon-Fri",
+      "placeholderServiceId": "e.g. opd_pediatrics",
+      "placeholderTime": "e.g. 09:00-17:00"
     }
   },
   "district": {
@@ -540,7 +599,9 @@
       "followUpsCompleted": "Follow-up Tasks Completed",
       "referralTrend": "Referral Trend (Last 30 Days)",
       "noTrendData": "No trend data available for this range.",
-      "noData": "No aggregate data available."
+      "noData": "No aggregate data available.",
+      "retry": "Retry",
+      "to": "to"
     },
     "roadmap": {
       "planned": "Planned",
@@ -606,6 +667,30 @@
       "schedule": "Schedule",
       "outcome": "Outcome",
       "details": "Details"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "analytics": "Analytics",
+      "facilities": "Facilities",
+      "catalog": "Catalog",
+      "incidents": "Incidents",
+      "audit": "Audit",
+      "config": "Config",
+      "profile": "My Profile"
+    },
+    "layout": {
+      "portalName": "District Command",
+      "appName": "CARESANCHAAR",
+      "cmo": "Chief Medical Officer",
+      "adminAccess": "Admin Access",
+      "syncData": "Sync Data",
+      "online": "Online"
+    },
+    "catalog": {
+      "actions": "Actions",
+      "placeholderHours": "e.g. Mon-Fri",
+      "placeholderServiceId": "e.g. opd_pediatrics",
+      "placeholderTime": "e.g. 09:00-17:00"
     }
   }
 }

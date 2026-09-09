@@ -1,3 +1,4 @@
+﻿import { useTranslations } from "next-intl";
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ interface Task {
 }
 
 export default function WorkerInboxPage({ params }: { params: Promise<{ locale: string }> }) {
+  const t = useTranslations("worker.inbox");
   const { locale } = use(params);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
   const [diastolic, setDiastolic] = useState('');
   const [symptoms, setSymptoms] = useState('');
   const [adherence, setAdherence] = useState('UNKNOWN');
-  
+
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
         setLoading(false);
         return;
       }
-      
+
       try {
         const q = query(
           collection(db, 'worker_tasks'),
@@ -57,13 +59,13 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
         setLoading(false);
       }
     };
-    
+
     // Auth state observer ensures we only fetch when user is confirmed loaded
     const unsubscribe = auth.onAuthStateChanged((user: any) => {
       if (user) fetchTasks();
       else setLoading(false);
     });
-    
+
     return () => unsubscribe();
   }, []);
 
@@ -78,9 +80,9 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
     try {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : '';
-      
+
       const idempotencyKey = `${activeTask.id}_${Date.now()}`;
-      
+
       const vitals = {
          systolic: systolic ? parseInt(systolic) : null,
          diastolic: diastolic ? parseInt(diastolic) : null,
@@ -156,12 +158,12 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+
                 <div className="space-y-4">
                   <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Pending Tasks ({pendingTasks.length})</h2>
                   {pendingTasks.map(task => (
-                    <div 
-                      key={task.id} 
+                    <div
+                      key={task.id}
                       className={`p-4 rounded-xl border transition-colors cursor-pointer ${activeTask?.id === task.id ? 'bg-secondary border-emerald-500/50' : 'bg-card border-border hover:border-border'}`}
                       onClick={() => { setActiveTask(task); setReplyNote(''); }}
                     >
@@ -178,7 +180,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                     </div>
                   ))}
                   {pendingTasks.length === 0 && <p className="text-sm text-muted-foreground">No pending tasks.</p>}
-                  
+
                   <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mt-8 mb-4">Completed ({completedTasks.length})</h2>
                   {completedTasks.map(task => (
                     <div key={task.id} className="p-4 rounded-xl bg-card/50 border border-border/50 opacity-70">
@@ -202,7 +204,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1 font-mono">Ref ID: {activeTask.referral_id}</p>
                       </div>
-                      
+
                       <div className="bg-secondary/50 rounded-xl p-4 mb-6 border border-border/50">
                         <p className="text-sm text-muted-foreground font-medium mb-1">Medical Officer Note:</p>
                         <p className="text-muted-foreground">{activeTask.note}</p>
@@ -213,11 +215,11 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                       {activeTask.type === 'FOLLOW_UP' && (
                         <div className="space-y-4 pb-4 mb-4 border-b border-border">
                            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Clinical Follow-up Structured Data</h3>
-                           
+
                            <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Follow-up Type</label>
-                                <select 
+                                <select
                                   value={followUpType}
                                   onChange={e => setFollowUpType(e.target.value)}
                                   className="w-full bg-secondary border-none rounded-md px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-emerald-500"
@@ -230,7 +232,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                               </div>
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Medication Adherence</label>
-                                <select 
+                                <select
                                   value={adherence}
                                   onChange={e => setAdherence(e.target.value)}
                                   className="w-full bg-secondary border-none rounded-md px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-emerald-500"
@@ -246,7 +248,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                            <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Blood Pressure (Systolic)</label>
-                                <input 
+                                <input
                                   type="number"
                                   placeholder="120"
                                   value={systolic}
@@ -256,7 +258,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                               </div>
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Blood Pressure (Diastolic)</label>
-                                <input 
+                                <input
                                   type="number"
                                   placeholder="80"
                                   value={diastolic}
@@ -268,9 +270,9 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
 
                            <div>
                              <label className="block text-xs text-muted-foreground mb-1">Current Symptoms (comma separated)</label>
-                             <input 
+                             <input
                                type="text"
-                               placeholder="e.g. fever, headache, better than before"
+                               placeholder={t("placeholder")}
                                value={symptoms}
                                onChange={e => setSymptoms(e.target.value)}
                                className="w-full bg-secondary border-none rounded-md px-3 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-emerald-500"
@@ -279,21 +281,21 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                         </div>
                       )}
 
-                      <textarea 
+                      <textarea
                         rows={3}
-                        placeholder="Visit summary, observations, or general reply..."
+                        placeholder={t("placeholder")}
                         className="w-full bg-secondary border-none rounded-lg px-4 py-3 text-sm text-foreground placeholder-slate-500 outline-none focus:ring-1 focus:ring-emerald-500 resize-none"
                         value={replyNote}
                         onChange={(e) => setReplyNote(e.target.value)}
                       />
                       <div className="flex justify-end gap-3">
-                        <button 
+                        <button
                           onClick={() => { setActiveTask(null); setReplyNote(''); }}
                           className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-white transition-colors"
                         >
                           Cancel
                         </button>
-                        <button 
+                        <button
                           disabled={!replyNote.trim() || submitting}
                           onClick={handleResolve}
                           className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-md transition-colors"
@@ -307,7 +309,7 @@ export default function WorkerInboxPage({ params }: { params: Promise<{ locale: 
                   ) : (
                     <div className="hidden md:flex h-full min-h-[300px] flex-col items-center justify-center border-2 border-dashed border-border rounded-2xl p-8 text-center bg-card/30">
                       <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground font-medium">Select a task to view details and respond.</p>
+                      <p className="text-muted-foreground font-medium">{t("noTasks")}</p>
                     </div>
                   )}
                 </div>

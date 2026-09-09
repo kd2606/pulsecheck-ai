@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 'use client';
 
 import { use, useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { SyncStatusBar } from '@/components/sync-status-bar';
 
 export default function WorkerPatientTimelinePage({ params }: { params: Promise<{ locale: string, id: string }> }) {
+  const t = useTranslations("worker.patientTimeline");
   const { locale, id: patientId } = use(params);
   const router = useRouter();
   
@@ -55,7 +57,7 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
        <Activity className="w-8 h-8 animate-spin text-emerald-500 mb-4" />
-       <p className="text-muted-foreground font-medium">Loading secure health record...</p>
+       <p className="text-muted-foreground font-medium">{t("loadingRecord")}</p>
     </div>
   );
 
@@ -63,7 +65,7 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
     <div className="min-h-screen bg-background p-8 flex flex-col items-center">
        <div className="max-w-md w-full bg-card rounded-2xl shadow-sm border border-red-500/20 p-8 text-center mt-12">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Access Denied</h2>
+          <h2 className="text-xl font-bold text-white mb-2">{t("accessDenied")}</h2>
           <p className="text-muted-foreground text-sm mb-6">{error}</p>
           <button 
             onClick={() => router.back()}
@@ -159,7 +161,7 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <div className="px-6 py-5 border-b border-border bg-secondary/30">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Longitudinal Care Record</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("longitudinalRecord")}</h2>
           </div>
           
           <div className="p-6">
@@ -191,29 +193,29 @@ export default function WorkerPatientTimelinePage({ params }: { params: Promise<
                           <div className="text-sm text-muted-foreground space-y-2 mt-4">
                              {event._type === 'TRIAGE' && (
                                 <div className="bg-secondary/50 p-3 rounded-lg border border-border">
-                                   <p><strong className="text-white">Symptoms:</strong> {event.symptoms?.join(', ')}</p>
-                                   <p className="mt-1"><strong className="text-white">Recommendation:</strong> {event.recommendation}</p>
+                                   <p><strong className="text-white">{t("symptoms")}</strong> {event.symptoms?.join(', ')}</p>
+                                   <p className="mt-1"><strong className="text-white">{t("recommendation")}</strong> {event.recommendation}</p>
                                 </div>
                              )}
                              {event._type === 'REFERRAL' && (
                                 <div>
-                                   <p>Target Facility: <span className="font-medium text-white">{event.target_facility || 'Unassigned'}</span></p>
-                                   <p>Care Category: <span className="font-medium text-white">{event.care_category}</span></p>
+                                   <p>{t("targetFacility")} <span className="font-medium text-white">{event.target_facility || t("unassigned")}</span></p>
+                                   <p>{t("careCategory")} <span className="font-medium text-white">{event.care_category}</span></p>
                                 </div>
                              )}
                              {event._type === 'FOLLOW_UP_RECORD' && (
                                 <div className="grid grid-cols-2 gap-4 bg-secondary/50 p-3 rounded-lg border border-border mt-2">
                                    <div>
-                                      <p className="text-xs text-muted-foreground uppercase">Vitals</p>
+                                      <p className="text-xs text-muted-foreground uppercase">{t("vitals")}</p>
                                       <p className="font-medium text-white">BP: {event.vitals?.systolic || '--'}/{event.vitals?.diastolic || '--'}</p>
                                    </div>
                                    <div>
-                                      <p className="text-xs text-muted-foreground uppercase">Adherence</p>
+                                      <p className="text-xs text-muted-foreground uppercase">{t("adherence")}</p>
                                       <p className="font-medium text-white">{event.adherence}</p>
                                    </div>
                                    {event.notes && (
                                       <div className="col-span-2 mt-1">
-                                        <p className="text-xs text-muted-foreground uppercase">Notes</p>
+                                        <p className="text-xs text-muted-foreground uppercase">{t("notes")}</p>
                                         <p>{event.notes}</p>
                                       </div>
                                    )}

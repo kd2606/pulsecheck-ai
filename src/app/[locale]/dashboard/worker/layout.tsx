@@ -25,6 +25,7 @@ import { OfflineCrypto } from "@/lib/crypto/offline-crypto";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,14 +50,16 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
     router.push(`/${locale}/auth/worker`);
   };
 
+  const t = useTranslations("worker");
+
   const navItems = [
-    { icon: Home, label: "Dashboard", href: `/${locale}/dashboard/worker` },
-    { icon: Users, label: "Assigned Families", href: `/${locale}/dashboard/worker/assigned-families` },
-    { icon: ClipboardPlus, label: "New Intake", href: `/${locale}/dashboard/worker/intake`, primary: true },
-    { icon: Send, label: "Referrals", href: `/${locale}/dashboard/worker/referrals` },
-    { icon: Bell, label: "Inbox", href: `/${locale}/dashboard/worker/inbox` },
-    { icon: FileText, label: "Reports", href: `/${locale}/dashboard/worker/reports` },
-    { icon: User, label: "My Profile", href: `/${locale}/dashboard/worker/profile` },
+    { icon: Home, label: t("nav.dashboard"), href: `/${locale}/dashboard/worker` },
+    { icon: Users, label: t("nav.assignedFamilies"), href: `/${locale}/dashboard/worker/assigned-families` },
+    { icon: ClipboardPlus, label: t("nav.newIntake"), href: `/${locale}/dashboard/worker/intake`, primary: true },
+    { icon: Send, label: t("nav.referrals"), href: `/${locale}/dashboard/worker/referrals` },
+    { icon: Bell, label: t("nav.inbox"), href: `/${locale}/dashboard/worker/inbox` },
+    { icon: FileText, label: t("nav.reports"), href: `/${locale}/dashboard/worker/reports` },
+    { icon: User, label: t("nav.myProfile"), href: `/${locale}/dashboard/worker/profile` },
   ];
 
   return (
@@ -81,8 +84,8 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
             <HeartPulse className="w-8 h-8 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">CARESANCHAAR</h1>
-            <p className="text-xs font-medium text-emerald-200/70 uppercase tracking-wider">Health Worker Portal</p>
+            <h1 className="text-xl font-bold tracking-tight text-white">{t("layout.appName")}</h1>
+            <p className="text-xs font-medium text-emerald-200/70 uppercase tracking-wider">{t("layout.portalName")}</p>
           </div>
         </div>
 
@@ -118,10 +121,10 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
-                <span className="text-sm font-medium text-emerald-400">Online</span>
+                <span className="text-sm font-medium text-emerald-400">{t("layout.online")}</span>
               </div>
               <Badge variant="secondary" className="bg-orange-500/20 text-orange-300 hover:bg-orange-500/20 text-xs border-orange-500/30">
-                3 unsynced
+                {t("layout.unsynced", { count: 3 })}
               </Badge>
             </div>
           </div>
@@ -132,8 +135,8 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
                 HW
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-white">Health Worker</span>
-                <span className="text-[10px] text-emerald-300 uppercase tracking-wider">ASHA Worker</span>
+                <span className="text-sm font-semibold text-white">{t("layout.healthWorker")}</span>
+                <span className="text-[10px] text-emerald-300 uppercase tracking-wider">{t("layout.ashaWorker")}</span>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/10 min-h-[44px] min-w-[44px]" onClick={handleLogout}>
@@ -163,7 +166,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
                     ? pathname === item.href 
                     : pathname.startsWith(item.href)
                 );
-                return activeItem ? activeItem.label : "Dashboard";
+                return activeItem ? activeItem.label : t("nav.dashboard");
               })()}
             </h2>
           </div>
@@ -172,7 +175,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
             <LanguageSwitcher />
             <Button variant="outline" size="sm" className="hidden sm:flex border-border bg-secondary hover:bg-secondary/80 text-foreground">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Sync Data
+              {t("layout.syncData")}
             </Button>
             <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-white hover:bg-white/10">
               <Bell className="w-5 h-5" />

@@ -192,7 +192,7 @@ export default function FacilityCatalogPage() {
                     <th className="px-4 py-3">{t('serviceName')}</th>
                     <th className="px-4 py-3">{t('serviceCategory')}</th>
                     <th className="px-4 py-3">{t('availability')}</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-3 text-right">{t("actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -251,7 +251,7 @@ export default function FacilityCatalogPage() {
                   <label className="text-sm font-medium">{t('serviceName')} ID</label>
                   <input type="text" className="w-full p-2 border rounded" 
                     value={formData.serviceId} onChange={e => setFormData({...formData, serviceId: e.target.value})} 
-                    placeholder="e.g. opd_pediatrics" />
+                    placeholder={t("placeholderServiceId")} />
                 </div>
               )}
               <div className="space-y-1">
@@ -279,12 +279,12 @@ export default function FacilityCatalogPage() {
               <div className="space-y-1">
                 <label className="text-sm font-medium">{t('operatingDays')}</label>
                 <input type="text" className="w-full p-2 border rounded" 
-                  value={formData.operatingDays} onChange={e => setFormData({...formData, operatingDays: e.target.value})} placeholder="e.g. Mon-Fri" />
+                  value={formData.operatingDays} onChange={e => setFormData({...formData, operatingDays: e.target.value})} placeholder={t("placeholderHours")} />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium">{t('operatingHours')}</label>
                 <input type="text" className="w-full p-2 border rounded" 
-                  value={formData.operatingHours} onChange={e => setFormData({...formData, operatingHours: e.target.value})} placeholder="e.g. 09:00-17:00" />
+                  value={formData.operatingHours} onChange={e => setFormData({...formData, operatingHours: e.target.value})} placeholder={t("placeholderTime")} />
               </div>
               <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline" onClick={() => { setIsAddingService(false); setIsEditingService(null); }}>{t('cancel')}</Button>
