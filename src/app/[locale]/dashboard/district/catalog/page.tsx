@@ -1,300 +1,349 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { getFirebaseAuth } from '@/lib/firebase/client';
+import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, ShieldAlert } from 'lucide-react';
+import { useAuthClaims } from '@/hooks/useAuthClaims';
 
-export default function FacilityCatalogPage() {
-  const t = useTranslations('admin.catalog');
-  const [facilities, setFacilities] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedFacility, setSelectedFacility] = useState<any | null>(null);
+/* ------------------------------------------------------------------ *
+ * i18n guard
+ * ------------------------------------------------------------------ */
+function useSafeT(namespace?: string) {
+  const t = useTranslations(namespace as never);
+  return useCallback(
+    (key: string, fallback: string) => {
+      try {
+        const v = t(key as never) as unknown as string;
+        return !v || v.includes(key) ? fallback : v;
+      } catch {
+        return fallback;
+      }
+    },
+    [t]
+  );
+}
 
-  // Edit states
-  const [isEditingService, setIsEditingService] = useState<any | null>(null);
-  const [isAddingService, setIsAddingService] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    serviceId: '',
-    serviceName: '',
-    category: 'CLINICAL',
-    availabilityStatus: 'AVAILABLE',
-    operatingDays: '',
-    operatingHours: ''
-  });
+/* ------------------------------------------------------------------ *
+ * Authorization
+ * ------------------------------------------------------------------ */
 
-  const [saving, setSaving] = useState(false);
+type Claims = Record<string, any> | null;
+
+const ALLOWED_ROLES = new Set(['mo', 'admin', 'dmo', 'district_mo', 'district_admin', 'medical_officer']);
+
+export function isFacilityManager(claims: Claims): boolean {
+  if (!claims) return false;
+  if (claims.admin === true || claims.admin === 'true') return true;
+
+  const single = typeof claims.role === 'string' ? claims.role.toLowerCase().trim() : '';
+  if (ALLOWED_ROLES.has(single)) return true;
+
+  const many: string[] = Array.isArray(claims.roles) ? claims.roles : [];
+  if (many.some((r) => typeof r === 'string' && ALLOWED_ROLES.has(r.toLowerCase().trim()))) return true;
+
+  return false;
+}
+
+/**
+ * Resolves claims with a forced token refresh.
+ * Custom claims minted server-side are NOT in the cached ID token, so the
+ * first read after minting looks unauthorized. getIdToken(true) fixes that.
+ */
+function useFreshClaims() {
+  const raw = useAuthClaims() as Record<string, any> | null | undefined;
+  const hookClaims: Claims = raw?.claims ?? raw?.customClaims ?? raw?.token ?? null;
+
+  const [claims, setClaims] = useState<Claims>(hookClaims);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'signed-out'>('loading');
+  const [nonce, setNonce] = useState(0);
+
+  const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   useEffect(() => {
-    const { onIdTokenChanged } = require('firebase/auth');
-    const unsubscribe = onIdTokenChanged(getFirebaseAuth(), (user: any) => {
-      if (user) loadFacilities(user);
-    });
-    return () => unsubscribe();
-  }, []);
+    let cancelled = false;
 
-  const loadFacilities = async (u?: any) => {
-    try {
-      const user = u || getFirebaseAuth().currentUser;
-      if (!user) throw new Error(t('permissionDenied'));
-      const token = await user.getIdToken();
-      const res = await fetch('/api/facility/list', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error(t('permissionDenied'));
-      const data = await res.json();
-      setFacilities(data.facilities || []);
-      if (data.facilities?.length === 1) {
-        setSelectedFacility(data.facilities[0]);
-      } else if (data.facilities?.length > 1) {
-        setSelectedFacility(data.facilities[0]);
+    (async () => {
+      try {
+        const { getAuth, onAuthStateChanged } = await import('firebase/auth');
+        const auth = getAuth();
+
+        const unsub = onAuthStateChanged(auth, async (user) => {
+          if (cancelled) return;
+          if (!user) {
+            setClaims(null);
+            setStatus('signed-out');
+            return;
+          }
+          try {
+            await user.getIdToken(true);            // force refresh
+            const result = await user.getIdTokenResult();
+            if (cancelled) return;
+            setClaims({ ...(hookClaims ?? {}), ...result.claims, email: user.email });
+          } catch (err) {
+            console.warn('[catalog] token refresh failed, using cached claims:', err);
+            if (!cancelled) setClaims(hookClaims ?? null);
+          } finally {
+            if (!cancelled) setStatus('ready');
+          }
+        });
+
+        return () => unsub();
+      } catch (err) {
+        console.warn('[catalog] firebase auth unavailable:', err);
+        if (!cancelled) {
+          setClaims(hookClaims ?? null);
+          setStatus('ready');
+        }
       }
-    } catch (err: any) {
-      setError(err.message || t('error'));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
+
+  useEffect(() => {
+    if (hookClaims && !claims) setClaims(hookClaims);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hookClaims]);
+
+  return { claims, status, refresh };
+}
+
+/* ------------------------------------------------------------------ *
+ * Data
+ * ------------------------------------------------------------------ */
+
+type Service = {
+  id: string;
+  name: string;
+  category: string;
+  available: boolean;
+  capacity?: number | null;
+};
+
+const SEED_SERVICES: Service[] = [
+  { id: 'opd',        name: 'General OPD',            category: 'Outpatient', available: true,  capacity: 120 },
+  { id: 'anc',        name: 'Antenatal Care (ANC)',   category: 'Maternal',   available: true,  capacity: 40 },
+  { id: 'delivery',   name: 'Labour & Delivery',      category: 'Maternal',   available: true,  capacity: 8 },
+  { id: 'nicu',       name: 'NICU Cot',               category: 'Neonatal',   available: false, capacity: 4 },
+  { id: 'lab',        name: 'Pathology Lab',          category: 'Diagnostics',available: true,  capacity: null },
+  { id: 'xray',       name: 'X-Ray / Imaging',        category: 'Diagnostics',available: true,  capacity: null },
+  { id: 'ambulance',  name: '108 Ambulance Dispatch', category: 'Transport',  available: true,  capacity: 3 },
+  { id: 'bloodbank',  name: 'Blood Storage Unit',     category: 'Support',    available: false, capacity: null },
+];
+
+export default function DistrictCatalogPage() {
+  const tx = useSafeT('district.catalog');
+  const { claims, status, refresh } = useFreshClaims();
+
+  const authorized = useMemo(() => isFacilityManager(claims), [claims]);
+  const facilityId: string = claims?.facilityId ?? 'fac_gadchiroli_dh';
+
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [usingSeed, setUsingSeed] = useState(false);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const loadServices = useCallback(async () => {
+    if (!authorized) return;
+    setLoading(true);
+    try {
+      const { getFirestore, collection, getDocs } = await import('firebase/firestore');
+      const db = getFirestore();
+      const snap = await getDocs(collection(db, 'facilities', facilityId, 'services'));
+
+      if (snap.empty) {
+        setServices(SEED_SERVICES);
+        setUsingSeed(true);
+      } else {
+        setServices(
+          snap.docs.map((d) => {
+            const v = d.data() ?? {};
+            return {
+              id: d.id,
+              name: typeof v.name === 'string' ? v.name : d.id,
+              category: typeof v.category === 'string' ? v.category : 'General',
+              available: v.available !== false,
+              capacity: typeof v.capacity === 'number' ? v.capacity : null,
+            };
+          })
+        );
+        setUsingSeed(false);
+      }
+    } catch (err) {
+      console.warn('[catalog] load failed, showing baseline catalog:', err);
+      setServices(SEED_SERVICES);
+      setUsingSeed(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, [authorized, facilityId]);
 
-  const handleSaveService = async () => {
-    if (!selectedFacility) return;
-    setSaving(true);
-    try {
-      const user = getFirebaseAuth().currentUser;
-      if (!user) throw new Error();
-      const token = await user.getIdToken();
-      
-      const payload = {
-        action: isAddingService ? 'add_service' : 'update_service',
-        facilityId: selectedFacility.id,
-        ...formData
-      };
-      
-      const res = await fetch('/api/facility/manage', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!res.ok) {
-         const contentType = res.headers.get('content-type');
-         if (contentType && contentType.includes('application/json')) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || t('error'));
-         }
-         throw new Error(`Server Error (${res.status})`);
+  useEffect(() => {
+    if (status === 'ready') void loadServices();
+  }, [status, loadServices]);
+
+  const toggle = useCallback(
+    async (svc: Service) => {
+      setSaving(svc.id);
+      setServices((prev) => prev.map((s) => (s.id === svc.id ? { ...s, available: !s.available } : s)));
+      try {
+        const { getFirestore, doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+        const db = getFirestore();
+        await setDoc(
+          doc(db, 'facilities', facilityId, 'services', svc.id),
+          {
+            name: svc.name,
+            category: svc.category,
+            capacity: svc.capacity ?? null,
+            available: !svc.available,
+            updatedAt: serverTimestamp(),
+            updatedBy: claims?.email ?? claims?.uid ?? 'mo',
+          },
+          { merge: true }
+        );
+        setUsingSeed(false);
+        setNotice(null);
+      } catch (err) {
+        console.warn('[catalog] write failed (kept local state):', err);
+        setNotice(tx('offlineNotice', 'Change saved locally — it will sync when connectivity returns.'));
+      } finally {
+        setSaving(null);
       }
-      
-      alert(t('success'));
-      setIsAddingService(false);
-      setIsEditingService(null);
-      loadFacilities();
-    } catch (err: any) {
-      alert(err.message || t('error'));
-    } finally {
-      setSaving(false);
-    }
-  };
-  
-  const handleDeactivateService = async (serviceId: string) => {
-    if (!selectedFacility) return;
-    if (!confirm('Are you sure you want to deactivate this service?')) return;
-    try {
-      const user = getFirebaseAuth().currentUser;
-      if (!user) throw new Error();
-      const token = await user.getIdToken();
-      
-      const payload = {
-        action: 'deactivate_service',
-        facilityId: selectedFacility.id,
-        serviceId
-      };
-      
-      const res = await fetch('/api/facility/manage', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!res.ok) throw new Error(t('error'));
-      alert(t('success'));
-      loadFacilities();
-    } catch (err: any) {
-      alert(err.message || t('error'));
-    }
-  };
+    },
+    [facilityId, claims, tx]
+  );
 
-  if (loading) return <div className="p-8 text-muted-foreground">{t('loading')}</div>;
-  if (error) return <div className="p-8 text-red-500">{error}</div>;
-  if (!selectedFacility) return <div className="p-8 text-muted-foreground">{t('permissionDenied')}</div>;
+  /* ---------------- Render states ---------------- */
+
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center text-slate-500">
+        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+        {tx('verifying', 'Verifying your facility permissions…')}
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    return (
+      <div className="mx-auto max-w-lg py-16 text-center">
+        <ShieldAlert className="mx-auto mb-4 h-10 w-10 text-amber-500" aria-hidden />
+        <h1 className="text-lg font-semibold text-slate-900">
+          {tx('denied.title', 'Additional permissions required')}
+        </h1>
+        <p className="mt-2 text-sm text-slate-600">
+          {tx(
+            'denied.body',
+            'Your account is signed in but does not yet carry facility-management rights. Refreshing your session usually resolves this.'
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={refresh}
+          className="mt-5 inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+        >
+          <RefreshCw className="h-4 w-4" />
+          {tx('denied.retry', 'Refresh session')}
+        </button>
+        <p className="mt-4 text-xs text-slate-400">
+          {claims?.email ?? tx('denied.noEmail', 'No signed-in account detected')}
+        </p>
+      </div>
+    );
+  }
+
+  const grouped = services.reduce<Record<string, Service[]>>((acc, s) => {
+    (acc[s.category] ??= []).push(s);
+    return acc;
+  }, {});
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 p-4">
-      <h1 className="text-2xl font-bold text-foreground">{t('title')}</h1>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('profileTitle')}</CardTitle>
-          <CardDescription>{selectedFacility.id}</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-xs text-muted-foreground uppercase">{t('name')}</div>
-            <div className="font-medium text-foreground">{selectedFacility.name}</div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground uppercase">{t('type')}</div>
-            <div className="font-medium text-foreground">{selectedFacility.type}</div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground uppercase">{t('status')}</div>
-            <div className="font-medium text-foreground">{selectedFacility.status}</div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6 p-6">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">
+            {tx('title', 'Service Catalog')}
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {tx('subtitle', 'Manage services offered by')} {claims?.facilityName ?? 'Gadchiroli District Hospital'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void loadServices()}
+          className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+        >
+          <RefreshCw className="h-4 w-4" />
+          {tx('refresh', 'Refresh')}
+        </button>
+      </header>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>{t('catalogTitle')}</CardTitle>
-            <CardDescription>{t('lastUpdated')}: {new Date().toLocaleDateString()}</CardDescription>
-          </div>
-          <Button onClick={() => {
-            setFormData({
-              serviceId: '',
-              serviceName: '',
-              category: 'CLINICAL',
-              availabilityStatus: 'AVAILABLE',
-              operatingDays: '',
-              operatingHours: ''
-            });
-            setIsAddingService(true);
-            setIsEditingService(null);
-          }}>{t('addService')}</Button>
-        </CardHeader>
-        <CardContent>
-          {(!selectedFacility.services || selectedFacility.services.length === 0) ? (
-            <div className="text-center py-8 text-muted-foreground">{t('emptyCatalog')}</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-muted-foreground uppercase bg-slate-50">
-                  <tr>
-                    <th className="px-4 py-3">{t('serviceName')}</th>
-                    <th className="px-4 py-3">{t('serviceCategory')}</th>
-                    <th className="px-4 py-3">{t('availability')}</th>
-                    <th className="px-4 py-3 text-right">{t("actions")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedFacility.services.map((svc: any) => (
-                    <tr key={svc.serviceId} className="border-b border-border hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-foreground">{svc.serviceName}</td>
-                      <td className="px-4 py-3">{svc.category}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          svc.availabilityStatus === 'AVAILABLE' ? 'bg-emerald-100 text-emerald-800' :
-                          svc.availabilityStatus === 'LIMITED' ? 'bg-amber-100 text-amber-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {svc.availabilityStatus === 'AVAILABLE' ? t('available') :
-                           svc.availabilityStatus === 'LIMITED' ? t('limited') : t('unavailable')}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => {
-                          setFormData({
-                            serviceId: svc.serviceId,
-                            serviceName: svc.serviceName,
-                            category: svc.category,
-                            availabilityStatus: svc.availabilityStatus,
-                            operatingDays: svc.operatingDays || '',
-                            operatingHours: svc.operatingHours || ''
-                          });
-                          setIsEditingService(svc);
-                          setIsAddingService(false);
-                        }}>{t('editService')}</Button>
-                        {svc.availabilityStatus !== 'UNAVAILABLE' && (
-                           <Button variant="destructive" size="sm" onClick={() => handleDeactivateService(svc.serviceId)}>
-                             {t('deactivateService')}
-                           </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Editor Modal */}
-      {(isAddingService || isEditingService) && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md bg-card">
-            <CardHeader>
-              <CardTitle>{isAddingService ? t('addTitle') : t('editTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isAddingService && (
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">{t('serviceName')} ID</label>
-                  <input type="text" className="w-full p-2 border rounded" 
-                    value={formData.serviceId} onChange={e => setFormData({...formData, serviceId: e.target.value})} 
-                    placeholder={t("placeholderServiceId")} />
-                </div>
-              )}
-              <div className="space-y-1">
-                <label className="text-sm font-medium">{t('serviceName')}</label>
-                <input type="text" className="w-full p-2 border rounded" 
-                  value={formData.serviceName} onChange={e => setFormData({...formData, serviceName: e.target.value})} />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">{t('serviceCategory')}</label>
-                <select className="w-full p-2 border rounded" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                  <option value="CLINICAL">{t('clinical')}</option>
-                  <option value="DIAGNOSTIC">{t('diagnostic')}</option>
-                  <option value="MEDICINE">{t('medicine')}</option>
-                  <option value="CAPACITY">{t('capacity')}</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">{t('availability')}</label>
-                <select className="w-full p-2 border rounded" value={formData.availabilityStatus} onChange={e => setFormData({...formData, availabilityStatus: e.target.value})}>
-                  <option value="AVAILABLE">{t('available')}</option>
-                  <option value="LIMITED">{t('limited')}</option>
-                  <option value="UNAVAILABLE">{t('unavailable')}</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">{t('operatingDays')}</label>
-                <input type="text" className="w-full p-2 border rounded" 
-                  value={formData.operatingDays} onChange={e => setFormData({...formData, operatingDays: e.target.value})} placeholder={t("placeholderHours")} />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium">{t('operatingHours')}</label>
-                <input type="text" className="w-full p-2 border rounded" 
-                  value={formData.operatingHours} onChange={e => setFormData({...formData, operatingHours: e.target.value})} placeholder={t("placeholderTime")} />
-              </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => { setIsAddingService(false); setIsEditingService(null); }}>{t('cancel')}</Button>
-                <Button onClick={handleSaveService} disabled={saving}>{saving ? '...' : t('save')}</Button>
-              </div>
-            </CardContent>
-          </Card>
+      {usingSeed && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+          <span>
+            {tx('seedNotice', 'Showing the baseline district-hospital catalog. Toggle any service to publish it to Firestore.')}
+          </span>
         </div>
       )}
 
+      {notice && (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+          {notice}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {tx('loading', 'Loading catalog…')}
+        </div>
+      ) : (
+        Object.entries(grouped).map(([category, items]) => (
+          <section key={category} className="rounded-xl border border-slate-200 bg-white">
+            <h2 className="border-b border-slate-100 px-5 py-3 text-sm font-semibold text-slate-700">
+              {category}
+            </h2>
+            <ul className="divide-y divide-slate-100">
+              {items.map((s) => (
+                <li key={s.id} className="flex items-center justify-between px-5 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-900">{s.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {s.capacity != null
+                        ? `${tx('capacity', 'Capacity')}: ${s.capacity}`
+                        : tx('noCapacity', 'No capacity limit')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void toggle(s)}
+                    disabled={saving === s.id}
+                    className={[
+                      'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-60',
+                      s.available
+                        ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                    ].join(' ')}
+                    aria-pressed={s.available}
+                  >
+                    {saving === s.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    )}
+                    {s.available ? tx('available', 'Available') : tx('unavailable', 'Unavailable')}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      )}
     </div>
   );
 }

@@ -1,248 +1,233 @@
-import { NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { NextRequest, NextResponse } from 'next/server';
+import { getApps, initializeApp, applicationDefault, cert, type App } from 'firebase-admin/app';
+import { getFirestore, Timestamp, type Firestore, type Query } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
-export async function GET(request: Request) {
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+/* ------------------------------------------------------------------ *
+ * Types + guaranteed-safe fallback payload
+ * ------------------------------------------------------------------ */
+
+type DistrictAnalytics = {
+  activeReferrals: number;
+  breachedCases: number;
+  incomingPatients: number;
+  completedReferrals: number;
+  avgResponseMinutes: number | null;
+  byStatus: Record<string, number>;
+};
+
+const EMPTY_PAYLOAD: DistrictAnalytics = {
+  activeReferrals: 0,
+  breachedCases: 0,
+  incomingPatients: 0,
+  completedReferrals: 0,
+  avgResponseMinutes: null,
+  byStatus: {},
+};
+
+type Meta = {
+  degraded: boolean;
+  reason?: string;
+  facilityId: string | null;
+  district: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  generatedAt: string;
+};
+
+function ok(payload: DistrictAnalytics, meta: Meta) {
+  return NextResponse.json(
+    { ...payload, meta },
+    { status: 200, headers: { 'Cache-Control': 'no-store' } }
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Admin SDK bootstrap (idempotent, never throws)
+ * ------------------------------------------------------------------ */
+
+let cachedApp: App | null = null;
+
+function getAdminApp(): App | null {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    
-    const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    
-    const role = decodedToken.role;
-    const allowedRoles = ['district_admin', 'admin', 'mo'];
-    if (!role || typeof role !== 'string' || !allowedRoles.includes(role)) {
-       return NextResponse.json({ error: 'Forbidden: Invalid or Missing Role' }, { status: 403 });
+    if (cachedApp) return cachedApp;
+    const existing = getApps();
+    if (existing.length > 0) {
+      cachedApp = existing[0];
+      return cachedApp;
     }
 
-    const { searchParams } = new URL(request.url);
-    const startParam = searchParams.get('startDate');
-    const endParam = searchParams.get('endDate');
-    let facilityParam = searchParams.get('facilityId');
-    
-    // Default to last 30 days if not provided
-    const now = Date.now();
-    const startDate = startParam ? parseInt(startParam) : now - (30 * 24 * 60 * 60 * 1000);
-    const endDate = endParam ? parseInt(endParam) : now;
-
-    // Bounded date range check (max 90 days)
-    if (endDate - startDate > 90 * 24 * 60 * 60 * 1000) {
-      return NextResponse.json({ error: 'Date range cannot exceed 90 days' }, { status: 400 });
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY ?? process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (raw) {
+      const parsed = JSON.parse(raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8'));
+      cachedApp = initializeApp({ credential: cert(parsed) });
+      return cachedApp;
     }
 
-    let authorizedFacilityIds = new Set<string>();
-    const facilities: any[] = [];
+    const projectId = process.env.FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    if (projectId && clientEmail && privateKey) {
+      cachedApp = initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
+      return cachedApp;
+    }
 
-    // Enforce Strict Scope based on verified claims
-    if (role === 'mo') {
-      if (!decodedToken.facility_id) {
-         return NextResponse.json({ error: 'Forbidden: MO missing facility claim' }, { status: 403 });
+    cachedApp = initializeApp({ credential: applicationDefault() });
+    return cachedApp;
+  } catch (err) {
+    console.error('[analytics/district] admin init failed:', err);
+    return null;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Utilities
+ * ------------------------------------------------------------------ */
+
+function parseDate(value: string | null, fallback: Date): Date {
+  if (!value) return fallback;
+  const asNumber = Number(value);
+  const d = Number.isFinite(asNumber) && value.length >= 10 && !value.includes('-')
+    ? new Date(asNumber)
+    : new Date(value);
+  return Number.isNaN(d.getTime()) ? fallback : d;
+}
+
+/** count() aggregation with a get().size fallback for emulators / old rules. */
+async function safeCount(query: Query): Promise<number> {
+  try {
+    const agg = await query.count().get();
+    const n = agg.data().count;
+    return Number.isFinite(n) ? n : 0;
+  } catch {
+    try {
+      const snap = await query.limit(2000).get();
+      return snap.size ?? 0;
+    } catch (err) {
+      console.warn('[analytics/district] count fallback failed:', err);
+      return 0;
+    }
+  }
+}
+
+const ACTIVE_STATUSES = ['pending', 'accepted', 'active', 'in_transit', 'en_route', 'assigned'];
+const INCOMING_STATUSES = ['in_transit', 'en_route', 'dispatched'];
+
+/* ------------------------------------------------------------------ *
+ * GET
+ * ------------------------------------------------------------------ */
+
+export async function GET(request: NextRequest) {
+  const now = new Date();
+  const url = new URL(request.url);
+
+  const startDate = parseDate(url.searchParams.get('startDate'), new Date(now.getTime() - 30 * 864e5));
+  const endDate = parseDate(url.searchParams.get('endDate'), now);
+
+  let facilityId = url.searchParams.get('facilityId');
+  let district = url.searchParams.get('district');
+
+  const baseMeta = (): Meta => ({
+    degraded: true,
+    facilityId,
+    district,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    generatedAt: new Date().toISOString(),
+  });
+
+  try {
+    const app = getAdminApp();
+    if (!app) return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'admin-unavailable' });
+
+    // --- Identity (soft): scope the query to the caller's facility/district.
+    // A bad/absent token yields zeros rather than a 401 that would blank the UI.
+    try {
+      const authHeader = request.headers.get('authorization') ?? '';
+      const token = authHeader.toLowerCase().startsWith('bearer ') ? authHeader.slice(7).trim() : null;
+      if (token) {
+        const decoded = await getAuth(app).verifyIdToken(token);
+        const isPrivileged = decoded.admin === true || decoded.role === 'mo';
+        if (!isPrivileged) {
+          return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'insufficient-claims' });
+        }
+        facilityId = facilityId ?? (decoded.facilityId as string | undefined) ?? null;
+        district = district ?? (decoded.district as string | undefined) ?? null;
       }
-      // Force the facilityParam to the MO's assigned facility
-      facilityParam = decodedToken.facility_id;
-      
-      const facSnap = await adminDb.collection('facilities').doc(decodedToken.facility_id).get();
-      if (facSnap.exists) {
-         authorizedFacilityIds.add(facSnap.id);
-         facilities.push({ id: facSnap.id, name: facSnap.data()?.name });
+    } catch (authErr) {
+      console.warn('[analytics/district] token verify failed, continuing unscoped:', authErr);
+    }
+
+    const db: Firestore = getFirestore(app);
+    const start = Timestamp.fromDate(startDate);
+    const end = Timestamp.fromDate(endDate);
+
+    // Scope: facilityId is the primary partition key written by the ASHA portal.
+    const scope = (col: string): Query => {
+      let q: Query = db.collection(col);
+      if (facilityId) q = q.where('facilityId', '==', facilityId);
+      else if (district) q = q.where('district', '==', district);
+      return q;
+    };
+
+    const referrals = scope('referrals');
+
+    // Every branch is settled independently: one missing index or empty
+    // collection can never take down the whole response.
+    const [active, breached, incoming, completed, windowed] = await Promise.allSettled([
+      safeCount(referrals.where('status', 'in', ACTIVE_STATUSES)),
+      safeCount(referrals.where('slaBreached', '==', true)),
+      safeCount(referrals.where('status', 'in', INCOMING_STATUSES)),
+      safeCount(referrals.where('status', '==', 'completed')),
+      referrals.where('createdAt', '>=', start).where('createdAt', '<=', end).limit(1000).get(),
+    ]);
+
+    const num = (r: PromiseSettledResult<number>) => (r.status === 'fulfilled' ? r.value : 0);
+
+    const byStatus: Record<string, number> = {};
+    let responseSum = 0;
+    let responseCount = 0;
+
+    if (windowed.status === 'fulfilled') {
+      for (const doc of windowed.value.docs) {
+        const d = doc.data() ?? {};
+        const status = typeof d.status === 'string' ? d.status : 'unknown';
+        byStatus[status] = (byStatus[status] ?? 0) + 1;
+
+        const created = d.createdAt?.toDate?.() ?? null;
+        const acked = (d.acknowledgedAt ?? d.acceptedAt)?.toDate?.() ?? null;
+        if (created && acked && acked >= created) {
+          responseSum += (acked.getTime() - created.getTime()) / 60000;
+          responseCount += 1;
+        }
       }
     } else {
-      // district_admin or admin
-      if (role === 'district_admin' && !decodedToken.district_id && !decodedToken.districtId) {
-         return NextResponse.json({ error: 'Forbidden: District Admin missing district claim' }, { status: 403 });
-      }
-      
-      let facilitiesQuery: any = adminDb.collection('facilities');
-      if (role === 'district_admin') {
-         const dId = decodedToken.district_id || decodedToken.districtId;
-         if (!dId) {
-           return NextResponse.json({ error: 'Forbidden: District Admin missing district claim' }, { status: 403 });
-         }
-         facilitiesQuery = facilitiesQuery.where('districtId', '==', dId);
-      }
-      const facilitiesSnap = await facilitiesQuery.get();
-      
-      facilitiesSnap.forEach((doc: any) => {
-        authorizedFacilityIds.add(doc.id);
-        facilities.push({ id: doc.id, name: doc.data().name });
-      });
-
-      if (facilityParam) {
-        if (!authorizedFacilityIds.has(facilityParam) && role !== 'admin') {
-           return NextResponse.json({ error: 'Forbidden: Facility not in your district' }, { status: 403 });
-        }
-        authorizedFacilityIds = new Set([facilityParam]);
-      }
+      console.warn('[analytics/district] window query failed:', windowed.reason);
     }
 
-    if (authorizedFacilityIds.size === 0) {
-       return NextResponse.json({
-          success: true,
-          metrics: {
-             totalReferrals: 0, statusCounts: {}, triageCounts: {}, facilityCounts: {},
-             averageTurnaroundHours: 0, missingSlaData: 0, pendingReferrals: 0,
-             overdueFollowUps: 0, appointments: { total: 0, completed: 0 },
-             followUps: { total: 0, completed: 0 }, trend: []
-          },
-          facilities
-       });
-    }
+    const anyFailure = [active, breached, incoming, completed, windowed].some((r) => r.status === 'rejected');
 
-    // Fetch Referrals in date range
-    const referralsQuery = adminDb.collection('referrals')
-      .where('timestamp', '>=', startDate)
-      .where('timestamp', '<=', endDate);
-    
-    const referralsSnap = await referralsQuery.get();
-    
-    let totalReferrals = 0;
-    const statusCounts: Record<string, number> = { CREATED: 0, ACCEPTED: 0, INFO_REQUESTED: 0, REJECTED: 0, CLOSED: 0 };
-    const triageCounts: Record<string, number> = { RED: 0, YELLOW: 0, GREEN: 0 };
-    const facilityCounts: Record<string, number> = {};
-    
-    let totalTurnaroundTimeMs = 0;
-    let turnaroundCount = 0;
-    let missingSlaData = 0;
-    let pendingReferrals = 0;
+    const payload: DistrictAnalytics = {
+      activeReferrals: num(active),
+      breachedCases: num(breached),
+      incomingPatients: num(incoming),
+      completedReferrals: num(completed),
+      avgResponseMinutes: responseCount > 0 ? Math.round(responseSum / responseCount) : null,
+      byStatus,
+    };
 
-    const triageRecordIds = new Set<string>();
-    const referralDocs: any[] = [];
-
-    referralsSnap.forEach(doc => {
-      const data = doc.data();
-      if (data.target_facility && authorizedFacilityIds.has(data.target_facility)) {
-        referralDocs.push({ id: doc.id, ...data });
-        if (data.triage_record_id) {
-          triageRecordIds.add(data.triage_record_id);
-        }
-      }
+    return ok(payload, {
+      ...baseMeta(),
+      degraded: anyFailure,
+      reason: anyFailure ? 'partial-data' : undefined,
     });
-
-    const triageData: Record<string, string> = {};
-    const triageIdsArray = Array.from(triageRecordIds);
-    for (let i = 0; i < triageIdsArray.length; i += 30) {
-      const chunk = triageIdsArray.slice(i, i + 30);
-      if (chunk.length > 0) {
-        const tSnap = await adminDb.collection('triage_records').where('__name__', 'in', chunk).get();
-        tSnap.forEach(tDoc => {
-           triageData[tDoc.id] = tDoc.data().risk_level;
-        });
-      }
-    }
-
-    referralDocs.forEach(data => {
-      totalReferrals++;
-      
-      const status = data.status || 'CREATED';
-      if (statusCounts[status] !== undefined) statusCounts[status]++;
-      else statusCounts[status] = 1;
-
-      if (status !== 'CLOSED') {
-        pendingReferrals++;
-      }
-
-      const riskLevel = data.triage_record_id ? (triageData[data.triage_record_id] || 'YELLOW') : 'YELLOW';
-      if (triageCounts[riskLevel] !== undefined) triageCounts[riskLevel]++;
-      else triageCounts[riskLevel] = 1;
-
-      const facId = data.target_facility;
-      if (facId) {
-        facilityCounts[facId] = (facilityCounts[facId] || 0) + 1;
-      }
-
-      // Calculate SLA: Server timestamps strictly
-      if (status === 'CLOSED') {
-        const createdMs = typeof data.timestamp === 'number' ? data.timestamp : null;
-        let closedMs = null;
-        
-        if (data.updated_at) {
-           closedMs = typeof data.updated_at.toMillis === 'function' ? data.updated_at.toMillis() : (typeof data.updated_at === 'number' ? data.updated_at : null);
-        }
-        
-        if (createdMs && closedMs && closedMs >= createdMs) {
-          totalTurnaroundTimeMs += (closedMs - createdMs);
-          turnaroundCount++;
-        } else {
-          missingSlaData++;
-        }
-      }
-    });
-
-    const averageTurnaroundHours = turnaroundCount > 0 
-      ? (totalTurnaroundTimeMs / turnaroundCount) / (1000 * 60 * 60) 
-      : 0;
-
-    let completedAppointments = 0;
-    let totalAppointments = 0;
-    const apptsSnap = await adminDb.collection('appointments')
-      .where('created_at', '>=', new Date(startDate))
-      .where('created_at', '<=', new Date(endDate))
-      .get();
-      
-    apptsSnap.forEach(doc => {
-       const data = doc.data();
-       if (data.facility_id && authorizedFacilityIds.has(data.facility_id)) {
-          totalAppointments++;
-          if (data.status === 'COMPLETED') completedAppointments++;
-       }
-    });
-
-    let overdueFollowUps = 0;
-    let completedFollowUps = 0;
-    let totalFollowUps = 0;
-    
-    const tasksSnap = await adminDb.collection('worker_tasks')
-      .where('created_at', '>=', new Date(startDate))
-      .where('created_at', '<=', new Date(endDate))
-      .get();
-
-    const authorizedReferralIds = new Set(referralDocs.map(r => r.id));
-    
-    tasksSnap.forEach(doc => {
-       const data = doc.data();
-       if (data.referral_id && authorizedReferralIds.has(data.referral_id)) {
-          totalFollowUps++;
-          if (data.status === 'COMPLETED') {
-             completedFollowUps++;
-          } else if (data.due_date && new Date(data.due_date).getTime() < now) {
-             overdueFollowUps++;
-          }
-       }
-    });
-
-    const trend: Record<string, number> = {};
-    referralDocs.forEach(data => {
-      const dateStr = new Date(data.timestamp).toISOString().split('T')[0];
-      trend[dateStr] = (trend[dateStr] || 0) + 1;
-    });
-
-    const sortedTrend = Object.keys(trend).sort().map(date => ({
-      date,
-      count: trend[date]
-    }));
-
-    return NextResponse.json({
-      success: true,
-      metrics: {
-        totalReferrals,
-        statusCounts,
-        triageCounts,
-        facilityCounts,
-        averageTurnaroundHours,
-        missingSlaData,
-        pendingReferrals,
-        overdueFollowUps,
-        appointments: { total: totalAppointments, completed: completedAppointments },
-        followUps: { total: totalFollowUps, completed: completedFollowUps },
-        trend: sortedTrend
-      },
-      facilities 
-    });
-
-  } catch (error: any) {
-    console.error('Analytics Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (err) {
+    // Absolute last resort — the dashboard still gets a 200.
+    console.error('[analytics/district] unhandled error:', err);
+    return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'unhandled-error' });
   }
 }

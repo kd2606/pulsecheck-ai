@@ -690,7 +690,44 @@
       "actions": "Actions",
       "placeholderHours": "e.g. Mon-Fri",
       "placeholderServiceId": "e.g. opd_pediatrics",
-      "placeholderTime": "e.g. 09:00-17:00"
+      "placeholderTime": "e.g. 09:00-17:00",
+      "title": "Service Catalog",
+      "subtitle": "Manage services offered by",
+      "verifying": "Verifying your facility permissions…",
+      "refresh": "Refresh",
+      "loading": "Loading catalog…",
+      "capacity": "Capacity",
+      "noCapacity": "No capacity limit",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "seedNotice": "Showing the baseline district-hospital catalog. Toggle any service to publish it to Firestore.",
+      "offlineNotice": "Change saved locally — it will sync when connectivity returns.",
+      "denied": {
+        "title": "Additional permissions required",
+        "body": "Your account is signed in but does not yet carry facility-management rights. Refreshing your session usually resolves this.",
+        "retry": "Refresh session",
+        "noEmail": "No signed-in account detected"
+      }
+    },
+    "sidebar": {
+      "brand": "CareSanchaar",
+      "subtitle": "District Command",
+      "fallbackName": "District Admin",
+      "signOut": "Sign out",
+      "loading": "Loading…",
+      "nav": {
+        "overview": "Command Overview",
+        "referrals": "Referrals",
+        "transport": "Transport",
+        "catalog": "Service Catalog",
+        "analytics": "Analytics",
+        "settings": "Settings"
+      },
+      "role": {
+        "mo": "Medical Officer",
+        "admin": "Administrator",
+        "default": "District Admin"
+      }
     }
   }
 }
