@@ -63,3 +63,5 @@ export function getFirebaseAuth(): Auth {
   authRef ??= getAuth(getFirebaseApp());
   return authRef;
 }
+
+export const auth = getFirebaseAuth();
