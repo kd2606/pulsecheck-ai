@@ -1,5 +1,5 @@
+"use client";
 ﻿import { useTranslations } from "next-intl";
-'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getOfflineDb } from '@/lib/db/offline-db';

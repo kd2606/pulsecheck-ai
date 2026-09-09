@@ -1,5 +1,5 @@
+"use client";
 import { useTranslations } from "next-intl";
-'use client';
 
 import { use, useEffect, useState } from 'react';
 import { auth } from '@/firebase/clientApp';
