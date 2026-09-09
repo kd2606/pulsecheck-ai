@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
     
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth().verifyIdToken(token);
+    const decodedToken = await adminAuth()!.verifyIdToken(token);
     
     const role = decodedToken.role; 
     if (!role || typeof role !== 'string') {
@@ -52,9 +52,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const refDoc = adminDb().collection('referrals').doc(referralId);
+    const refDoc = adminDb()!.collection('referrals').doc(referralId);
     
-    await adminDb().runTransaction(async (t) => {
+    await adminDb()!.runTransaction(async (t) => {
       const docSnap = await t.get(refDoc);
       if (!docSnap.exists) {
         throw new Error('NOT_FOUND');
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       });
 
       // Write audit event
-      const auditRef = adminDb().collection('referral_events').doc();
+      const auditRef = adminDb()!.collection('referral_events').doc();
       t.set(auditRef, {
         referral_id: referralId,
         actor_uid: decodedToken.uid,
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
       // Generate a follow-up task for the ASHA worker if requested info or rejected
       if (status === 'INFO_REQUESTED' || status === 'REJECTED') {
-         const newTaskRef = adminDb().collection('worker_tasks').doc();
+         const newTaskRef = adminDb()!.collection('worker_tasks').doc();
          t.set(newTaskRef, {
             worker_uid: data?.created_by || data?.owner_uid,
             referral_id: referralId,
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       
       // If the worker is responding to a task, mark it as completed
       if (taskId && status === 'CREATED' && (role === 'worker' || role === 'asha')) {
-         const taskDoc = adminDb().collection('worker_tasks').doc(taskId);
+         const taskDoc = adminDb()!.collection('worker_tasks').doc(taskId);
          t.update(taskDoc, {
             status: 'COMPLETED',
             resolved_at: FieldValue.serverTimestamp(),

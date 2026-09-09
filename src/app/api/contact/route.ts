@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
         // Prevent duplicate submissions by generating a deterministic hash or simply relying on Firestore auto ID 
         // if rate limiting is not strictly defined here, we will just store it.
-        await adminDb().collection('contact_enquiries').add(enquiry);
+        await adminDb()!.collection('contact_enquiries').add(enquiry);
 
         try {
             const transporter = nodemailer.createTransport({

@@ -1,11 +1,35 @@
-﻿const fs = require('fs');
-const file = 'src/app/[locale]/dashboard/district/page.tsx';
-let code = fs.readFileSync(file, 'utf8');
+const fs = require('fs');
+const p = require('path');
+function walk(d){
+  let r=[];
+  fs.readdirSync(d).forEach(f=>{
+    f=p.join(d,f);
+    if(fs.statSync(f).isDirectory()) r=r.concat(walk(f));
+    else if (f.endsWith('.ts') || f.endsWith('.tsx')) r.push(f);
+  });
+  return r;
+}
 
-code = code.replace(
-  "const { referrals: liveReferrals, loading } = useDistrictReferrals(claims?.facilityId);",
-  "const { referrals: _liveReferrals, loading } = useDistrictReferrals(claims?.facilityId);\n  const liveReferrals = _liveReferrals as any[];"
-);
+const files = walk('src');
+for (const file of files) {
+  if (file.includes('admin.ts')) continue;
+  if (file.includes('district/referrals')) continue;
+  if (file.includes('analytics/district')) continue;
+  if (file.includes('facility/list')) continue;
 
-fs.writeFileSync(file, code);
-console.log('Fixed TS by casting to any[]');
+  let code = fs.readFileSync(file, 'utf8');
+  let changed = false;
+  if (code.includes('adminDb()')) {
+    code = code.replace(/adminDb\(\)(?!\!|\.)/g, 'adminDb()!');
+    code = code.replace(/adminDb\(\)\./g, 'adminDb()!.');
+    changed = true;
+  }
+  if (code.includes('adminAuth()')) {
+    code = code.replace(/adminAuth\(\)(?!\!|\.)/g, 'adminAuth()!');
+    code = code.replace(/adminAuth\(\)\./g, 'adminAuth()!.');
+    changed = true;
+  }
+  if (changed) {
+    fs.writeFileSync(file, code);
+  }
+}

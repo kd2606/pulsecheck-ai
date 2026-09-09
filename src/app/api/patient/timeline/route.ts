@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth().verifyIdToken(token);
+    const decodedToken = await adminAuth()!.verifyIdToken(token);
     const role = decodedToken.role;
     const uid = decodedToken.uid;
 
@@ -24,14 +24,14 @@ export async function GET(request: Request) {
     }
 
     // 1. Fetch Patient Record
-    const patientSnap = await adminDb().collection('patients').doc(patientId).get();
+    const patientSnap = await adminDb()!.collection('patients').doc(patientId).get();
     if (!patientSnap.exists) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
     }
     const patientData = patientSnap.data();
 
     // 2. Fetch Consent from standardized 'consents' collection
-    const consentQueryTop = await adminDb().collection('consents')
+    const consentQueryTop = await adminDb()!.collection('consents')
        .where('patient_id', '==', patientId)
        .orderBy('timestamp', 'desc')
        .limit(1)
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
        if (!decodedToken.facility_id) {
           return NextResponse.json({ error: 'Forbidden: Medical Officer missing facility claim' }, { status: 403 });
        }
-       const refSnap = await adminDb().collection('referrals')
+       const refSnap = await adminDb()!.collection('referrals')
           .where('patient_id', '==', patientId)
           .where('target_facility', '==', decodedToken.facility_id)
           .limit(1)
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
     // 4. Fetch Timeline Events (Chronological Data Collection)
 
     // A. Referrals
-    const referralsSnap = await adminDb().collection('referrals').where('patient_id', '==', patientId).get();
+    const referralsSnap = await adminDb()!.collection('referrals').where('patient_id', '==', patientId).get();
     const referrals = referralsSnap.docs.map(d => ({ id: d.id, _type: 'REFERRAL', ...d.data() }));
 
     // B. Referral Events (Audits)
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
        // Batched IN query (max 30)
        for (let i = 0; i < refIds.length; i += 30) {
           const chunk = refIds.slice(i, i + 30);
-          const evSnap = await adminDb().collection('referral_events').where('referral_id', 'in', chunk).get();
+          const evSnap = await adminDb()!.collection('referral_events').where('referral_id', 'in', chunk).get();
           const evs = evSnap.docs.map(d => {
              const data = d.data();
              // Redact sensitive clinical notes from audit events if the viewer is not the MO or Worker assigned
@@ -118,15 +118,15 @@ export async function GET(request: Request) {
     }
 
     // C. Triage Records
-    const triageSnap = await adminDb().collection('triage_records').where('patient_id', '==', patientId).get();
+    const triageSnap = await adminDb()!.collection('triage_records').where('patient_id', '==', patientId).get();
     const triageRecords = triageSnap.docs.map(d => ({ id: d.id, _type: 'TRIAGE', ...d.data() }));
 
     // D. Appointments
-    const appointmentsSnap = await adminDb().collection('appointments').where('patient_id', '==', patientId).get();
+    const appointmentsSnap = await adminDb()!.collection('appointments').where('patient_id', '==', patientId).get();
     const appointments = appointmentsSnap.docs.map(d => ({ id: d.id, _type: 'APPOINTMENT', ...d.data() }));
 
     // E. Follow-up Records
-    const followupsSnap = await adminDb().collection('followup_records').where('patient_id', '==', patientId).get();
+    const followupsSnap = await adminDb()!.collection('followup_records').where('patient_id', '==', patientId).get();
     const followups = followupsSnap.docs.map(d => ({ id: d.id, _type: 'FOLLOW_UP_RECORD', ...d.data() }));
 
     // 5. Unify, Sort, and Redact Timeline

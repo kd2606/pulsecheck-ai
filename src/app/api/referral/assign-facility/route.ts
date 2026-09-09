@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     }
     
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth().verifyIdToken(token);
+    const decodedToken = await adminAuth()!.verifyIdToken(token);
     
     const role = decodedToken.role; 
     if (!role || typeof role !== 'string') {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     // Validate facility exists and is active
     if (facilityId !== 'PENDING_ASSIGNMENT') {
-        const facilityDoc = await adminDb().collection('facilities').doc(facilityId).get();
+        const facilityDoc = await adminDb()!.collection('facilities').doc(facilityId).get();
         if (!facilityDoc.exists) {
             return NextResponse.json({ error: 'Facility not found' }, { status: 404 });
         }
@@ -51,9 +51,9 @@ export async function POST(request: Request) {
         }
     }
 
-    const refDoc = adminDb().collection('referrals').doc(referralId);
+    const refDoc = adminDb()!.collection('referrals').doc(referralId);
     
-    await adminDb().runTransaction(async (t) => {
+    await adminDb()!.runTransaction(async (t) => {
       const docSnap = await t.get(refDoc);
       if (!docSnap.exists) {
         throw new Error('NOT_FOUND');
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       });
 
       // Write audit event without PII
-      const auditRef = adminDb().collection('referral_events').doc();
+      const auditRef = adminDb()!.collection('referral_events').doc();
       t.set(auditRef, {
         referral_id: referralId,
         actor_uid: decodedToken.uid,

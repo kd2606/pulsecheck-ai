@@ -104,7 +104,9 @@ async function resolveFacilityId(req: Request): Promise<{ facilityId: string | n
 
     if (token) {
     try {
-      const decoded = await adminAuth().verifyIdToken(token);
+      const auth = adminAuth()!;
+      if (!auth) throw new Error('admin_auth_failed');
+      const decoded = await auth.verifyIdToken(token);
       const claimFacility = (decoded.facilityId as string | undefined) ?? undefined;
       if (claimFacility) return { facilityId: claimFacility, source: 'claims' };
       if (decoded.admin === true || decoded.role === 'mo') {
@@ -138,7 +140,9 @@ export async function GET(req: Request) {
     // Single-field equality queries only -> no composite index required.
     for (const field of FACILITY_FIELDS) {
       try {
-        const snap = await adminDb().collection('referrals').where(field, '==', facilityId).limit(300).get();
+        const db = adminDb()!;
+        if (!db) return NextResponse.json({ referrals: [], count: 0, error: 'admin_failed_silently' }, { status: 200 });
+        const snap = await db.collection('referrals').where(field, '==', facilityId).limit(300).get();
         snap.forEach((doc) => {
           if (!seen.has(doc.id)) seen.set(doc.id, mapDoc(doc.id, doc.data() as Record<string, unknown>));
         });

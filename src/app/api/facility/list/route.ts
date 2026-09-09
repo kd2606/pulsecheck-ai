@@ -15,7 +15,9 @@ export async function GET(req: Request) {
 
     let decoded;
     try {
-      decoded = await adminAuth().verifyIdToken(token);
+      const auth = adminAuth()!;
+      if (!auth) throw new Error('admin_auth_failed');
+      decoded = await auth.verifyIdToken(token);
     } catch {
       return NextResponse.json({ ...EMPTY, error: 'invalid_token' }, { status: 401 });
     }
@@ -23,11 +25,14 @@ export async function GET(req: Request) {
     // --- Role resolution with Firestore self-heal (fixes stale-claim 403s) ---
     let role = (decoded.role as string) || (decoded.worker ? 'worker' : null);
     if (!role) {
-      const profile = await adminDb().collection('users').doc(decoded.uid).get();
+      const db = adminDb()!;
+      if (!db) throw new Error('admin_db_failed');
+      const profile = await db.collection('users').doc(decoded.uid).get();
       role = (profile.exists ? (profile.data()?.role as string) : null) ?? null;
       if (role) {
         // repair the claim so future requests are fast
-        await adminAuth().setCustomUserClaims(decoded.uid, {
+        const auth2 = adminAuth()!;
+        if (auth2) await auth2.setCustomUserClaims(decoded.uid, {
           ...decoded, role, worker: role === 'worker',
         }).catch(() => {});
       }
@@ -40,7 +45,9 @@ export async function GET(req: Request) {
       new URL(req.url).searchParams.get('district') ||
       'Gadchiroli';
 
-    const col = adminDb().collection('facilities');
+    const db = adminDb()!;
+    if (!db) return NextResponse.json({ ...EMPTY, error: 'admin_failed_silently' }, { status: 200 });
+    const col = db.collection('facilities');
 
     // Primary query, scoped by district
     let snap = await col.where('district', '==', district).limit(200).get();

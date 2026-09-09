@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing or invalid authorization header.' }, { status: 401 });
     }
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth().verifyIdToken(token);
+    const decodedToken = await adminAuth()!.verifyIdToken(token);
     const role = decodedToken.role;
     
     // Authorization logic
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
        return NextResponse.json({ error: 'Missing target facility.' }, { status: 400 });
     }
 
-    const facilityRef = adminDb().collection('facilities').doc(targetFacilityId);
+    const facilityRef = adminDb()!.collection('facilities').doc(targetFacilityId);
     const facilitySnap = await facilityRef.get();
     
     if (!facilitySnap.exists) {
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
        await facilityRef.update(updates);
        
        // Write audit log (no PII)
-       await adminDb().collection('audit_events').add({
+       await adminDb()!.collection('audit_events').add({
           event_type: 'FACILITY_PROFILE_UPDATE',
           facility_id: targetFacilityId,
           performed_by: decodedToken.uid,
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
        
        await serviceRef.set(serviceData, { merge: true });
        
-       await adminDb().collection('audit_events').add({
+       await adminDb()!.collection('audit_events').add({
           event_type: action === 'add_service' ? 'SERVICE_ADDED' : 'SERVICE_UPDATED',
           facility_id: targetFacilityId,
           service_id: body.serviceId,
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
           updatedByUid: decodedToken.uid
        });
        
-       await adminDb().collection('audit_events').add({
+       await adminDb()!.collection('audit_events').add({
           event_type: 'SERVICE_DEACTIVATED',
           facility_id: targetFacilityId,
           service_id: body.serviceId,

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
     
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth().verifyIdToken(token);
+    const decodedToken = await adminAuth()!.verifyIdToken(token);
     
     const role = decodedToken.role;
     if (!role || (role !== 'worker' && role !== 'asha')) {
@@ -34,14 +34,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const taskDocRef = adminDb().collection('worker_tasks').doc(taskId);
-    const refDocRef = adminDb().collection('referrals').doc(referralId);
+    const taskDocRef = adminDb()!.collection('worker_tasks').doc(taskId);
+    const refDocRef = adminDb()!.collection('referrals').doc(referralId);
     
     // Hash the idempotency key for safe storage lookup
     const idempHash = crypto.createHash('sha256').update(idempotencyKey).digest('hex');
-    const idempDocRef = adminDb().collection('idempotency_keys').doc(idempHash);
+    const idempDocRef = adminDb()!.collection('idempotency_keys').doc(idempHash);
 
-    await adminDb().runTransaction(async (t) => {
+    await adminDb()!.runTransaction(async (t) => {
       // 1. Idempotency Check
       const idempSnap = await t.get(idempDocRef);
       if (idempSnap.exists) {
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       }
 
       // 4. Create the Structured Follow-up Record (Longitudinal Integration)
-      const followUpRef = adminDb().collection('followup_records').doc();
+      const followUpRef = adminDb()!.collection('followup_records').doc();
       const followUpPayload = {
          task_id: taskId,
          referral_id: referralId,
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       });
 
       // 7. Write Audit Event
-      const auditRef = adminDb().collection('referral_events').doc();
+      const auditRef = adminDb()!.collection('referral_events').doc();
       t.set(auditRef, {
          referral_id: referralId,
          actor_uid: decodedToken.uid,
