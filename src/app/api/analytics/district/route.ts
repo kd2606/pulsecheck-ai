@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApps, initializeApp, applicationDefault, cert, type App } from 'firebase-admin/app';
-import { getFirestore, Timestamp, type Firestore, type Query } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
+
+import { Timestamp, type Firestore, type Query } from 'firebase-admin/firestore';
+import { adminAuth, adminDb } from '@/lib/firebase/admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -44,44 +44,6 @@ function ok(payload: DistrictAnalytics, meta: Meta) {
     { ...payload, meta },
     { status: 200, headers: { 'Cache-Control': 'no-store' } }
   );
-}
-
-/* ------------------------------------------------------------------ *
- * Admin SDK bootstrap (idempotent, never throws)
- * ------------------------------------------------------------------ */
-
-let cachedApp: App | null = null;
-
-function getAdminApp(): App | null {
-  try {
-    if (cachedApp) return cachedApp;
-    const existing = getApps();
-    if (existing.length > 0) {
-      cachedApp = existing[0];
-      return cachedApp;
-    }
-
-    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY ?? process.env.FIREBASE_SERVICE_ACCOUNT;
-    if (raw) {
-      const parsed = JSON.parse(raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8'));
-      cachedApp = initializeApp({ credential: cert(parsed) });
-      return cachedApp;
-    }
-
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-    if (projectId && clientEmail && privateKey) {
-      cachedApp = initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
-      return cachedApp;
-    }
-
-    cachedApp = initializeApp({ credential: applicationDefault() });
-    return cachedApp;
-  } catch (err) {
-    console.error('[analytics/district] admin init failed:', err);
-    return null;
-  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -141,8 +103,8 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    const app = getAdminApp();
-    if (!app) return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'admin-unavailable' });
+    
+    
 
     // --- Identity (soft): scope the query to the caller's facility/district.
     // A bad/absent token yields zeros rather than a 401 that would blank the UI.
@@ -150,7 +112,7 @@ export async function GET(request: NextRequest) {
       const authHeader = request.headers.get('authorization') ?? '';
       const token = authHeader.toLowerCase().startsWith('bearer ') ? authHeader.slice(7).trim() : null;
       if (token) {
-        const decoded = await getAuth(app).verifyIdToken(token);
+        const decoded = await adminAuth.verifyIdToken(token);
         const isPrivileged = decoded.admin === true || decoded.role === 'mo';
         if (!isPrivileged) {
           return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'insufficient-claims' });
@@ -162,7 +124,7 @@ export async function GET(request: NextRequest) {
       console.warn('[analytics/district] token verify failed, continuing unscoped:', authErr);
     }
 
-    const db: Firestore = getFirestore(app);
+    const db: Firestore = adminDb;
     const start = Timestamp.fromDate(startDate);
     const end = Timestamp.fromDate(endDate);
 
@@ -231,3 +193,4 @@ export async function GET(request: NextRequest) {
     return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'unhandled-error' });
   }
 }
+
