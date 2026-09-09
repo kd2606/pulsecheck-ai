@@ -29,7 +29,8 @@ interface PatientPayload {
   name: string;
   abha_id?: string;
   gender: Gender;
-  dob: string;
+  dob?: string | null;
+  age_years?: number | null;
   phone?: string;
 }
 
@@ -49,6 +50,7 @@ interface IntakeFormState {
   abha_id: string;
   gender: Gender | '';
   dob: string;
+  age_years: string;
   phone: string;
   symptoms: string;
   temperature_f: string;
@@ -87,6 +89,7 @@ function createInitialState(): IntakeFormState {
     abha_id: '',
     gender: '',
     dob: '',
+    age_years: '',
     phone: '',
     symptoms: '',
     temperature_f: '',
@@ -235,10 +238,15 @@ export default function NewIntakePage() {
       errs.gender = t('validation.genderRequired');
     }
 
-    if (f.dob === '') {
-      errs.dob = t('validation.dobRequired');
-    } else {
-      const dob = new Date(`${f.dob}T00:00:00`);
+    if (f.dob !== '') {
+      const dob = new Date(`${f.dob}
+
+    if (f.age_years !== '') {
+      const parsedAge = Number(f.age_years);
+      if (!Number.isInteger(parsedAge) || parsedAge < 0 || parsedAge > 130) {
+        errs.age_years = 'Invalid age (0-130)';
+      }
+    }T00:00:00`);
       if (Number.isNaN(dob.getTime())) {
         errs.dob = t('validation.dobInvalid');
       } else if (dob.getTime() > Date.now()) {
@@ -323,6 +331,10 @@ export default function NewIntakePage() {
   }, []);
 
   const age = useMemo<number | null>(() => {
+    if (form.age_years !== '') {
+      const parsedAge = Number(form.age_years);
+      if (Number.isInteger(parsedAge) && parsedAge >= 0 && parsedAge <= 130) return parsedAge;
+    }
     if (form.dob === '') return null;
     const dob = new Date(`${form.dob}T00:00:00`);
     if (Number.isNaN(dob.getTime())) return null;
@@ -333,8 +345,8 @@ export default function NewIntakePage() {
     if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < dob.getDate())) {
       years -= 1;
     }
-    return years >= 0 && years < 130 ? years : null;
-  }, [form.dob]);
+    return years >= 0 && years <= 130 ? years : null;
+  }, [form.dob, form.age_years]);
 
   const symptomCount = useMemo<number>(() => parseSymptoms(form.symptoms).length, [form.symptoms]);
 
@@ -431,7 +443,8 @@ export default function NewIntakePage() {
     const patientData: PatientPayload = {
       name: form.name.trim().replace(/\s+/g, ' '),
       gender: form.gender as Gender,
-      dob: form.dob,
+      dob: form.dob || null,
+      age_years: form.age_years ? Number(form.age_years) : null,
       ...(abha !== '' ? { abha_id: abha } : {}),
       ...(phone !== '' ? { phone } : {}),
     };
@@ -574,7 +587,7 @@ export default function NewIntakePage() {
                 </Select>
               </Field>
 
-              <Field error={errors.dob} hint={age !== null ? t('approximateAge', { age }) : undefined} id="dob" label={t('dob')} required optionalLabel={t('optional')}>
+              <Field error={errors.dob} hint={age !== null && form.age_years === '' ? t('approximateAge', { age }) : undefined} id="dob" label={t('dob')} optionalLabel={t('optional')}>
                 <input
                   id="dob"
                   name="dob"
@@ -584,8 +597,24 @@ export default function NewIntakePage() {
                   value={form.dob}
                   disabled={isSaving}
                   aria-invalid={errors.dob !== undefined}
-                  aria-describedby={errors.dob !== undefined ? 'dob-error' : age !== null ? 'dob-hint' : undefined}
-                  onChange={(event) => setField('dob', event.target.value)}
+                  aria-describedby={errors.dob !== undefined ? 'dob-error' : age !== null && form.age_years === '' ? 'dob-hint' : undefined}
+                  onChange={(event) => { setField('dob', event.target.value); if (event.target.value) setField('age_years', ''); }}
+                />
+              </Field>
+
+              <Field error={errors.age_years} id="age_years" label="Age (Years)" optionalLabel={t('optional')}>
+                <input
+                  id="age_years"
+                  name="age_years"
+                  type="number"
+                  min="0"
+                  max="130"
+                  placeholder="e.g. 45"
+                  className={INPUT_CLASS}
+                  value={form.age_years}
+                  disabled={isSaving || form.dob !== ''}
+                  aria-invalid={errors.age_years !== undefined}
+                  onChange={(event) => setField('age_years', event.target.value)}
                 />
               </Field>
 

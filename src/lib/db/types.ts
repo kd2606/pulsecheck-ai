@@ -42,7 +42,8 @@ export interface Patient extends SyncMeta {
   abha_id: string | null;
   gender: Gender;
   /** ISO-8601 date only (YYYY-MM-DD). */
-  dob: string;
+  dob: string | null;
+  age_years?: number | null;
   phone: string | null;
   created_at: EpochMs;
 }
@@ -140,3 +141,4 @@ export interface Facility {
   services?: FacilityService[];
   schemaVersion: number;
 }
+

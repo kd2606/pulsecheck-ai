@@ -28,9 +28,13 @@ export const patientIntakeSchema = z.object({
     .string()
     .regex(ISO_DATE, 'dob must be YYYY-MM-DD')
     .refine((value) => {
+      if (!value) return true;
       const parsed = Date.parse(`${value}T00:00:00Z`);
       return Number.isFinite(parsed) && parsed <= Date.now();
-    }, 'dob cannot be in the future'),
+    }, 'dob cannot be in the future')
+    .nullable()
+    .default(null),
+  age_years: z.number().int().min(0).max(130).nullable().default(null),
   phone: z.string().trim().regex(INDIAN_MOBILE, 'Invalid Indian mobile number').nullable().default(null),
 });
 
