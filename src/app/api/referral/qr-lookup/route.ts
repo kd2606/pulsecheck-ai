@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const token = authHeader.split('Bearer ')[1];
     let decodedToken;
     try {
-      decodedToken = await adminAuth.verifyIdToken(token);
+      decodedToken = await adminAuth().verifyIdToken(token);
     } catch {
       return NextResponse.json(
         { error: 'Invalid or expired session', code: 'AUTH_INVALID' },
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     }
 
     // 4. Resolve referral from Firestore
-    const refDoc = await adminDb.collection('referrals').doc(referralId).get();
+    const refDoc = await adminDb().collection('referrals').doc(referralId).get();
 
     if (!refDoc.exists) {
       return NextResponse.json(
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
 
     // 7. Write audit event for QR scan
     try {
-      await adminDb.collection('referral_events').add({
+      await adminDb().collection('referral_events').add({
         referral_id: referralId,
         actor_uid: decodedToken.uid,
         action: 'QR_SCANNED',

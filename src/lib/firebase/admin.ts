@@ -1,51 +1,29 @@
-import { cert, getApp, getApps, initializeApp, type App } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-
-function buildCredential() {
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-  if (raw) {
-    try {
-      const decoded = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
-      const parsed = JSON.parse(decoded);
-      return cert({
-        projectId: parsed.project_id ?? parsed.projectId,
-        clientEmail: parsed.client_email ?? parsed.clientEmail,
-        privateKey: (parsed.private_key ?? parsed.privateKey ?? '').replace(/\\n/g, '\n'),
-      });
-    } catch (e) {
-      console.warn('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY', e);
-    }
-  }
-  
-  try {
-    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = (process.env.FIREBASE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n');
-    
-    if (projectId && clientEmail && privateKey) {
-      return cert({
-        projectId,
-        clientEmail,
-        privateKey,
-      });
-    }
-  } catch (e) {
-    console.warn('Failed to build cert from individual env vars', e);
-  }
-  
-  return null;
-}
-
-const credential = buildCredential();
-
-export const app: App = getApps().length
-  ? getApp()
-  : initializeApp(credential ? { credential } : { projectId: 'demo-project' });
-
-export const adminAuth = getAuth(app);
-export const adminDb = getFirestore(app);
+﻿import { getApps, initializeApp, cert, type App } from 'firebase-admin/app';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import { getAuth, type Auth } from 'firebase-admin/auth';
 
 export function getAdminApp(): App {
-  return app;
+  if (getApps().length > 0) {
+    return getApps()[0];
+  }
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  
+  // Safely parse Vercel environment keys (stripping rogue quotes and escaping newlines)
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  if (privateKey) {
+    privateKey = privateKey.replace(/\\n/g, '\n').replace(/(^"|"$)/g, '');
+  }
+
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error('FATAL: Firebase Admin environment variables missing or malformed.');
+  }
+
+  return initializeApp({
+    credential: cert({ projectId, clientEmail, privateKey }),
+  });
 }
+
+export const adminDb = (): Firestore => getFirestore(getAdminApp());
+export const adminAuth = (): Auth => getAuth(getAdminApp());

@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       const authHeader = request.headers.get('authorization') ?? '';
       const token = authHeader.toLowerCase().startsWith('bearer ') ? authHeader.slice(7).trim() : null;
       if (token) {
-        const decoded = await adminAuth.verifyIdToken(token);
+        const decoded = await adminAuth().verifyIdToken(token);
         const isPrivileged = decoded.admin === true || decoded.role === 'mo';
         if (!isPrivileged) {
           return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'insufficient-claims' });
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
       console.warn('[analytics/district] token verify failed, continuing unscoped:', authErr);
     }
 
-    const db: Firestore = adminDb;
+    const db: Firestore = adminDb();
     const start = Timestamp.fromDate(startDate);
     const end = Timestamp.fromDate(endDate);
 

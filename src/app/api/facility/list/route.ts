@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
     let decoded;
     try {
-      decoded = await adminAuth.verifyIdToken(token);
+      decoded = await adminAuth().verifyIdToken(token);
     } catch {
       return NextResponse.json({ ...EMPTY, error: 'invalid_token' }, { status: 401 });
     }
@@ -23,11 +23,11 @@ export async function GET(req: Request) {
     // --- Role resolution with Firestore self-heal (fixes stale-claim 403s) ---
     let role = (decoded.role as string) || (decoded.worker ? 'worker' : null);
     if (!role) {
-      const profile = await adminDb.collection('users').doc(decoded.uid).get();
+      const profile = await adminDb().collection('users').doc(decoded.uid).get();
       role = (profile.exists ? (profile.data()?.role as string) : null) ?? null;
       if (role) {
         // repair the claim so future requests are fast
-        await adminAuth.setCustomUserClaims(decoded.uid, {
+        await adminAuth().setCustomUserClaims(decoded.uid, {
           ...decoded, role, worker: role === 'worker',
         }).catch(() => {});
       }
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
       new URL(req.url).searchParams.get('district') ||
       'Gadchiroli';
 
-    const col = adminDb.collection('facilities');
+    const col = adminDb().collection('facilities');
 
     // Primary query, scoped by district
     let snap = await col.where('district', '==', district).limit(200).get();

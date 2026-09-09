@@ -9,7 +9,7 @@ export async function requireUser(allowed: Role[]) {
   if (!cookie) redirect('/auth');
 
   try {
-    const claims = await adminAuth.verifySessionCookie(cookie, true);
+    const claims = await adminAuth().verifySessionCookie(cookie, true);
     const role = (claims.role as Role);
     if (!role || !allowed.includes(role)) redirect('/');
     return { uid: claims.sub, role, claims };
@@ -17,3 +17,4 @@ export async function requireUser(allowed: Role[]) {
     redirect('/auth');
   }
 }
+

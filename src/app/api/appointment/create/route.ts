@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
     
     const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth.verifyIdToken(token);
+    const decodedToken = await adminAuth().verifyIdToken(token);
     
     const role = decodedToken.role;
     const allowedRoles = ['mo', 'district_admin', 'admin']; // Only facility staff can schedule an appointment for now
@@ -26,10 +26,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const refDoc = adminDb.collection('referrals').doc(referralId);
+    const refDoc = adminDb().collection('referrals').doc(referralId);
     
     // We will do this in a transaction to ensure idempotency and stable token generation
-    const result = await adminDb.runTransaction(async (t) => {
+    const result = await adminDb().runTransaction(async (t) => {
       const docSnap = await t.get(refDoc);
       if (!docSnap.exists) {
         throw new Error('NOT_FOUND');
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
       // Check for existing appointment via idempotency key
       const querySnap = await t.get(
-        adminDb.collection('appointments').where('idempotency_key', '==', idempotencyKey).limit(1)
+        adminDb().collection('appointments').where('idempotency_key', '==', idempotencyKey).limit(1)
       );
 
       if (!querySnap.empty) {
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
       // Generate a simple token: e.g. based on time or random string. 
       // In a real system, you might increment a daily counter per facility.
-      const dailyCounterRef = adminDb.collection('facility_stats').doc(`${facilityId}_${dateSlot}`);
+      const dailyCounterRef = adminDb().collection('facility_stats').doc(`${facilityId}_${dateSlot}`);
       const counterSnap = await t.get(dailyCounterRef);
       const currentCount = counterSnap.exists ? (counterSnap.data()?.token_count || 0) : 0;
       const nextCount = currentCount + 1;
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       t.set(dailyCounterRef, { token_count: nextCount }, { merge: true });
 
       const appointmentId = randomUUID();
-      const apptRef = adminDb.collection('appointments').doc(appointmentId);
+      const apptRef = adminDb().collection('appointments').doc(appointmentId);
       
       const newAppt = {
         id: appointmentId,

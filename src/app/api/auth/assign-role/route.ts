@@ -40,11 +40,11 @@ export async function POST(request: Request) {
     }
 
     try {
-      const decoded = await adminAuth.verifyIdToken(idToken);
+      const decoded = await adminAuth().verifyIdToken(idToken);
       uid = decoded.uid;
 
       // Set the custom claim (preserve any existing claims)
-      const existingUser = await adminAuth.getUser(uid);
+      const existingUser = await adminAuth().getUser(uid);
       const existingClaims = existingUser.customClaims || {};
       
       const newClaims: any = { ...existingClaims, role };
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         newClaims.district_id = 'demo_khordha_01'; // Default demo scope
       }
       
-      await adminAuth.setCustomUserClaims(uid, newClaims);
+      await adminAuth().setCustomUserClaims(uid, newClaims);
 
       return NextResponse.json({ ok: true, role });
     } catch (adminError: any) {
