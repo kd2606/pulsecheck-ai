@@ -7,6 +7,7 @@ import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { saveIntakeOffline } from '@/lib/services/intake.service';
 import { runWorkerTriage } from '@/ai/flows/worker-triage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AIAssistantFAB, type ParsedIntakeData } from '@/components/worker/AIAssistantFAB';
 
 /* -------------------------------------------------------------------------- */
 /*                                   Types                                    */
@@ -330,6 +331,23 @@ export default function NewIntakePage() {
     setAiPendingOffline(false);
   }, []);
 
+  const handleDataParsed = useCallback((data: ParsedIntakeData) => {
+    if (data.name) setField('name', data.name);
+    if (data.age_years) setField('age_years', String(data.age_years));
+    if (data.gender) setField('gender', data.gender);
+    if (data.symptoms) setField('symptoms', data.symptoms);
+    if (data.temperature_f) setField('temperature_f', String(data.temperature_f));
+    if (data.systolic_bp) setField('systolic_bp', String(data.systolic_bp));
+    if (data.diastolic_bp) setField('diastolic_bp', String(data.diastolic_bp));
+    if (data.risk_level) {
+      setField('risk_level', data.risk_level);
+      if (!actionTouched && DEFAULT_ACTION[data.risk_level]) {
+        setField('recommended_action', DEFAULT_ACTION[data.risk_level]);
+      }
+    }
+  }, [setField, actionTouched, DEFAULT_ACTION]);
+
+
   const age = useMemo<number | null>(() => {
     if (form.age_years !== '') {
       const parsedAge = Number(form.age_years);
@@ -497,6 +515,7 @@ export default function NewIntakePage() {
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8">
+      <AIAssistantFAB onDataParsed={handleDataParsed} />
       <div className="mx-auto w-full max-w-4xl">
         <header className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t('fieldOps')}</p>
