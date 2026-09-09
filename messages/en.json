@@ -415,7 +415,34 @@
       "emergencyCount": "Emergency Cases",
       "unscheduled": "Unscheduled",
       "noFacilities": "No facilities found",
-      "syncCatalogNow": "Sync Catalog Now"
+      "syncCatalogNow": "Sync Catalog Now",
+      "thRaised": "Raised",
+      "thAction": "Action",
+      "thPatient": "Patient",
+      "thFacility": "Facility",
+      "thStatus": "Status",
+      "thTriage": "Triage",
+      "thUpdated": "Last updated",
+      "syncing": "Syncing…",
+      "syncingTitle": "Syncing referrals",
+      "syncingDescription": "Uploading offline records to the server. Keep this tab open.",
+      "syncPending": "Pending sync",
+      "syncSuccess": "All referrals synced",
+      "syncFailed": "Sync failed. Will retry automatically.",
+      "syncRetry": "Retry sync",
+      "empty": "No referrals yet",
+      "emptyDescription": "Referrals you raise will appear here.",
+      "view": "View",
+      "assign": "Assign facility"
+    },
+    "facilities": {
+      "modalTitle": "Assign Target Facility",
+      "loading": "Loading facility catalog…",
+      "empty": "No facilities found - please add data",
+      "error": "Failed to fetch facility catalog from server",
+      "retry": "Retry",
+      "select": "Select facility",
+      "confirm": "Assign"
     },
     "queue": {
       "title": "Queue & Appointments"
