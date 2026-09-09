@@ -43,7 +43,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
   ];
 
   return (
-    <div className="min-h-screen dashboard-true-black dark bg-background text-foreground flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen dashboard-true-black dark bg-black text-foreground flex flex-col md:flex-row font-sans">
       {/* Mobile Sidebar Overlay */}
       <div 
         className={cn(
@@ -56,11 +56,11 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border transform transition-all duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-[#0a0a0a] border-r border-slate-800 transform transition-all duration-300 ease-in-out md:relative md:translate-x-0 flex flex-col",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-4 shrink-0 border-b border-border">
+        <div className="p-4 shrink-0 border-b border-slate-800">
           <div className="flex items-center gap-2 px-2 text-indigo-500">
             <HeartPulse className="w-8 h-8" />
             <div>
@@ -88,8 +88,8 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   isActive 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-foreground hover:bg-secondary/80 hover:text-foreground"
+                    ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 shadow-sm" 
+                    : "text-foreground hover:bg-slate-900 hover:text-slate-200"
                 )}
               >
                 <Icon className={cn("size-5", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
@@ -100,8 +100,8 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           })}
         </div>
 
-        <div className="p-4 border-t border-border mt-auto">
-          <div className="flex items-center gap-3 px-2 py-3 rounded-lg bg-muted/50 border border-border">
+        <div className="p-4 border-t border-slate-800 mt-auto">
+          <div className="flex items-center gap-3 px-2 py-3 rounded-lg bg-slate-900/50 border border-slate-800">
             <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-200 dark:border-indigo-800">
               CM
             </div>
@@ -131,7 +131,7 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
+        <header className="h-16 bg-card border-b border-slate-800 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
@@ -170,3 +170,4 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
     </div>
   );
 }
+

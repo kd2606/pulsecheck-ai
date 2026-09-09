@@ -5,12 +5,17 @@ import { getFirestore } from 'firebase-admin/firestore';
 function buildCredential() {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   if (raw) {
-    const parsed = JSON.parse(raw);
-    return cert({
-      projectId: parsed.project_id ?? parsed.projectId,
-      clientEmail: parsed.client_email ?? parsed.clientEmail,
-      privateKey: (parsed.private_key ?? parsed.privateKey ?? '').replace(/\\n/g, '\n'),
-    });
+    try {
+      const decoded = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
+      const parsed = JSON.parse(decoded);
+      return cert({
+        projectId: parsed.project_id ?? parsed.projectId,
+        clientEmail: parsed.client_email ?? parsed.clientEmail,
+        privateKey: (parsed.private_key ?? parsed.privateKey ?? '').replace(/\\n/g, '\n'),
+      });
+    } catch (e) {
+      console.warn('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY', e);
+    }
   }
   
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;

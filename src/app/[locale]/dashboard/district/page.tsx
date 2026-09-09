@@ -17,7 +17,7 @@ const STATUS_STYLES: Record<ReferralRow['status'], string> = {
 const URGENCY_STYLES: Record<ReferralRow['urgency'], string> = {
   critical: 'bg-rose-500/20 text-rose-200 ring-1 ring-rose-400/40',
   high: 'bg-orange-500/15 text-orange-200 ring-1 ring-orange-400/30',
-  routine: 'bg-slate-600/30 text-slate-200 ring-1 ring-slate-400/20',
+  routine: 'bg-slate-600/30 text-slate-300 ring-1 ring-slate-400/20',
 };
 
 function label(value: string) {
@@ -36,7 +36,7 @@ function relativeTime(iso: string | null) {
 
 function StatCard({ title, value, tone }: { title: string; value: string | number; tone: string }) {
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-800/60 p-5 shadow-lg">
+    <div className="rounded-2xl border border-slate-800/80 bg-[#0a0a0a] p-5 shadow-lg">
       <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</p>
       <p className={`mt-2 text-3xl font-bold ${tone}`}>{value}</p>
     </div>
@@ -82,8 +82,8 @@ export default function DistrictDashboardPage() {
           <StatCard title="SLA compliance" value={slaCompliance} tone="text-emerald-300" />
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900 shadow-2xl">
-          <div className="flex flex-col gap-2 border-b border-slate-700/60 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <section className="overflow-hidden rounded-2xl border border-slate-800/80 bg-[#0a0a0a] shadow-2xl">
+          <div className="flex flex-col gap-2 border-b border-slate-800/80 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-white">Live Referral Tracking</h2>
               <p className="mt-1 text-sm text-slate-300">
@@ -103,8 +103,8 @@ export default function DistrictDashboardPage() {
           )}
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-700/60">
-              <thead className="bg-slate-800/80">
+            <table className="min-w-full divide-y divide-slate-800/60">
+              <thead className="bg-[#111]">
                 <tr>
                   {['Patient', 'Village', 'Reason', 'Urgency', 'Status', 'Raised', 'ASHA'].map((h) => (
                     <th
@@ -131,13 +131,13 @@ export default function DistrictDashboardPage() {
                   referrals.map((r) => (
                     <tr key={r.id} className="transition hover:bg-slate-800/50">
                       <td className="whitespace-nowrap px-6 py-4">
-                        <p className="text-sm font-semibold text-slate-100">{r.patientName}</p>
+                        <p className="text-sm font-semibold text-slate-50">{r.patientName}</p>
                         <p className="text-xs text-slate-400">
                           {r.age !== null ? `${r.age} yrs` : 'Age N/A'} · {label(r.gender)}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">{r.village}</td>
-                      <td className="max-w-xs px-6 py-4 text-sm text-slate-200">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-50">{r.village}</td>
+                      <td className="max-w-xs px-6 py-4 text-sm text-slate-300">
                         <span className="line-clamp-2">{r.reason}</span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
@@ -154,19 +154,19 @@ export default function DistrictDashboardPage() {
                         )}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <p className="text-sm text-slate-100">{relativeTime(r.createdAt)}</p>
+                        <p className="text-sm text-slate-50">{relativeTime(r.createdAt)}</p>
                         <p className="text-xs text-slate-400">
                           {r.ageMinutes !== null ? `${r.ageMinutes} min elapsed` : '—'}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-200">{r.ashaName}</td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-300">{r.ashaName}</td>
                     </tr>
                   ))}
 
                 {!isLoading && referrals.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-6 py-16 text-center">
-                      <p className="text-base font-semibold text-slate-100">No active referrals found</p>
+                      <p className="text-base font-semibold text-slate-50">No active referrals found</p>
                       <p className="mt-1 text-sm text-slate-400">
                         Create one from the ASHA portal — it will appear here within seconds.
                       </p>
@@ -181,3 +181,5 @@ export default function DistrictDashboardPage() {
     </div>
   );
 }
+
+
