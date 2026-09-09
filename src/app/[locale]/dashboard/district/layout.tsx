@@ -60,8 +60,8 @@ export default function DistrictLayout({ children }: { children: React.ReactNode
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col flex-1 p-4 overflow-y-auto">
-          <div className="flex items-center gap-2 px-2 mb-6 text-indigo-500">
+        <div className="p-4 shrink-0 border-b border-border">
+          <div className="flex items-center gap-2 px-2 text-indigo-500">
             <HeartPulse className="w-8 h-8" />
             <div>
               <h1 className="font-bold text-foreground leading-tight">{t("layout.appName")}</h1>
