@@ -32,9 +32,16 @@ if (app) {
     const isStaffRoute = typeof window !== 'undefined' && 
         (window.location.pathname.includes('/worker') || window.location.pathname.includes('/district'));
         
-    db = isStaffRoute 
-        ? initializeFirestore(app, { localCache: memoryLocalCache() })
-        : getFirestore(app);
+    if (isStaffRoute) {
+        try {
+            db = initializeFirestore(app, { localCache: memoryLocalCache() });
+        } catch {
+            // Already initialized (Next.js HMR / React Strict Mode re-render)
+            db = getFirestore(app);
+        }
+    } else {
+        db = getFirestore(app);
+    }
 } else {
     db = null as any;
 }

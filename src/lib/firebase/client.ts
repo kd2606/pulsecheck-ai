@@ -3,6 +3,7 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import {
+  getFirestore,
   initializeFirestore,
   memoryLocalCache,
   type Firestore,
@@ -50,12 +51,17 @@ export function getFirebaseApp(): FirebaseApp {
 
 export function getDb(): Firestore {
   if (firestoreRef !== null) return firestoreRef;
-  firestoreRef = initializeFirestore(getFirebaseApp(), {
-    // Dexie is the durable offline store; keep Firestore's cache ephemeral.
-    localCache: memoryLocalCache(),
-    // Rural networks sit behind proxies that break gRPC streaming.
-    experimentalAutoDetectLongPolling: true,
-  });
+  try {
+    firestoreRef = initializeFirestore(getFirebaseApp(), {
+      // Dexie is the durable offline store; keep Firestore's cache ephemeral.
+      localCache: memoryLocalCache(),
+      // Rural networks sit behind proxies that break gRPC streaming.
+      experimentalAutoDetectLongPolling: true,
+    });
+  } catch {
+    // Already initialized (Next.js HMR / React Strict Mode re-render)
+    firestoreRef = getFirestore(getFirebaseApp());
+  }
   return firestoreRef;
 }
 
