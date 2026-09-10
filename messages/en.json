@@ -428,6 +428,8 @@
       "thAction": "Action",
       "thPatient": "Patient",
       "thFacility": "Facility",
+      "thToken": "Token / ID",
+      "thUrgency": "Urgency",
       "thStatus": "Status",
       "thTriage": "Triage",
       "thUpdated": "Last updated",

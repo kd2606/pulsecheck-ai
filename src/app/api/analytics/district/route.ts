@@ -1,11 +1,16 @@
+// src/app/api/analytics/district/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 import { Timestamp, type Firestore, type Query } from 'firebase-admin/firestore';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, getAdminDb, getAdminInitError } from '@/lib/firebase/admin';
 
+// Firebase Admin uses Node built-ins (crypto, fs, net) and cannot run on Edge.
 export const runtime = 'nodejs';
+// Never let Next.js cache or statically prerender this handler at build time.
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+export const maxDuration = 30;
 
 /* ------------------------------------------------------------------ *
  * Types + guaranteed-safe fallback payload
@@ -39,10 +44,15 @@ type Meta = {
   generatedAt: string;
 };
 
-function ok(payload: DistrictAnalytics, meta: Meta) {
+const NO_STORE = {
+  'Cache-Control': 'no-store, max-age=0, must-revalidate',
+} as const;
+
+/** Every response leaves this handler with HTTP 200 by design. */
+function ok(payload: DistrictAnalytics | Record<string, unknown>, meta: Meta) {
   return NextResponse.json(
     { ...payload, meta },
-    { status: 200, headers: { 'Cache-Control': 'no-store' } }
+    { status: 200, headers: NO_STORE },
   );
 }
 
@@ -103,8 +113,15 @@ export async function GET(request: NextRequest) {
   });
 
   try {
-    
-    
+    const db = getAdminDb();
+
+    if (!db) {
+      console.error(
+        '[api/analytics/district] Admin SDK unavailable:',
+        getAdminInitError(),
+      );
+      return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'admin-unavailable' });
+    }
 
     // --- Identity (soft): scope the query to the caller's facility/district.
     // A bad/absent token yields zeros rather than a 401 that would blank the UI.
@@ -112,22 +129,21 @@ export async function GET(request: NextRequest) {
       const authHeader = request.headers.get('authorization') ?? '';
       const token = authHeader.toLowerCase().startsWith('bearer ') ? authHeader.slice(7).trim() : null;
       if (token) {
-        const auth = adminAuth()!;
-        if (!auth) throw new Error('admin_auth_failed');
-        const decoded = await auth.verifyIdToken(token);
-        const isPrivileged = decoded.admin === true || decoded.role === 'mo';
-        if (!isPrivileged) {
-          return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'insufficient-claims' });
+        const auth = getAdminAuth();
+        if (auth) {
+          const decoded = await auth.verifyIdToken(token);
+          const isPrivileged = decoded.admin === true || decoded.role === 'mo';
+          if (!isPrivileged) {
+            return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'insufficient-claims' });
+          }
+          facilityId = facilityId ?? (decoded.facilityId as string | undefined) ?? null;
+          district = district ?? (decoded.district as string | undefined) ?? null;
         }
-        facilityId = facilityId ?? (decoded.facilityId as string | undefined) ?? null;
-        district = district ?? (decoded.district as string | undefined) ?? null;
       }
     } catch (authErr) {
       console.warn('[analytics/district] token verify failed, continuing unscoped:', authErr);
     }
 
-    const db = adminDb()!;
-    if (!db) return ok({ referrals: [], count: 0, error: 'admin_failed_silently' } as any, { ...baseMeta(), reason: 'admin_failed_silently' });
     const start = Timestamp.fromDate(startDate);
     const end = Timestamp.fromDate(endDate);
 
@@ -196,4 +212,3 @@ export async function GET(request: NextRequest) {
     return ok(EMPTY_PAYLOAD, { ...baseMeta(), reason: 'unhandled-error' });
   }
 }
-
