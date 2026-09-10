@@ -23,7 +23,9 @@ export default function LanguageSwitcher() {
     if (segments.length > 1) {
       segments[1] = nextLocale;
       const newPath = segments.join('/');
-      router.push(newPath);
+      // Preserve any existing query parameters (e.g. ?next=... or filters)
+      const search = typeof window !== 'undefined' ? window.location.search : '';
+      router.push(newPath + search);
     }
   };
 
